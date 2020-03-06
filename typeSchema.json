@@ -1,0 +1,319 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "typeSchema.json",
+  "definitions": {
+    "root": {
+      "type": "object",
+      "patternProperties": {
+        "(\\$schema)": {
+          "type": "string"
+        },
+        "(.*?)": {
+          "$ref": "#/definitions/typesAll"
+        }
+      },
+      "additionalProperties": false
+    },
+    "objectType": {
+      "description": "Object type, can have any properties with any types, but properties should not start with $",
+      "type": "object",
+      "patternProperties": {
+        "^(?!\\$).*": {
+          "$ref": "#/definitions/typesAll"
+        }
+      },
+      "additionalProperties": false,
+      "not": {
+        "oneOf": [
+          {
+            "properties": {
+              "$enum": {}
+            },
+            "additionalProperties": false,
+            "required": [
+              "$enum"
+            ]
+          },
+          {
+            "properties": {
+              "$array": {}
+            },
+            "additionalProperties": false,
+            "required": [
+              "$array"
+            ]
+          }
+        ]
+      }
+    },
+    "metaData": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "valueTypes": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/objectType"
+        },
+        {
+          "description": "enum type",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "onlyIn": {
+              "type": "string",
+              "enum": [
+                "request",
+                "response"
+              ]
+            },
+            "showSelect": {
+              "type": "boolean"
+            },
+            "$enum": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "$enum"
+          ]
+        },
+        {
+          "description": "array type",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "onlyIn": {
+              "type": "string",
+              "enum": [
+                "request",
+                "response"
+              ]
+            },
+            "multiSelect": {
+              "type": "string",
+              "description": "This value should contain the name of the source field"
+            },
+            "$array": {
+              "$ref": "#/definitions/typesAll"
+            }
+          },
+          "required": [
+            "$array"
+          ]
+        },
+        {
+          "description": "number type",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "onlyIn": {
+              "type": "string",
+              "enum": [
+                "request",
+                "response"
+              ]
+            },
+            "postfix":{"type":"string"},
+            "$number": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "min": {
+                  "type": "number"
+                },
+                "max": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "required": [
+            "$number"
+          ]
+        },
+        {
+          "description": "object type",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "onlyIn": {
+              "type": "string",
+              "enum": [
+                "request",
+                "response"
+              ]
+            },
+            "$object": {
+              "$ref": "#/definitions/objectType"
+            }
+          },
+          "required": [
+            "$object"
+          ]
+        },
+        {
+          "description": "map type",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "onlyIn": {
+              "type": "string",
+              "enum": [
+                "request",
+                "response"
+              ]
+            },
+            "$map": {
+              "$ref": "#/definitions/typesAll"
+            }
+          },
+          "required": [
+            "$map"
+          ]
+        },
+        {
+          "description": "string type",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "onlyIn": {
+              "type": "string",
+              "enum": [
+                "request",
+                "response"
+              ]
+            },
+            "select": {
+              "type": "string",
+              "description": "This value should contain the name of the source field"
+            },
+            "$string": {
+              "type": "object",
+              "properties": {
+                "minLength": {
+                  "type": "integer"
+                },
+                "maxLength": {
+                  "type": "integer"
+                },
+                "regex": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": [
+            "$string"
+          ]
+        },
+        {
+          "description": "meta type",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "onlyIn": {
+              "type": "string",
+              "enum": [
+                "request",
+                "response"
+              ]
+            },
+            "$type": {
+              "type": "string",
+              "enum": [
+                "boolean",
+                "string",
+                "number",
+                "integer",
+                "?"
+              ]
+            }
+          },
+          "required": [
+            "$type"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "boolean",
+            "string",
+            "number",
+            "integer",
+            "?"
+          ]
+        }
+      ]
+    },
+    "typesAll": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/valueTypes"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/valueTypes"
+          },
+          "minItems": 1,
+          "description": "If the value can have multiple types, at least one type needs to be specified"
+        }
+      ]
+    }
+  },
+  "$ref": "#/definitions/root"
+}
