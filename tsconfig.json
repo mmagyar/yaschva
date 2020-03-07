@@ -13,6 +13,7 @@
     "sourceMap": true,
     "noEmitOnError": true,
     "noErrorTruncation": true,
+    "resolveJsonModule": true,
     "baseUrl": "./src",
     "rootDirs": [
       "./src"

@@ -1,55 +1,6 @@
-export type Common = {
-  default: any;
-}
-export declare type TypeMeta = {
-  name?: string;
-  description?: string;
-  onlyIn?: "request" | "response";
-};
-export type ObjectValue = ValueType | ValueType[];
-export type SimpleTypes = "string" | "boolean" | "number" | "integer" | "?"|"any";
-export type ObjectType = { [key: string]: ObjectValue };
-export type EnumType = TypeMeta & {showSelect?: boolean; $enum: string[]};
-export type ArrayType = TypeMeta & { multiSelect?: string; $array: ObjectValue};
-export type ObjectMetaType = TypeMeta & {
-  $object: ObjectType;
-};
-export type MapType = TypeMeta & {
-  $map: ObjectValue;
-}
-export type StringType = TypeMeta &
-{ select?: string;$string: {minLength?: number;maxLength?: number;regex?: string}};
-export declare type NumberType = TypeMeta & {
-  postfix?: string;
-  $number: {
-    min?: number;
-    max?: number;
-    step?: number;
-  };
-};
-export declare type MetaType = TypeMeta & { $type: SimpleTypes };
-
-export type ValueType =
-  | SimpleTypes
-  | EnumType
-  | ObjectType
-  | ArrayType
-  | ObjectMetaType
-  | StringType
-  | NumberType
-  | MetaType
-  | MapType;
-
-export const isSimpleType = (tbd: any): tbd is SimpleTypes => typeof tbd === "string";
-export const isArray = (tbd: any): tbd is ArrayType => tbd.$array;
-export const isMap = (tbd: any): tbd is MapType => tbd.$map;
-export const isObjectMeta = (tbd: any): tbd is ObjectMetaType => tbd.$object;
-export const isString = (tbd: any): tbd is StringType => tbd.$string;
-export const isNumber = (tbd: any): tbd is NumberType => tbd.$number;
-export const isMeta = (tbd: any): tbd is MetaType => tbd.$type;
-export const isEnum = (tbd: any): tbd is EnumType => tbd.$enum;
-export const isObj = (tbd: any): tbd is ObjectType =>
-  !Object.keys(tbd).some(x => x.startsWith("$"));
+import { Validation, StringType, ArrayType, ObjectType, SimpleTypes,
+  isSimpleType, isArray, isEnum, isObj,
+  isObjectMeta, isMap, isNumber, isMeta, isString } from "./validationTypes";
 
 type InputTypes = any | string | number | object | void | boolean | null
 export type ValidationOutputs= ValidationOutput|ValidationOutput[]
@@ -66,7 +17,7 @@ export type ValidationFailed = {
   message: string;
 }
 type SimpleValidation = string | null
-type validateFn = (type: ObjectValue, value: InputTypes) => ValidationResult
+type validateFn = (type: Validation, value: InputTypes) => ValidationResult
 
 const validateNullish = (value: InputTypes): SimpleValidation =>
   !(value === undefined) ? "Value is not undefined" : null;
@@ -111,7 +62,7 @@ const validateStringObject = (value: InputTypes, validator: StringType): SimpleV
 const validateBool = (value: InputTypes): SimpleValidation =>
   typeof value !== "boolean" ? "Value is not a boolean" : null;
 
-const validateOneOf = (value: InputTypes, validator: ObjectValue[], validate: validateFn):
+const validateOneOf = (value: InputTypes, validator: Validation[], validate: validateFn):
  ValidationResult => {
   if (!validator.length) throw new Error("one of type needs at least one type");
 
@@ -163,7 +114,7 @@ const validateObject = (value: InputTypes, validator: ObjectType, validate: vali
 
 };
 
-const validateMap = (value: InputTypes, validator: ObjectValue, validate: validateFn):
+const validateMap = (value: InputTypes, validator: Validation, validate: validateFn):
  ValidationResult => {
   if (typeof value !== "object" || value === null || value === undefined)
     return { result: "fail", output: { error: "Value is not an Object", value } };
@@ -193,7 +144,7 @@ const simpleValidation = (type: SimpleTypes, value: any): SimpleValidation => {
 const toResult = (res: SimpleValidation, value: InputTypes): ValidationResult =>
   ({ result: res ? "fail" : "pass", output: res ? { error: res, value } : null });
 
-export const validate = (type: ObjectValue, value: InputTypes): ValidationResult => {
+export const validate = (type: Validation, value: InputTypes): ValidationResult => {
   if (typeof type === "undefined") throw new Error("Type for validation cannot be undefined");
   if (isSimpleType(type))
     return toResult(simpleValidation(type, value), value);
@@ -231,3 +182,9 @@ export const validate = (type: ObjectValue, value: InputTypes): ValidationResult
 };
 
 
+export const loadJson = async (path: string): Promise<Validation> => {
+  const json = await import(path);
+  delete json.$schema;
+
+  return json;
+};
