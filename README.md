@@ -1,7 +1,7 @@
 
-# yaschva
+## Examples
 
-Yet another schema validation
+[Examples](examples)
 
 ## Why not just use JSON schama?
 
@@ -14,5 +14,8 @@ This project tries to simplify syntax for better redebility, and provide more se
 
 ## How to use JSON schema definition when writing yaschva schema
 
-[Download the schema here](typeSchema.json)
-In your yaschava schema file you need to add the following:
+In your yaschava schema file you need to add a property in the root object called:
+
+`$schema: "https://mmagyar.github.io/yaschva/typeSchema.json"`
+
+This will enable your IDE to help with yaschva's syntax and check for errors
