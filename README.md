@@ -1,7 +1,7 @@
 
 ## Examples
 
-[Examples](examples)
+[Examples](https://github.com/mmagyar/yaschva/tree/master/examples)
 
 ## Limitations
 
