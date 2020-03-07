@@ -1,6 +1,29 @@
-import { ObjectValue, validate } from "./validate";
+import { validate, loadJson } from "./validate";
+import { Validation } from "./validationTypes";
 
 describe("validate", () => {
+  it("shows example schema working", async () => {
+    const example = await loadJson("../examples/example1.json");
+    const data = {
+      myString: "35p5Rx",
+      myOptionalString: "opts",
+      myObject: {
+        myNumberInsideAnObject: -1064355751952420,
+        myDetailedNumberInsideAnObject: 7.547970286391079
+      },
+      myArrayOfNumbers: [6021837145779515, -3586724423310628, 7654360694223995, -4591855572376372],
+      myEnum: "enum2",
+      myNumberRange: 5,
+      myKeyValuePairs: {
+        h5mRyKCL: "fq3aXU", wff99z2e: "4D0Ptj", h3VcecUx: "vmKmRU", Ox3CN4Iq: "2FWzGw"
+      },
+      myMultiType: -8508087912141643,
+      myRegex: "work"
+    };
+    expect(validate(example, data)).toHaveProperty("result", "pass");
+    expect(validate(example, { })).toHaveProperty("result", "fail");
+  });
+
   it("passes validation for correct simple values", () => {
     expect(validate("string", "hello")).toHaveProperty("result", "pass");
     expect(validate("integer", 123)).toHaveProperty("result", "pass");
@@ -34,7 +57,7 @@ describe("validate", () => {
   });
 
   it("fails objects with missing properties", () => {
-    expect(validate({ myNumber: "number" }, { })).toHaveProperty("result", "fail");
+    expect(validate({ myNumber: "number" }, {})).toHaveProperty("result", "fail");
     expect(validate({ num: "number", int: "integer", str: "string", bool: "boolean" },
       { num: 3 })).toHaveProperty("result", "fail");
 
@@ -60,10 +83,10 @@ describe("validate", () => {
     expect(validate(["integer", "string", "?"], undefined)).toHaveProperty("result", "pass");
     expect(validate(["integer", "string", "?"], {})).toHaveProperty("result", "fail");
 
-    const type: ObjectValue = { myValue: ["integer", "string", "?"] };
+    const type: Validation = { myValue: ["integer", "string", "?"] };
     expect(validate(type, { myValue: 1233232342344532 })).toHaveProperty("result", "pass");
     expect(validate(type, { myValue: "abc" })).toHaveProperty("result", "pass");
-    expect(validate(type, { })).toHaveProperty("result", "pass");
+    expect(validate(type, {})).toHaveProperty("result", "pass");
     expect(validate(type, undefined)).toHaveProperty("result", "fail");
   });
 
@@ -79,7 +102,7 @@ describe("validate", () => {
 
 
   it("handles enums with special syntax", () => {
-    const type: ObjectValue = { $enum: ["ts", "typescript"] };
+    const type: Validation = { $enum: ["ts", "typescript"] };
     expect(validate(type, "ts")).toHaveProperty("result", "pass");
     expect(validate(type, "typescript")).toHaveProperty("result", "pass");
     expect(validate(type, "javascript")).toHaveProperty("result", "fail");
@@ -88,8 +111,10 @@ describe("validate", () => {
   });
 
   it("provides useful error description", () => {
-    const type: ObjectValue = { num: "number", int: "integer", str: "string", bool: "boolean",
-      obj: { member: "boolean", memberId: ["string", "?"] } };
+    const type: Validation = {
+      num: "number", int: "integer", str: "string", bool: "boolean",
+      obj: { member: "boolean", memberId: ["string", "?"] }
+    };
     const result = validate(type, { num: "abc" });
 
     expect(result).toHaveProperty("result", "fail");
@@ -109,20 +134,26 @@ describe("validate", () => {
       int: { error: "Value is not an integer ", value: 123.3 },
       str: { error: "Value is not a string", value: [] },
       bool: { error: "Value is not a boolean", value: "true" },
-      obj: { member: { error: "Value is not a boolean", value: undefined },
-        memberId: null }
+      obj: {
+        member: { error: "Value is not a boolean", value: undefined },
+        memberId: null
+      }
     });
   });
 
   it("uses null to signal that there is no error for a given property", () => {
-    const type: ObjectValue =
-    { obj: { member: "boolean", memberId: ["string", "?"], nested: { inside: "string" } } };
+    const type: Validation =
+      { obj: { member: "boolean", memberId: ["string", "?"], nested: { inside: "string" } } };
     const result = validate(type, { obj: { member: false, nested: { inside: "hello" } } });
 
     expect(result).toHaveProperty("result", "pass");
-    expect(result.output).toStrictEqual({ obj: { member: null,
-      nested: { inside: null },
-      memberId: null } });
+    expect(result.output).toStrictEqual({
+      obj: {
+        member: null,
+        nested: { inside: null },
+        memberId: null
+      }
+    });
   });
 
   it("rejects objects with additional keys", () => {
@@ -141,7 +172,7 @@ describe("validate", () => {
     expect(() => validate({ $whatever: "bigFloat" } as any, { myValue: 2 }))
       .toThrowError("Unknown validator:{\"$whatever\":\"bigFloat\"}");
 
-    expect(() => validate(undefined as any, { }))
+    expect(() => validate(undefined as any, {}))
       .toThrowError("Type for validation cannot be undefined");
   });
 

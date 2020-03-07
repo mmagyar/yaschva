@@ -1,0 +1,15 @@
+{
+  "$schema": "https://mmagyar.github.io/yaschva/typeSchema.json",
+  "myString": "string",
+  "myOptionalString": ["?", "string"],
+  "myObject": {
+    "myNumberInsideAnObject": "number",
+    "myDetailedNumberInsideAnObject": { "$number": { "min": 0, "max": 18 } }
+  },
+  "myArrayOfNumbers": { "$array": "number" },
+  "myEnum": { "$enum": ["enum1", "enum2"] },
+  "myKeyValuePairs": { "$map": "string" },
+  "myMultiType": ["string", "number"],
+  "myNumberRange": { "$number": { "min": 4, "max": 9 } },
+  "myRegex": { "$string": { "regex": "\\b(\\w*work\\w*)\\b" } }
+}
