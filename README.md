@@ -1,3 +1,6 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+![Node.js CI](https://github.com/mmagyar/yaschva/workflows/Node.js%20CI/badge.svg?branch=master)
+![Code coverage](https://img.shields.io/codecov/c/github/mmagyar/yaschva)
 
 ## Examples
 
@@ -6,8 +9,10 @@
 ## Limitations
 
 Property names starting with a $ (dollar sign) are reserved
+
 ## Capabilities
-- Validate based on the schema
+
+- Validate data based on the schema
 - Give easy to understand error messages
 - Generate random data based on the schema
 
@@ -26,4 +31,6 @@ In your yaschava schema file you need to add a property in the root object calle
 
 `"$schema": "https://mmagyar.github.io/yaschva/typeSchema.json"`
 
-This will enable your IDE to help with yaschva's syntax and check for errors
+This will enable your IDE to help with yaschva's syntax and check for errors.
+
+Note: the `$schema` property is not part of yaschva schema, and will be removed when using the `loadJson` function.
