@@ -1,7 +1,8 @@
 {
   "name": "yaschva",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Yet another schema validation",
+  "keywords": ["schema", "validation"],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "prepublish": "tsc",
@@ -17,7 +18,7 @@
     "test:watch": "jest --watch"
   },
   "author": "mmagyar.com",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "typescript": "^3.7.3",
     "eslint": "^6.7.2",
