@@ -5,9 +5,9 @@ import { Validation, StringType, ArrayType, ObjectType, SimpleTypes,
 type InputTypes = any | string | number | object | void | boolean | null
 export type ValidationOutputs= ValidationOutput|ValidationOutput[]
 export type ValidationOutput =
-  {[key: string]: ValidationOutputs} |
-  null |
-  {"error": string;output?: ValidationOutputs; value: any}
+  | {[key: string]: ValidationOutputs}
+  | null
+  | {"error": string; output?: ValidationOutputs; value: any}
 
 export type ValidationResult = {
   "result": "pass"|"fail";
@@ -172,7 +172,7 @@ export const validate = (type: Validation, value: InputTypes): ValidationResult 
     return toResult(validateNumberComplex(value, type.$number.min, type.$number.max), value);
 
   if (isMeta(type))
-    return toResult(simpleValidation(value, type.$type), value);
+    return toResult(simpleValidation(type.$type, value), value);
 
   if (isString(type))
     return toResult(validateStringObject(value, type), value);

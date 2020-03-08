@@ -35,6 +35,7 @@ describe("It generates data based on schema", () => {
     expect(result).toHaveProperty("any");
     expect(result).toHaveProperty("optional");
     expect(result.optional).toBeUndefined();
+    expect(validate(schema, result)).toHaveProperty("result", "pass");
   });
 
   it("generates on of multiple types", () => {
@@ -46,7 +47,7 @@ describe("It generates data based on schema", () => {
     expect(typeof result.stringOrNumber === "string" ||
       typeof result.stringOrNumber === "number").toBeTruthy();
     expect(result.optionalString === undefined || typeof result.optionalString === "string");
-
+    expect(validate(schema, result)).toHaveProperty("result", "pass");
   });
 
 
@@ -67,7 +68,7 @@ describe("It generates data based on schema", () => {
         expect(typeof x.hello === "string").toBeTruthy();
         expect(typeof x.world === "number").toBeTruthy();
       });
-
+    expect(validate(schema, result)).toHaveProperty("result", "pass");
   });
 
   it("generates enum", () => {
@@ -77,7 +78,7 @@ describe("It generates data based on schema", () => {
     };
     const result = generate(schema);
     expect(enums.some(x => x === result.enum)).toBeTruthy();
-
+    expect(validate(schema, result)).toHaveProperty("result", "pass");
   });
 
   it("generates object meta", () => {
@@ -88,7 +89,7 @@ describe("It generates data based on schema", () => {
     expect(result).toHaveProperty("meta");
     expect(result.meta).toHaveProperty("here");
     expect(typeof result.meta.here === "string").toBeTruthy();
-
+    expect(validate(schema, result)).toHaveProperty("result", "pass");
   });
 
   it("generates map (key value pairs)", () => {
@@ -102,6 +103,8 @@ describe("It generates data based on schema", () => {
     expect(values.length).toBeGreaterThanOrEqual(1);
     expect(values.length).toBeLessThanOrEqual(33);
     values.forEach(x => expect(typeof x === "number").toBeTruthy());
+    expect(validate(schema, result)).toHaveProperty("result", "pass");
+
   });
 
   it("generates bound number", () => {
@@ -147,7 +150,7 @@ describe("It generates data based on schema", () => {
 
   });
 
-  it("gerenates exmaple", async () => {
+  it("generates example", async () => {
     const a = await loadJson("../examples/example1.json");
 
     expect(validate(a, generate(a))).toHaveProperty("result", "pass");
