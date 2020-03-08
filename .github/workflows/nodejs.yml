@@ -29,6 +29,8 @@ jobs:
     - run: npm run test:coverage
       env:
         CI: true
+    - name: Enforce git tag to match package.json version
+    - run: sh checkTags.sh
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
