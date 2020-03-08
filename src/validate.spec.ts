@@ -22,6 +22,28 @@ describe("validate", () => {
     };
     expect(validate(example, data)).toHaveProperty("result", "pass");
     expect(validate(example, { })).toHaveProperty("result", "fail");
+
+    expect(validate(example, { })).toEqual({
+      result: "fail",
+      output: {
+        myString: { error: "Value is not a string", value: undefined },
+        myOptionalString: null,
+        myObject: { error: "Value is not an Object", value: undefined },
+        myArrayOfNumbers: { error: "Value is not an Array", value: undefined },
+        myEnum: { error: "Value is not a string", value: undefined },
+        myKeyValuePairs: { error: "Value is not an Object", value: undefined },
+        myMultiType: {
+          error: "Did not match any from the listed types",
+          value: undefined,
+          output: [
+            { error: "Value is not a string", value: undefined },
+            { error: "Value is not a number", value: undefined }
+          ]
+        },
+        myNumberRange: { error: "Value is not a number", value: undefined },
+        myRegex: { error: "Value is not a string", value: undefined }
+      }
+    });
   });
 
   it("passes validation for correct simple values", () => {
@@ -31,6 +53,7 @@ describe("validate", () => {
     expect(validate("boolean", true)).toHaveProperty("result", "pass");
     expect(validate("?", undefined)).toHaveProperty("result", "pass");
     expect(validate("any", 233)).toHaveProperty("result", "pass");
+    expect(validate({ $type: "string" }, "desert")).toHaveProperty("result", "pass");
   });
 
 
@@ -180,4 +203,48 @@ describe("validate", () => {
     expect(() => validate({ $whatever: "string" }, { $whatever: 2 })).toThrowError();
   });
 
+  it("can validate string length", () => {
+    const schema: Validation = { $string: { minLength: 4, maxLength: 6 } };
+    expect(validate(schema, "abc")).toEqual({ result: "fail", output: {
+      error: "String is shorter than the required minimum length", value: "abc"
+    } });
+
+    expect(validate(schema, "Lorem ipsum")).toEqual({ result: "fail", output: {
+      error: "String is longer than the required maximum length", value: "Lorem ipsum"
+    } });
+
+    expect(validate(schema, "hello")).toHaveProperty("result", "pass");
+  });
+
+  it("can validate string by regex", () => {
+    const schema: Validation = { $string: { regex: "hello \\w+" } };
+    expect(validate(schema, "abc")).toEqual({ result: "fail", output: {
+      error: "String did not match required regex", value: "abc"
+    } });
+
+
+    expect(validate(schema, "hello world")).toHaveProperty("result", "pass");
+  });
+
+  it("can enforce maximum / minimum number", () => {
+    const schema: Validation = { $number: { min: 1, max: 66 } };
+
+    expect(validate(schema, 0)).toEqual({ result: "fail", output: {
+      error: "Value is smaller than the required minimum", value: 0
+    } });
+
+    expect(validate(schema, 67)).toEqual({ result: "fail", output: {
+      error: "Value is bigger than the required maximum", value: 67
+    } });
+
+    expect(validate(schema, 44)).toHaveProperty("result", "pass");
+
+  });
+
+  it("can validate key value pairs (map)", () => {
+    const schema: Validation = { $map: ["number"] };
+    expect(validate(schema, { x: 3, y: 4, z: 99 })).toHaveProperty("result", "pass");
+    expect(validate(schema, { x: 3, y: 4, z: "99" })).toHaveProperty("result", "fail");
+    expect(validate(schema, { x: 3, y: "a string", z: 34 })).toHaveProperty("result", "fail");
+  });
 });
