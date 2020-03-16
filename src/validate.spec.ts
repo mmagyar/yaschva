@@ -1,3 +1,4 @@
+/* eslint-disable dot-notation */
 import { validate, loadJson } from "./validate";
 import { Validation } from "./validationTypes";
 
@@ -246,5 +247,25 @@ describe("validate", () => {
     expect(validate(schema, { x: 3, y: 4, z: 99 })).toHaveProperty("result", "pass");
     expect(validate(schema, { x: 3, y: 4, z: "99" })).toHaveProperty("result", "fail");
     expect(validate(schema, { x: 3, y: "a string", z: 34 })).toHaveProperty("result", "fail");
+  });
+
+  it("protects against prototype injection", () => {
+    const schema: Validation = { a: "number", b: ["string", "?"] };
+    const input: any = { a: 4 };
+    // eslint-disable-next-line no-proto
+    input.__proto__.b = 3;
+    const result = validate(schema, input);
+    expect(result).toHaveProperty("output.a", null);
+    expect(result).toHaveProperty("output.b.error", "Did not match any from the listed types");
+  });
+
+  it("protects against prototype injection from json", () => {
+    const schema: Validation = { a: "number", b: ["string", "?"] };
+    const input: any = JSON.parse("{ \"a\": 5, \"__proto__\": {\"b\" : 3} }");
+    const input2 = { ...input };
+    const result = validate(schema, input2);
+    expect(input2.b).toEqual(3);
+    expect(result).toHaveProperty("output.a", null);
+    expect(result).toHaveProperty("output.b.error", "Did not match any from the listed types");
   });
 });
