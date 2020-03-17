@@ -4,7 +4,7 @@ import { Validation } from "./validationTypes";
 
 describe("validate", () => {
   it("shows example schema working", async () => {
-    const example = await loadJson("../examples/example1.json");
+    const example = await loadJson(await import("../examples/example1.json"));
     const data = {
       myString: "35p5Rx",
       myOptionalString: "opts",

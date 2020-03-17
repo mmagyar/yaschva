@@ -151,7 +151,7 @@ describe("It generates data based on schema", () => {
   });
 
   it("generates example", async () => {
-    const a = await loadJson("../examples/example1.json");
+    const a = await loadJson(await import("../examples/example1.json"));
 
     expect(validate(a, generate(a))).toHaveProperty("result", "pass");
   });
