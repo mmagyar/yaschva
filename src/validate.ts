@@ -182,9 +182,11 @@ export const validate = (type: Validation, value: InputTypes): ValidationResult 
 };
 
 
-export const loadJson = async (path: string): Promise<Validation> => {
-  const json = await import(path);
-  delete json.$schema;
+export const loadJson = (json: string | object): Promise<Validation> => {
 
-  return json;
+  const jsonOut = typeof json === "string" ? JSON.parse(json) : json;
+  console.log(jsonOut, typeof jsonOut);
+  delete jsonOut.$schema;
+
+  return jsonOut;
 };
