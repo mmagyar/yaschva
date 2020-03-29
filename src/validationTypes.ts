@@ -4,11 +4,11 @@ export type Common = {
 export declare type TypeMeta = {
   name?: string;
   description?: string;
-  onlyIn?: "request" | "response";
+  onlyIn?: 'request' | 'response';
 };
 
 export type Validation = ValueType | ValueType[];
-export type SimpleTypes = "string" | "boolean" | "number" | "integer" | "?" | "any";
+export type SimpleTypes = 'string' | 'boolean' | 'number' | 'integer' | '?' | 'any';
 export type ObjectType = { [key: string]: Validation };
 export type EnumType = TypeMeta & {showSelect?: boolean; $enum: string[]};
 export type ArrayType = TypeMeta & { multiSelect?: string; $array: Validation};
@@ -41,13 +41,13 @@ export type ValueType =
   | MetaType
   | MapType;
 
-export const isSimpleType = (tbd: any): tbd is SimpleTypes => typeof tbd === "string";
-export const isArray = (tbd: any): tbd is ArrayType => tbd.$array;
-export const isMap = (tbd: any): tbd is MapType => tbd.$map;
-export const isObjectMeta = (tbd: any): tbd is ObjectMetaType => tbd.$object;
-export const isString = (tbd: any): tbd is StringType => tbd.$string;
-export const isNumber = (tbd: any): tbd is NumberType => tbd.$number;
-export const isMeta = (tbd: any): tbd is MetaType => tbd.$type;
-export const isEnum = (tbd: any): tbd is EnumType => tbd.$enum;
+export const isSimpleType = (tbd: any): tbd is SimpleTypes => typeof tbd === 'string'
+export const isArray = (tbd: any): tbd is ArrayType => tbd.$array
+export const isMap = (tbd: any): tbd is MapType => tbd.$map
+export const isObjectMeta = (tbd: any): tbd is ObjectMetaType => tbd.$object
+export const isString = (tbd: any): tbd is StringType => tbd.$string
+export const isNumber = (tbd: any): tbd is NumberType => tbd.$number
+export const isMeta = (tbd: any): tbd is MetaType => tbd.$type
+export const isEnum = (tbd: any): tbd is EnumType => tbd.$enum
 export const isObj = (tbd: any): tbd is ObjectType =>
-  !Object.keys(tbd).some(x => x.startsWith("$"));
+  !Object.keys(tbd).some(x => x.startsWith('$'))
