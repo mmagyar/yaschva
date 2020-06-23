@@ -35,7 +35,7 @@ export const validationToType = (input: ValueType | ValueType[]): string => {
 
   if (isArray(input)) {
     const type = validationToType(input.$array)
-    return Array.isArray(input.$array) && input.$array.length > 1
+    return (Array.isArray(input.$array) && input.$array.length > 1) || type.indexOf('|') > -1
       ? `(${type})[]` : `${type}[]`
   }
 

@@ -49,6 +49,11 @@ describe('Creates typescript type from a schema', () => {
       .toEqual('"lorem" | "ipsum" | "santa" | "domine"')
   })
 
+  it('generates type for array ofenum', () => {
+    expect(validationToType({ $array: { $enum: ['lorem', 'ipsum', 'santa', 'domine'] } }))
+      .toEqual('("lorem" | "ipsum" | "santa" | "domine")[]')
+  })
+
   it('generates type for objects with undefined union if all members are optional', () => {
     const schema: Validation = {
       prop1: ['?', 'string'],
