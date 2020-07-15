@@ -26,15 +26,21 @@ describe('It generates data based on schema', () => {
       boolean: 'boolean',
       integer: 'integer'
     }
-    const result = generate(schema)
-    expect(typeof result.string).toEqual('string')
-    expect(typeof result.number).toEqual('number')
-    expect(typeof result.boolean).toEqual('boolean')
-    expect(Number.isSafeInteger(result.integer))
-    expect(result).toHaveProperty('any')
-    expect(result).toHaveProperty('optional')
-    expect(result.optional).toBeUndefined()
-    expect(validate(schema, result)).toHaveProperty('result', 'pass')
+    const anyGenerated = []
+    for (let i = 0; i < 32; i++) {
+      const result = generate(schema)
+      expect(typeof result.string).toEqual('string')
+      expect(typeof result.number).toEqual('number')
+      expect(typeof result.boolean).toEqual('boolean')
+      expect(Number.isSafeInteger(result.integer))
+      if (result.any === undefined) anyGenerated.push(result.any)
+      expect(result).not.toHaveProperty('optional')
+      expect(result.optional).toBeUndefined()
+      expect(validate(schema, result)).toHaveProperty('result', 'pass')
+    }
+
+    // Make sure any generates non undefined values as well
+    expect(anyGenerated.length).toBeGreaterThan(0)
   })
 
   it('generates on of multiple types', () => {
@@ -144,8 +150,14 @@ describe('It generates data based on schema', () => {
     expect(test2).toThrowError()
   })
 
-  it('generates example', async () => {
+  it('generates example from parsed json', async () => {
     const a = loadJson(await import('../examples/example1.json'))
+
+    expect(validate(a, generate(a))).toHaveProperty('result', 'pass')
+  })
+
+  it('generates example from string', async () => {
+    const a = loadJson(JSON.stringify(await import('../examples/example1.json')))
 
     expect(validate(a, generate(a))).toHaveProperty('result', 'pass')
   })
@@ -154,5 +166,27 @@ describe('It generates data based on schema', () => {
     const result = generate({ $string: { regex: '\\b(\\w*work\\w*)\\b' } })
     expect(typeof result === 'string').toBeTruthy()
     expect(result.includes('work')).toBeTruthy()
+  })
+
+  it('generates uuid based on regex', () => {
+    const regex = '[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}'
+    for (var i = 0; i < 240; i++) {
+      const result = generate({ id: { $string: { regex } } })
+      expect(typeof result.id).toBe('string')
+    }
+  })
+
+  it('does not add property to object if it\'s optionally undefined', () => {
+    const undefinedGenerated = []
+    for (var i = 0; i < 240; i++) {
+      const result = generate({ value: ['string', '?'] })
+      if (Object.keys(result).indexOf('value') !== -1) {
+        expect(typeof result.value).toBe('string')
+      } else {
+        expect(Object.keys(result)).toHaveLength(0)
+        undefinedGenerated.push(result)
+      }
+    }
+    expect(undefinedGenerated.length).toBeGreaterThan(0)
   })
 })

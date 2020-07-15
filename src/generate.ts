@@ -53,7 +53,8 @@ export const generate = (type: Validation,
 
   if (isObj(type)) {
     return Object.entries(type).reduce((prev: any, [key, value]) => {
-      prev[key] = generate(value)
+      const generated = generate(value)
+      if (typeof generated !== 'undefined') prev[key] = generated
       return prev
     }, {})
   }
