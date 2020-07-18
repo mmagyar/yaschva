@@ -8,6 +8,15 @@
         "(\\$schema)": {
           "type": "string"
         },
+        "(\\$types)":{
+            "type": "object",
+            "patternProperties": {
+            "(^\\$)": {
+              "$ref": "#/definitions/typesAll"
+            }
+          },
+          "additionalProperties":false
+        },
         "(.*?)": {
           "$ref": "#/definitions/typesAll"
         }
@@ -297,6 +306,10 @@
             "null",
             "?"
           ]
+        },
+        {
+          "type": "string",
+          "pattern": "^\\$"
         }
       ]
     },

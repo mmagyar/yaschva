@@ -1,6 +1,7 @@
 import {
   Validation, isSimpleType, isArray, isEnum,
-  isObj, isObjectMeta, isMap, isNumber, isMeta, isString, SimpleTypes
+  isObj, isObjectMeta, isMap, isNumber, isMeta,
+  isString, SimpleTypes, isTypeDefValidation
 } from './validationTypes'
 import { randexp } from 'randexp'
 type Options = {
@@ -38,34 +39,55 @@ const simpleGeneration = (type: SimpleTypes): any => {
     default: throw new Error(`Unknown validator:${JSON.stringify(type)}`)
   }
 }
+
 export const generate = (type: Validation,
   options: Options = { arrayMin: 1, arrayMax: 90, mapMin: 1, mapMax: 33 }
+): any => generateInternal(type, options, {})
+const generateInternal = (typeIn: Validation, options: Options, typesIn: {[key:string] : Validation }
 ): any => {
-  if (isSimpleType(type)) { return simpleGeneration(type) }
+  let customTypes = typesIn
+  let type:Validation = typeIn
+  if (isTypeDefValidation(typeIn)) {
+    customTypes = typeIn.$types
+    type = { ...typeIn }
+    delete type.$types
+  }
 
-  if (Array.isArray(type)) { return generate(type[randomNumber(true, 0, type.length - 1)]) }
+  const gen = (type:Validation) => generateInternal(type, options, customTypes)
+
+  if (isSimpleType(type)) {
+    if (customTypes[type]) {
+      return gen(customTypes[type])
+    }
+
+    return simpleGeneration(type)
+  }
+
+  if (Array.isArray(type)) { return gen(type[randomNumber(true, 0, type.length - 1)]) }
 
   if (isArray(type)) {
+    const arrayType = type
     return Array.from(Array(randomNumber(true, options.arrayMin, options.arrayMax)))
-      .map(() => generate(type.$array))
+      .map(() => gen(arrayType.$array))
   }
 
   if (isEnum(type)) { return type.$enum[randomNumber(true, 0, type.$enum.length - 1)] }
 
   if (isObj(type)) {
     return Object.entries(type).reduce((prev: any, [key, value]) => {
-      const generated = generate(value)
+      const generated = gen(value)
       if (typeof generated !== 'undefined') prev[key] = generated
       return prev
     }, {})
   }
 
-  if (isObjectMeta(type)) { return generate(type.$object) }
+  if (isObjectMeta(type)) { return gen(type.$object) }
 
   if (isMap(type)) {
+    const mapType = type
     return Array.from(Array(randomNumber(true, options.mapMin, options.mapMax)))
       .reduce((prev: any) => {
-        prev[randomString(8)] = generate(type.$map)
+        prev[randomString(8)] = gen(mapType.$map)
         return prev
       }, {})
   }

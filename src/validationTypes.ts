@@ -7,16 +7,19 @@ export declare type TypeMeta = {
   onlyIn?: 'request' | 'response';
 };
 
-export type Validation = ValueType | ValueType[];
-export type SimpleTypes = 'string' | 'boolean' | 'number' | 'integer' | 'null' | '?' | 'any';
-export type ObjectType = { [key: string]: Validation };
+type CustomValueType = string // Maybe use nominal typing to prevent arbitrary strings
+export type ValueTypes = ValueType | ValueType[]
+export type TypeDef = {$types: {[key:string]:ValueTypes}} & ObjectType
+export type Validation = ValueTypes | TypeDef
+export type SimpleTypes = 'string' | 'boolean' | 'number' | 'integer' | 'null' | '?' | 'any' | CustomValueType;
+export type ObjectType = { [key: string]: ValueTypes };
 export type EnumType = TypeMeta & {showSelect?: boolean; $enum: string[]};
-export type ArrayType = TypeMeta & { multiSelect?: string; $array: Validation};
+export type ArrayType = TypeMeta & { multiSelect?: string; $array: ValueTypes};
 export type ObjectMetaType = TypeMeta & {
   $object: ObjectType;
 };
 export type MapType = TypeMeta & {
-  $map: Validation;
+  $map: ValueTypes;
 }
 export type StringType = TypeMeta &
 { select?: string;$string: {minLength?: number;maxLength?: number;regex?: string}};
@@ -51,3 +54,4 @@ export const isMeta = (tbd: any): tbd is MetaType => tbd.$type
 export const isEnum = (tbd: any): tbd is EnumType => tbd.$enum
 export const isObj = (tbd: any): tbd is ObjectType =>
   !Object.keys(tbd).some(x => x.startsWith('$'))
+export const isTypeDefValidation = (tbd: any): tbd is TypeDef => tbd.$types

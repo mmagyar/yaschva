@@ -81,6 +81,18 @@ describe('Creates typescript type from a schema', () => {
       .toEqual('{ [key: string] : number | (string | undefined)[]}')
   })
 
+  it('generates types based on custom type', () => {
+    const schema: Validation = {
+      $types: { $person: { name: 'string', height: 'number' } },
+      string: 'string',
+      person: '$person',
+      number: 'number'
+
+    }
+    expect(validationToType(schema))
+      .toEqual('{ string: string; person: { name: string; height: number }; number: number }')
+  })
+
   it('throws on unknown type', () => {
     const test = () => {
       const schema: any = { $stringss: { minLength: 77 } }

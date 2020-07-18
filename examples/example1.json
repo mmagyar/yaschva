@@ -1,5 +1,14 @@
 {
   "$schema": "https://mmagyar.github.io/yaschva/typeSchema.json",
+  "$types": {
+    "$addressType": {
+      "name": "string",
+      "street": "string",
+      "city": "string",
+      "country": "string"
+    }
+  },
+  "myAddress": "$addressType",
   "myString": "string",
   "myOptionalString": ["?", "string"],
   "myObject": {

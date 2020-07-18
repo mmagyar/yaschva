@@ -1,6 +1,6 @@
 import {
-  ValueType, Validation, isArray, isEnum, isObj,
-  isString, isMap, isObjectMeta, isNumber
+  Validation, isArray, isEnum, isObj,
+  isString, isMap, isObjectMeta, isNumber, isTypeDefValidation, ValueTypes
 } from './validationTypes'
 
 const containsOptional = (input: Validation) =>
@@ -29,38 +29,54 @@ const simpleTypes = (input: string) => {
     default: throw new Error(`Unhandled ${input}`)
   }
 }
-
-export const validationToType = (input: ValueType | ValueType[]): string => {
-  if (Array.isArray(input)) { return input.map(validationToType).join(' | ') }
-
-  if (typeof input === 'string') { return simpleTypes(input) }
-
-  if (isArray(input)) {
-    const type = validationToType(input.$array)
-    return (Array.isArray(input.$array) && input.$array.length > 1) || type.indexOf('|') > -1
-      ? `(${type})[]` : `${type}[]`
+export const validationToType = (input:ValueTypes): string => validationToTypeInternal(input, {})
+const validationToTypeInternal = (input: ValueTypes, typesIn: {[key:string]:Validation}): string => {
+  let customTypes = typesIn
+  let type:Validation = input
+  if (isTypeDefValidation(input)) {
+    customTypes = input.$types
+    type = { ...input }
+    delete type.$types
   }
 
-  if (isEnum(input)) { return input.$enum.map(x => `"${x}"`).join(' | ') }
+  const toType = (input:ValueTypes) => validationToTypeInternal(input, customTypes)
 
-  if (isObj(input)) {
+  if (Array.isArray(type)) { return type.map(toType).join(' | ') }
+
+  if (typeof type === 'string') {
+    if (customTypes[type]) {
+      return toType(customTypes[type])
+    }
+
+    return simpleTypes(type)
+  }
+
+  if (isArray(type)) {
+    const typeRet = toType(type.$array)
+    return (Array.isArray(type.$array) && type.$array.length > 1) || typeRet.indexOf('|') > -1
+      ? `(${typeRet})[]` : `${typeRet}[]`
+  }
+
+  if (isEnum(type)) { return type.$enum.map(x => `"${x}"`).join(' | ') }
+
+  if (isObj(type)) {
     const optionalPostfix = (value: Validation) => containsOptional(value) ? '?' : ''
 
-    const obj = Object.entries(input)
-      .map(([key, value]) => `${key}${optionalPostfix(value)}: ${validationToType(value)}`)
+    const obj = Object.entries(type)
+      .map(([key, value]) => `${key}${optionalPostfix(value)}: ${toType(value)}`)
       .join('; ')
-    if (allOptional(input)) { return `{ ${obj} } | undefined` }
+    if (allOptional(type)) { return `{ ${obj} } | undefined` }
 
     return `{ ${obj} }`
   }
 
-  if (isString(input)) { return validationToType('string') }
+  if (isString(type)) { return toType('string') }
 
-  if (isMap(input)) { return `{ [key: string] : ${validationToType(input.$map)}}` }
+  if (isMap(type)) { return `{ [key: string] : ${toType(type.$map)}}` }
 
-  if (isObjectMeta(input)) { return validationToType(input.$object) }
+  if (isObjectMeta(type)) { return toType(type.$object) }
 
-  if (isNumber(input)) { return validationToType('number') }
+  if (isNumber(type)) { return toType('number') }
 
-  throw new Error(`UNSUPPORTED ${JSON.stringify(input, undefined, 2)}`)
+  throw new Error(`UNSUPPORTED ${JSON.stringify(type, undefined, 2)}`)
 }

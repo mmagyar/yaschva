@@ -1,7 +1,7 @@
 import {
   Validation, StringType, ArrayType, ObjectType, SimpleTypes,
   isSimpleType, isArray, isEnum, isObj,
-  isObjectMeta, isMap, isNumber, isMeta, isString
+  isObjectMeta, isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes
 } from './validationTypes'
 
 type InputTypes = any | string | number | object | void | boolean | null
@@ -62,7 +62,7 @@ const validateStringObject = (value: InputTypes, validator: StringType): SimpleV
 const validateBool = (value: InputTypes): SimpleValidation =>
   typeof value !== 'boolean' ? 'Value is not a boolean' : null
 
-const validateOneOf = (value: InputTypes, validator: Validation[], validate: validateFn):
+const validateOneOf = (value: InputTypes, validator: ValueType[], validate: validateFn):
  ValidationResult => {
   if (!validator.length) throw new Error('one of type needs at least one type')
 
@@ -145,21 +145,38 @@ const simpleValidation = (type: SimpleTypes, value: any): SimpleValidation => {
 const toResult = (res: SimpleValidation, value: InputTypes): ValidationResult =>
   ({ result: res ? 'fail' : 'pass', output: res ? { error: res, value } : null })
 
-export const validate = (type: Validation, value: InputTypes): ValidationResult => {
-  if (typeof type === 'undefined') throw new Error('Type for validation cannot be undefined')
-  if (isSimpleType(type)) { return toResult(simpleValidation(type, value), value) }
+const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: {[key:string] : ValueTypes}): ValidationResult => {
+  if (typeof typeIn === 'undefined') throw new Error('Type for validation cannot be undefined')
 
-  if (Array.isArray(type)) { return validateOneOf(value, type, validate) }
+  let type = typeIn
+  let customTypes: {[key:string] : ValueTypes} = customTypesIn
+  if (isTypeDefValidation(typeIn)) {
+    customTypes = typeIn.$types
+    type = { ...typeIn }
+    delete type.$types
+  }
 
-  if (isArray(type)) { return validateArray(value, type, validate) }
+  const validateCustom :validateFn = (type:Validation, value:any) => validateInternal(type, value, customTypes)
+
+  if (isSimpleType(type)) {
+    if (customTypes[type]) {
+      return validateCustom(customTypes[type], value)
+    }
+
+    return toResult(simpleValidation(type, value), value)
+  }
+
+  if (Array.isArray(type)) { return validateOneOf(value, type, validateCustom) }
+
+  if (isArray(type)) { return validateArray(value, type, validateCustom) }
 
   if (isEnum(type)) { return toResult(validateString(value, type.$enum), value) }
 
-  if (isObj(type)) { return validateObject(value, type, validate) }
+  if (isObj(type)) { return validateObject(value, type, validateCustom) }
 
-  if (isObjectMeta(type)) { return validateObject(value, type.$object, validate) }
+  if (isObjectMeta(type)) { return validateObject(value, type.$object, validateCustom) }
 
-  if (isMap(type)) { return validateMap(value, type.$map, validate) }
+  if (isMap(type)) { return validateMap(value, type.$map, validateCustom) }
 
   if (isNumber(type)) { return toResult(validateNumberComplex(value, type.$number.min, type.$number.max), value) }
 
@@ -168,6 +185,10 @@ export const validate = (type: Validation, value: InputTypes): ValidationResult 
   if (isString(type)) { return toResult(validateStringObject(value, type), value) }
 
   throw new Error(`Unknown validator:${JSON.stringify(type)}`)
+}
+
+export const validate = (type: Validation, value: InputTypes): ValidationResult => {
+  return validateInternal(type, value, {})
 }
 
 export const loadJson = (json: string | object): Validation => {

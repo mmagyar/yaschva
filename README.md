@@ -18,6 +18,7 @@ Property names starting with a $ (dollar sign) are reserved.
 - Give easy to understand error messages.
 - Generate random data based on the schema.
 - Generate typescript types from schema.
+- Declare your own types, to keep the schema DRY.
 
 ### Why not just use JSON schema?
 

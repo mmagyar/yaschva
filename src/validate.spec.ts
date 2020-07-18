@@ -20,9 +20,14 @@ describe('validate', () => {
       },
       myMultiType: -8508087912141643,
       myNull: null,
-      myRegex: 'work'
+      myRegex: 'work',
+      myAddress: {
+        name: 'Homer Simpson',
+        street: '742 Evergreen Terrace',
+        city: 'Springfield',
+        country: 'USA'
+      }
     }
-
     expect(validate(example, data)).toHaveProperty('result', 'pass')
     expect(validate(example, { })).toHaveProperty('result', 'fail')
 
@@ -45,7 +50,8 @@ describe('validate', () => {
         },
         myNull: { error: 'Value is not null', value: undefined },
         myNumberRange: { error: 'Value is not a number', value: undefined },
-        myRegex: { error: 'Value is not a string', value: undefined }
+        myRegex: { error: 'Value is not a string', value: undefined },
+        myAddress: { error: 'Value is not an Object', value: undefined }
       }
     })
   })
@@ -286,5 +292,33 @@ describe('validate', () => {
     expect(input2.b).toEqual(3)
     expect(result).toHaveProperty('output.a', null)
     expect(result).toHaveProperty('output.b.error', 'Did not match any from the listed types')
+  })
+
+  it('can use type definitions', () => {
+    const schema: Validation = {
+      $types: { $range: { $number: { min: 1, max: 99 } } },
+      a: 'number',
+      b: '$range'
+    }
+
+    expect(validate(schema, { a: 2, b: 43 })).toHaveProperty('result', 'pass')
+    expect(validate(schema, { a: 2, b: 101 })).toHaveProperty('result', 'fail')
+    expect(validate(schema, { a: 2, b: 0 })).toHaveProperty('result', 'fail')
+  })
+
+  it('type definitions can reference each other.', () => {
+    const schema: Validation = {
+      $types: {
+        $myObject: { itsRange: '$range', name: 'string' },
+        $range: { $number: { min: 1, max: 99 } }
+      },
+      a: '$myObject',
+      b: '$range'
+    }
+
+    expect(validate(schema, { a: { name: 'abc', itsRange: 22 }, b: 43 })).toHaveProperty('result', 'pass')
+    expect(validate(schema, { a: { name: 'abc', itsRange: 101 }, b: 43 })).toHaveProperty('result', 'fail')
+    expect(validate(schema, { a: { name: 'abc', itsRange: 22 }, b: 0 })).toHaveProperty('result', 'fail')
+    expect(validate(schema, { a: 2, b: 0 })).toHaveProperty('result', 'fail')
   })
 })
