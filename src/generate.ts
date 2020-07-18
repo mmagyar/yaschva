@@ -30,6 +30,7 @@ const simpleGeneration = (type: SimpleTypes): any => {
   switch (type) {
     case 'any': return simpleGeneration(simpleTypes[randomNumber(true, 0, simpleTypes.length - 1)])
     case '?': return undefined
+    case 'null': return null
     case 'number': return randomNumber()
     case 'integer': return randomNumber(true)
     case 'string': return randomString()

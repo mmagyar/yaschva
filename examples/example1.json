@@ -11,5 +11,6 @@
   "myKeyValuePairs": { "$map": "string" },
   "myMultiType": ["string", "number"],
   "myNumberRange": { "$number": { "min": 4, "max": 9 } },
+  "myNull": "null",
   "myRegex": { "$string": { "regex": "\\b(\\w*work\\w*)\\b" } }
 }

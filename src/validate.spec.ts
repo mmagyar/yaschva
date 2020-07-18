@@ -19,8 +19,10 @@ describe('validate', () => {
         h5mRyKCL: 'fq3aXU', wff99z2e: '4D0Ptj', h3VcecUx: 'vmKmRU', Ox3CN4Iq: '2FWzGw'
       },
       myMultiType: -8508087912141643,
+      myNull: null,
       myRegex: 'work'
     }
+
     expect(validate(example, data)).toHaveProperty('result', 'pass')
     expect(validate(example, { })).toHaveProperty('result', 'fail')
 
@@ -41,6 +43,7 @@ describe('validate', () => {
             { error: 'Value is not a number', value: undefined }
           ]
         },
+        myNull: { error: 'Value is not null', value: undefined },
         myNumberRange: { error: 'Value is not a number', value: undefined },
         myRegex: { error: 'Value is not a string', value: undefined }
       }
@@ -53,6 +56,7 @@ describe('validate', () => {
     expect(validate('number', 123.3)).toHaveProperty('result', 'pass')
     expect(validate('boolean', true)).toHaveProperty('result', 'pass')
     expect(validate('?', undefined)).toHaveProperty('result', 'pass')
+    expect(validate('null', null)).toHaveProperty('result', 'pass')
     expect(validate('any', 233)).toHaveProperty('result', 'pass')
     expect(validate({ $type: 'string' }, 'desert')).toHaveProperty('result', 'pass')
   })
@@ -64,6 +68,9 @@ describe('validate', () => {
     expect(validate('number', '123.4')).toHaveProperty('result', 'fail')
     expect(validate('boolean', 'true')).toHaveProperty('result', 'fail')
     expect(validate('?', 'yes')).toHaveProperty('result', 'fail')
+    expect(validate('null', 'no')).toHaveProperty('result', 'fail')
+    expect(validate('null', undefined)).toHaveProperty('result', 'fail')
+
     // Fails for non safe integer above 2^53
     expect(validate('integer', 12332323423445323)).toHaveProperty('result', 'fail')
 

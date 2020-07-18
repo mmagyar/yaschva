@@ -8,7 +8,7 @@ export declare type TypeMeta = {
 };
 
 export type Validation = ValueType | ValueType[];
-export type SimpleTypes = 'string' | 'boolean' | 'number' | 'integer' | '?' | 'any';
+export type SimpleTypes = 'string' | 'boolean' | 'number' | 'integer' | 'null' | '?' | 'any';
 export type ObjectType = { [key: string]: Validation };
 export type EnumType = TypeMeta & {showSelect?: boolean; $enum: string[]};
 export type ArrayType = TypeMeta & { multiSelect?: string; $array: Validation};

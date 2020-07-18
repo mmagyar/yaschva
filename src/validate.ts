@@ -21,8 +21,11 @@ export type ValidationFailed = {
 type SimpleValidation = string | null
 type validateFn = (type: Validation, value: InputTypes) => ValidationResult
 
-const validateNullish = (value: InputTypes): SimpleValidation =>
+const validateUndefined = (value: InputTypes): SimpleValidation =>
   !(value === undefined) ? 'Value is not undefined' : null
+
+const validateNull = (value: InputTypes): SimpleValidation =>
+  !(value === null) ? 'Value is not null' : null
 
 const validateNumber = (value: InputTypes): SimpleValidation =>
   !Number.isFinite(value) || typeof value !== 'number' ? 'Value is not a number' : null
@@ -129,11 +132,12 @@ const validateMap = (value: InputTypes, validator: Validation, validate: validat
 const simpleValidation = (type: SimpleTypes, value: any): SimpleValidation => {
   switch (type) {
     case 'any': return null
-    case '?': return validateNullish(value)
+    case '?': return validateUndefined(value)
     case 'number': return validateNumber(value)
     case 'integer': return validateInteger(value)
     case 'string': return validateString(value)
     case 'boolean': return validateBool(value)
+    case 'null': return validateNull(value)
     default: throw new Error(`Unknown validator:${JSON.stringify(type)}`)
   }
 }

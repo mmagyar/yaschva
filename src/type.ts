@@ -22,6 +22,8 @@ const simpleTypes = (input: string) => {
       return 'boolean'
     case 'any':
       return 'any'
+    case 'null':
+      return 'null'
     case '?':
       return 'undefined'
     default: throw new Error(`Unhandled ${input}`)

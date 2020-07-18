@@ -4,6 +4,7 @@ import { Validation } from './validationTypes'
 describe('Creates typescript type from a schema', () => {
   it('generates simple types', () => {
     expect(validationToType('?')).toEqual('undefined')
+    expect(validationToType('null')).toEqual('null')
     expect(validationToType('any')).toEqual('any')
     expect(validationToType('boolean')).toEqual('boolean')
     expect(validationToType('number')).toEqual('number')

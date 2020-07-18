@@ -22,6 +22,7 @@ describe('It generates data based on schema', () => {
       string: 'string',
       number: 'number',
       any: 'any',
+      null: 'null',
       optional: '?',
       boolean: 'boolean',
       integer: 'integer'
@@ -32,6 +33,7 @@ describe('It generates data based on schema', () => {
       expect(typeof result.string).toEqual('string')
       expect(typeof result.number).toEqual('number')
       expect(typeof result.boolean).toEqual('boolean')
+      expect(result.null).toStrictEqual(null)
       expect(Number.isSafeInteger(result.integer))
       if (result.any === undefined) anyGenerated.push(result.any)
       expect(result).not.toHaveProperty('optional')
