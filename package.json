@@ -1,6 +1,6 @@
 {
   "name": "yaschva",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "description": "Yet another schema validation",
   "keywords": [
     "schema",
@@ -9,6 +9,7 @@
     "typescript",
     "json"
   ],
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "prepublish": "tsc",
@@ -19,23 +20,22 @@
   "scripts": {
     "build": "tsc",
     "eslint:fix": "eslint src/**/*.ts --fix",
-    "test": "jest",
+    "test": "tsc && jest",
     "clean:test": "jest --clearCache",
     "standard": "standardx **/*.ts",
     "standard:fix": "standardx --fix **/*.ts",
-    "test:coverage": "npm run standard && jest --coverage",
+    "test:coverage": "tsc && npm run standard && jest --coverage",
     "test:watch": "jest --watch"
   },
   "author": "mmagyar.com",
   "license": "MIT",
   "standardx": {
     "env": [
-      "jest"
+      "jest",
+      "es6"
     ],
     "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint/eslint-plugin"
-    ]
+    "plugins": [ "@typescript-eslint/eslint-plugin" ]
   },
   "eslintConfig": {
     "rules": {
@@ -43,15 +43,23 @@
       "@typescript-eslint/no-unused-vars": "error"
     }
   },
+  "babel":{
+    "sourceMaps": "both",
+    "env": { "test": { "plugins": ["@babel/plugin-transform-modules-commonjs"] } }
+  },
+  "jest": {
+    "roots": ["<rootDir>/dist"]
+  },
   "devDependencies": {
-    "@types/jest": "^26.0.4",
-    "@typescript-eslint/eslint-plugin": "^3.6.1",
-    "@typescript-eslint/parser": "^3.6.1",
-    "jest": "^26.1.0",
-    "ts-jest": "^26.1.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.10.4",
+    "@types/jest": "^26.0.9",
+    "@typescript-eslint/eslint-plugin": "^3.9.0",
+    "@typescript-eslint/parser": "^3.9.0",
+    "jest": "^26.3.0",
+    "standardx": "^5.0.0",
+    "ts-jest": "^26.1.4",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.7",
-    "standardx": "^5.0.0"
+    "typescript": "^3.9.7"
   },
   "dependencies": {
     "randexp": "^0.5.3"

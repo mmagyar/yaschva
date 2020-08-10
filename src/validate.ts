@@ -2,7 +2,7 @@ import {
   Validation, StringType, ArrayType, ObjectType, SimpleTypes,
   isSimpleType, isArray, isEnum, isObj,
   isObjectMeta, isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes
-} from './validationTypes'
+} from './validationTypes.js'
 
 type InputTypes = any | string | number | object | void | boolean | null
 export type ValidationOutputs= ValidationOutput|ValidationOutput[]
@@ -192,7 +192,7 @@ export const validate = (type: Validation, value: InputTypes): ValidationResult 
 }
 
 export const loadJson = (json: string | object): Validation => {
-  const jsonOut = typeof json === 'string' ? JSON.parse(json) : json
+  const jsonOut: any = typeof json === 'string' ? JSON.parse(json) : json
   delete jsonOut.$schema
 
   return jsonOut

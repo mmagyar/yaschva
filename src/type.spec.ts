@@ -1,5 +1,5 @@
-import { validationToType } from './type'
-import { Validation } from './validationTypes'
+import { validationToType } from './type.js'
+import { Validation } from './validationTypes.js'
 
 describe('Creates typescript type from a schema', () => {
   it('generates simple types', () => {

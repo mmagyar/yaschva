@@ -1,7 +1,7 @@
 import {
   Validation, isArray, isEnum, isObj,
   isString, isMap, isObjectMeta, isNumber, isTypeDefValidation, ValueTypes
-} from './validationTypes'
+} from './validationTypes.js'
 
 const containsOptional = (input: Validation) =>
   (Array.isArray(input) && input.some(y => y === '?')) ||

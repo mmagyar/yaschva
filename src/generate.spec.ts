@@ -1,6 +1,8 @@
-import { Validation } from './validationTypes'
-import { generate, randomNumber } from './generate'
-import { loadJson, validate } from './validate'
+import { Validation } from './validationTypes.js'
+import { generate, randomNumber } from './generate.js'
+import { loadJson, validate } from './validate.js'
+import fs from 'fs'
+const file = fs.promises.readFile
 describe('It generates data based on schema', () => {
   const checkNumber = (result: number) => {
     expect(result).not.toEqual(Infinity)
@@ -153,13 +155,13 @@ describe('It generates data based on schema', () => {
   })
 
   it('generates example from parsed json', async () => {
-    const a = loadJson(await import('../examples/example1.json'))
+    const a = loadJson(JSON.parse(await file('./examples/example1.json', 'utf8')))
 
     expect(validate(a, generate(a))).toHaveProperty('result', 'pass')
   })
 
   it('generates example from string', async () => {
-    const a = loadJson(JSON.stringify(await import('../examples/example1.json')))
+    const a = loadJson(await file('./examples/example1.json', 'utf8'))
 
     expect(validate(a, generate(a))).toHaveProperty('result', 'pass')
   })
