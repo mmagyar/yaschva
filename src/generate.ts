@@ -2,8 +2,8 @@ import {
   Validation, isSimpleType, isArray, isEnum,
   isObj, isObjectMeta, isMap, isNumber, isMeta,
   isString, SimpleTypes, isTypeDefValidation
-} from './validationTypes'
-import { randexp } from 'randexp'
+} from './validationTypes.js'
+import randexp from 'randexp'
 type Options = {
   arrayMin: number; arrayMax: number;
   mapMin: number; mapMax: number;
@@ -97,7 +97,7 @@ const generateInternal = (typeIn: Validation, options: Options, typesIn: {[key:s
   if (isMeta(type)) { return simpleGeneration(type.$type) }
 
   if (isString(type)) {
-    if (type.$string.regex) { return randexp(type.$string.regex) }
+    if (type.$string.regex) { return randexp.randexp(type.$string.regex) }
 
     return randomString(type.$string.minLength || type.$string.maxLength || 6)
   }

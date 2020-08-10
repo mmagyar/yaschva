@@ -1,10 +1,11 @@
 /* eslint-disable dot-notation */
-import { validate, loadJson } from './validate'
-import { Validation } from './validationTypes'
-
+import { validate, loadJson } from './validate.js'
+import { Validation } from './validationTypes.js'
+import fs from 'fs'
+const file = fs.promises.readFile
 describe('validate', () => {
   it('shows example schema working', async () => {
-    const example = await loadJson(await import('../examples/example1.json'))
+    const example = loadJson(await file('./examples/example1.json', 'utf8'))
     const data = {
       myString: '35p5Rx',
       myOptionalString: 'opts',
