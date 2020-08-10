@@ -31,9 +31,9 @@ This project tries to simplify syntax for better readability, and provide more s
 
 ### How to use JSON schema definition when writing yaschva schema
 
-In your yaschava schema file you need to add a property in the root object called:
+In your yaschva schema file you need to add a property in the root object called:
 
-`"$schema": "https://mmagyar.github.io/yaschva/typeSchema.json"`
+`"$schema": "https://yaschva.com/schema.json"`
 
 This will enable your IDE to help with yaschva's syntax and check for errors.
 

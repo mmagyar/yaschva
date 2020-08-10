@@ -1,6 +1,6 @@
 {
   "name": "yaschva",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Yet another schema validation",
   "keywords": [
     "schema",
@@ -35,7 +35,9 @@
       "es6"
     ],
     "parser": "@typescript-eslint/parser",
-    "plugins": [ "@typescript-eslint/eslint-plugin" ]
+    "plugins": [
+      "@typescript-eslint/eslint-plugin"
+    ]
   },
   "eslintConfig": {
     "rules": {
@@ -43,12 +45,20 @@
       "@typescript-eslint/no-unused-vars": "error"
     }
   },
-  "babel":{
+  "babel": {
     "sourceMaps": "both",
-    "env": { "test": { "plugins": ["@babel/plugin-transform-modules-commonjs"] } }
+    "env": {
+      "test": {
+        "plugins": [
+          "@babel/plugin-transform-modules-commonjs"
+        ]
+      }
+    }
   },
   "jest": {
-    "roots": ["<rootDir>/dist"]
+    "roots": [
+      "<rootDir>/dist"
+    ]
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
