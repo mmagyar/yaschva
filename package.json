@@ -1,6 +1,6 @@
 {
   "name": "yaschva",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "description": "Yet another schema validation",
   "keywords": [
     "schema",
@@ -10,22 +10,22 @@
     "json"
   ],
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "prepublish": "tsc",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "prepublish": "npm run build && npm run build:commonjs",
   "repository": {
     "type": "git",
     "url": "https://github.com/mmagyar/yaschva.git"
   },
   "scripts": {
     "build": "tsc",
+    "build:commonjs": "tsc --module \"CommonJS\" -t \"es6\" --outDir \"./cjs\"",
     "eslint:fix": "eslint src/**/*.ts --fix",
-    "test": "tsc && jest",
+    "test": "npm run build:commonjs && jest",
     "clean:test": "jest --clearCache",
     "standard": "standardx **/*.ts",
     "standard:fix": "standardx --fix **/*.ts",
-    "test:coverage": "tsc && npm run standard && jest --coverage",
-    "test:watch": "jest --watch"
+    "test:coverage": "npm run build:commonjs && npm run standard && jest --coverage"
   },
   "author": "mmagyar.com",
   "license": "MIT",
@@ -45,19 +45,9 @@
       "@typescript-eslint/no-unused-vars": "error"
     }
   },
-  "babel": {
-    "sourceMaps": "both",
-    "env": {
-      "test": {
-        "plugins": [
-          "@babel/plugin-transform-modules-commonjs"
-        ]
-      }
-    }
-  },
   "jest": {
     "roots": [
-      "<rootDir>/dist"
+      "<rootDir>/cjs"
     ]
   },
   "devDependencies": {

@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "module": "es6",
-    "target": "es6",
+    "target": "esnext",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "preserveConstEnums": true,
-    "outDir": "./dist",
+    "outDir": "./",
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "strict": true,
@@ -15,19 +15,15 @@
     "noEmitOnError": true,
     "noErrorTruncation": true,
     "resolveJsonModule": true,
-    "baseUrl": "./src",
     "rootDirs": [
       "./src"
     ],
-    "paths": {},
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "lib": [
     "esnext"
     ]
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": [ "src/**/*" ],
   "exclude": [ "node_modules" ]
 }

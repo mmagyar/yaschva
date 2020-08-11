@@ -3,6 +3,10 @@ node_modules
 /node_modules
 /.pnp
 .pnp.js
+cjs
+*.js
+*.js.map
+*.d.ts
 
 *.tgz
 # testing

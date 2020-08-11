@@ -2,15 +2,22 @@
 ![Node.js CI](https://github.com/mmagyar/yaschva/workflows/Node.js%20CI/badge.svg?branch=master)
 ![Code coverage](https://img.shields.io/codecov/c/github/mmagyar/yaschva)
 
-A simple validation library, aimed at defining schema for api calls.
+#### A simple validation library, aimed at defining schema for api calls.
+#### Using a concise definition, with safe defaults.
 
 ## Examples
-
-[Examples](https://github.com/mmagyar/yaschva/tree/master/examples)
-
-## Limitations
-
-Property names starting with a $ (dollar sign) are reserved.
+Defining an object with a few properties is as simple this:
+```json
+{
+  this helps your IDE to autocomplete the schema when writing it.
+  ↓↓↓↓↓↓↓↓↓
+  "$schema": "https://yaschva.com/schema.json",
+  "username": "string",               <-- Username is a string
+  "numberOfCats": "number",           <-- this is a number
+  "favoriteCatName": ["?", "string"]  <-- this is an optional string
+}
+```
+[More examples](https://github.com/mmagyar/yaschva/tree/master/examples)
 
 ## Capabilities
 
@@ -19,6 +26,19 @@ Property names starting with a $ (dollar sign) are reserved.
 - Generate random data based on the schema.
 - Generate typescript types from schema.
 - Declare your own types, to keep the schema DRY.
+
+## Limitations
+
+Property names starting with a $ (dollar sign) are reserved.
+
+
+## Project structure
+This project is written in typescript. These can be found under `./src`.
+
+The default build will create ES6 Modules with EsNext target,
+these can be found under package root directly in the npm package.
+
+Sources compiled with Commonjs modules and es6 target can be found under `./cjs` in the npm package.
 
 ### Why not just use JSON schema?
 
