@@ -1,6 +1,6 @@
 {
   "name": "yaschva",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Yet another schema validation",
   "keywords": [
     "schema",
@@ -12,12 +12,12 @@
   "type": "module",
   "main": "./index.js",
   "types": "./index.d.ts",
-  "prepublish": "npm run build && npm run build:commonjs",
   "repository": {
     "type": "git",
     "url": "https://github.com/mmagyar/yaschva.git"
   },
   "scripts": {
+    "prepack": "npm run build && npm run build:commonjs",
     "build": "tsc",
     "build:commonjs": "tsc --module \"CommonJS\" -t \"es6\" --outDir \"./cjs\"",
     "eslint:fix": "eslint src/**/*.ts --fix",
