@@ -1,5 +1,4 @@
 import { validationToType } from './type.js'
-import { validate } from './validate.js'
 import { Validation } from './validationTypes.js'
 
 describe('Creates typescript type from a schema', () => {
