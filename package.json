@@ -1,6 +1,6 @@
 {
   "name": "yaschva",
-  "version": "2.1.1",
+  "version": "2.2.1",
   "description": "Yet another schema validation",
   "keywords": [
     "schema",
@@ -20,9 +20,10 @@
     "prepack": "npm run build && npm run build:commonjs",
     "build": "tsc",
     "build:commonjs": "tsc --module \"CommonJS\" -t \"es6\" --outDir \"./cjs\"",
-    "eslint:fix": "eslint src/**/*.ts --fix",
+    "watch:commonjs": "tsc --module \"CommonJS\" -t \"es6\" --outDir \"./cjs\" --watch",
     "test": "npm run build:commonjs && jest",
     "clean:test": "jest --clearCache",
+    "watch:test": "jest --watchAll",
     "standard": "standardx **/*.ts",
     "standard:fix": "standardx --fix **/*.ts",
     "test:coverage": "npm run build:commonjs && npm run standard && jest --coverage"
@@ -52,12 +53,12 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
-    "@types/jest": "^26.0.9",
-    "@typescript-eslint/eslint-plugin": "^3.9.0",
-    "@typescript-eslint/parser": "^3.9.0",
-    "jest": "^26.3.0",
+    "@types/jest": "^26.0.13",
+    "@typescript-eslint/eslint-plugin": "^4.1.1",
+    "@typescript-eslint/parser": "^4.1.1",
+    "jest": "^26.4.2",
     "standardx": "^5.0.0",
-    "typescript": "^3.9.7"
+    "typescript": "^4.0.2"
   },
   "dependencies": {
     "randexp": "^0.5.3"

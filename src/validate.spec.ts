@@ -1,4 +1,5 @@
 /* eslint-disable dot-notation */
+
 import { validate, loadJson } from './validate.js'
 import { Validation } from './validationTypes.js'
 import fs from 'fs'
@@ -275,9 +276,21 @@ describe('validate', () => {
     expect(validate(schema, { x: 3, y: 'a string', z: 34 })).toHaveProperty('result', 'fail')
   })
 
-  it('protects against prototype injection', () => {
+  it('protects against global object prototype injection', () => {
     const schema: Validation = { a: 'number', b: ['string', '?'] }
     const input: any = { a: 4 }
+    // eslint-disable-next-line no-proto
+    input.__proto__.b = 99
+    const result = validate(schema, input)
+    expect(result).toHaveProperty('output.a', null)
+    expect(result).toHaveProperty('output.b.error', 'Did not match any from the listed types')
+  })
+
+  it('protects against prototype injection on class', () => {
+    const schema: Validation = { a: 'number', b: ['string', '?'] }
+    // eslint-disable-next-line no-useless-constructor
+    class Test1 { constructor (public readonly a: number) {} }
+    const input: any = new Test1(4)
     // eslint-disable-next-line no-proto
     input.__proto__.b = 3
     const result = validate(schema, input)
@@ -321,5 +334,15 @@ describe('validate', () => {
     expect(validate(schema, { a: { name: 'abc', itsRange: 101 }, b: 43 })).toHaveProperty('result', 'fail')
     expect(validate(schema, { a: { name: 'abc', itsRange: 22 }, b: 0 })).toHaveProperty('result', 'fail')
     expect(validate(schema, { a: 2, b: 0 })).toHaveProperty('result', 'fail')
+  })
+
+  it('$ sign can be escaped in the schema and used for data key', () => {
+    const validated = validate({ myNumber: 'number', '\\$escapedDollar': 'string' }, { myNumber: 12.3, $escapedDollar: 'value' })
+    expect(validated).toHaveProperty('result', 'pass')
+    expect(validated.output).toHaveProperty('$escapedDollar', null)
+
+    const validated2 = validate({ myNumber: 'number', '\\$escapedDollar': 'string' }, { myNumber: 12.3, $escapedDollar: 234 })
+    expect(validated2).toHaveProperty('result', 'fail')
+    expect(validated2.output).toHaveProperty('$escapedDollar', { error: 'Value is not a string', value: 234 })
   })
 })

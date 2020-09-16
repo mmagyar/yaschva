@@ -193,4 +193,10 @@ describe('It generates data based on schema', () => {
     }
     expect(undefinedGenerated.length).toBeGreaterThan(0)
   })
+
+  it('$ sign can be escaped in the schema and used for data key', () => {
+    const validated = generate({ myNumber: 'number', '\\$escapedDollar': 'string' })
+    expect(validated).toHaveProperty('myNumber')
+    expect(validated).toHaveProperty('$escapedDollar')
+  })
 })

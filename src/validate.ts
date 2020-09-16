@@ -102,12 +102,23 @@ const validateObject = (value: InputTypes, validator: ObjectType, validate: vali
 
   let fail = false
   const output: {[key: string]: ValidationOutputs} = {}
-  for (const key of Object.keys(value).concat(Object.keys(validator))) {
-    if (!validator[key]) {
+
+  for (const key of Object.keys(value)) {
+    const validatorKey = key.startsWith('$') ? `\\${key}` : key
+    if (!validator[validatorKey]) {
       fail = true
       output[key] = { error: 'Key does not exist on validator', value: value[key] }
     } else {
-      const { result, output: outputInternal } = validate(validator[key], value[key])
+      const { result, output: outputInternal } = validate(validator[validatorKey], value[key])
+      if (result === 'fail') fail = true
+      output[key] = outputInternal
+    }
+  }
+
+  for (const validatorKey of Object.keys(validator)) {
+    const key = validatorKey.startsWith('\\$') ? validatorKey.slice(1) : validatorKey
+    if (!Object.prototype.hasOwnProperty.call(output, key)) {
+      const { result, output: outputInternal } = validate(validator[validatorKey], value[key])
       if (result === 'fail') fail = true
       output[key] = outputInternal
     }
@@ -148,7 +159,7 @@ const toResult = (res: SimpleValidation, value: InputTypes): ValidationResult =>
 const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: {[key:string] : ValueTypes}): ValidationResult => {
   if (typeof typeIn === 'undefined') throw new Error('Type for validation cannot be undefined')
 
-  let type = typeIn
+  let type: ValueTypes = typeIn
   let customTypes: {[key:string] : ValueTypes} = customTypesIn
   if (isTypeDefValidation(typeIn)) {
     customTypes = typeIn.$types

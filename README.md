@@ -30,6 +30,8 @@ Defining an object with a few properties is as simple this:
 ## Limitations
 
 Property names starting with a $ (dollar sign) are reserved.
+If your data structure has value names starting with $,
+they need to be escaped in the schema: `{ "\\$escapedDollarSign": "string" }`
 
 
 ## Project structure
@@ -58,3 +60,6 @@ In your yaschva schema file you need to add a property in the root object called
 This will enable your IDE to help with yaschva's syntax and check for errors.
 
 Note: the `$schema` property is not part of yaschva schema, and will be removed when using the `loadJson` function.
+
+### TODO
+- Add "unique set" restriction to array

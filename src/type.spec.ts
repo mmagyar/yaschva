@@ -1,4 +1,5 @@
 import { validationToType } from './type.js'
+import { validate } from './validate.js'
 import { Validation } from './validationTypes.js'
 
 describe('Creates typescript type from a schema', () => {
@@ -107,5 +108,9 @@ describe('Creates typescript type from a schema', () => {
     }
 
     expect(test2).toThrowError()
+  })
+  it('$ sign can be escaped in the schema and used for data key', () => {
+    const validated = validationToType({ myNumber: 'number', '\\$escapedDollar': 'string' })
+    expect(validated).toEqual('{ myNumber: number; $escapedDollar: string }')
   })
 })

@@ -1,7 +1,7 @@
 import {
   Validation, isSimpleType, isArray, isEnum,
   isObj, isObjectMeta, isMap, isNumber, isMeta,
-  isString, SimpleTypes, isTypeDefValidation
+  isString, SimpleTypes, isTypeDefValidation, ValueTypes
 } from './validationTypes.js'
 import randexp from 'randexp'
 type Options = {
@@ -46,7 +46,7 @@ export const generate = (type: Validation,
 const generateInternal = (typeIn: Validation, options: Options, typesIn: {[key:string] : Validation }
 ): any => {
   let customTypes = typesIn
-  let type:Validation = typeIn
+  let type:ValueTypes = typeIn
   if (isTypeDefValidation(typeIn)) {
     customTypes = typeIn.$types
     type = { ...typeIn }
@@ -76,7 +76,8 @@ const generateInternal = (typeIn: Validation, options: Options, typesIn: {[key:s
   if (isObj(type)) {
     return Object.entries(type).reduce((prev: any, [key, value]) => {
       const generated = gen(value)
-      if (typeof generated !== 'undefined') prev[key] = generated
+      const keyC = key.startsWith('\\$') ? key.slice(1) : key
+      if (typeof generated !== 'undefined') prev[keyC] = generated
       return prev
     }, {})
   }

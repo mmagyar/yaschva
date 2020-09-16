@@ -32,7 +32,7 @@ const simpleTypes = (input: string) => {
 export const validationToType = (input:ValueTypes): string => validationToTypeInternal(input, {})
 const validationToTypeInternal = (input: ValueTypes, typesIn: {[key:string]:Validation}): string => {
   let customTypes = typesIn
-  let type:Validation = input
+  let type:ValueTypes = input
   if (isTypeDefValidation(input)) {
     customTypes = input.$types
     type = { ...input }
@@ -63,7 +63,7 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: {[key:string]:Vali
     const optionalPostfix = (value: Validation) => containsOptional(value) ? '?' : ''
 
     const obj = Object.entries(type)
-      .map(([key, value]) => `${key}${optionalPostfix(value)}: ${toType(value)}`)
+      .map(([key, value]) => `${key.startsWith('\\$') ? key.slice(1) : key}${optionalPostfix(value)}: ${toType(value)}`)
       .join('; ')
     if (allOptional(type)) { return `{ ${obj} } | undefined` }
 
