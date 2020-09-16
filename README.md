@@ -5,6 +5,11 @@
 #### A simple validation library, aimed at defining schema for api calls.
 #### Using a concise definition, with safe defaults.
 
+## Playground
+There is an interactive playground, where yaschva can be test driven
+
+[playground.yaschva.com](https://playground.yaschva.com)
+
 ## Examples
 Defining an object with a few properties is as simple this:
 ```json
