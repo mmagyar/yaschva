@@ -68,7 +68,7 @@ const generateInternal = (typeIn: Validation, options: Options, typesIn: {[key:s
   if (isArray(type)) {
     const arrayType = type
     return Array.from(Array(randomNumber(true, options.arrayMin, options.arrayMax)))
-      .map(() => gen(arrayType.$array))
+      .map(() => gen(arrayType.$array)).filter(x => typeof x !== 'undefined')
   }
 
   if (isEnum(type)) { return type.$enum[randomNumber(true, 0, type.$enum.length - 1)] }

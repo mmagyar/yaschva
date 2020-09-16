@@ -199,4 +199,12 @@ describe('It generates data based on schema', () => {
     expect(validated).toHaveProperty('myNumber')
     expect(validated).toHaveProperty('$escapedDollar')
   })
+
+  it('generates empty array for array of undefined', () => {
+    const schema = { $array: '?' }
+    const generated = generate(schema)
+    const validated = validate(schema, generated)
+    expect(validated).toHaveProperty('result', 'pass')
+    expect(validate(schema, JSON.parse(JSON.stringify(generated)))).toHaveProperty('result', 'pass')
+  })
 })
