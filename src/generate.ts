@@ -149,8 +149,8 @@ const generateInternal = (
   if (isNumber(type)) {
     return randomNumber(
       false,
-      type.$number.min ?? options.minNumber,
-      type.$number.max ?? options.maxNumber)
+      type.$number.min == null ? options.minNumber : type.$number.min,
+      type.$number.max == null ? options.maxNumber : type.$number.max)
   }
 
   if (isMeta(type)) { return gen(type.$type) }
