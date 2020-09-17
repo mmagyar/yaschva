@@ -171,29 +171,22 @@
           ]
         },
         {
-          "description": "object type",
+          "description": "and type",
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "onlyIn": {
-              "type": "string",
-              "enum": [
-                "request",
-                "response"
-              ]
-            },
-            "$object": {
-              "$ref": "#/definitions/objectType"
+            "$and": {
+              "$type": "array",
+              "items": [{
+                "$ref": "#/definitions/objectType"
+              }, {
+                  "type": "string",
+                  "pattern": "^\\$"
+              }]
             }
           },
           "required": [
-            "$object"
+            "$and"
           ]
         },
         {
