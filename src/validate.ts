@@ -1,7 +1,7 @@
 import {
   Validation, StringType, ArrayType, ObjectType, SimpleTypes,
   isSimpleType, isArray, isEnum, isObj,
-  isObjectMeta, isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes
+  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType
 } from './validationTypes.js'
 
 type InputTypes = any | string | number | object | void | boolean | null
@@ -9,17 +9,35 @@ export type ValidationOutputs= ValidationOutput|ValidationOutput[]
 export type ValidationOutput =
   | {[key: string]: ValidationOutputs}
   | null
-  | {'error': string; output?: ValidationOutputs; value: any}
+  | {'error': string, output?: ValidationOutputs, value: any}
 
 export type ValidationResult = {
-  'result': 'pass'|'fail';
-  output: ValidationOutputs;
+  'result': 'pass'|'fail'
+  output: ValidationOutputs
 }
-export type ValidationFailed = {
-  message: string;
-}
+export type ValidationFailed = { message: string }
 type SimpleValidation = string | null
 type validateFn = (type: Validation, value: InputTypes) => ValidationResult
+
+export const combineValidationObjects = <T>(type:AndType, customTypes:any, onError: (input:any)=>T)
+  :{result: 'error', error:T} | {pass: ObjectType, result? : void} => {
+  const resolveMeta = (tpe: Validation) : Validation => {
+    if (typeof tpe === 'string') { return resolveMeta(customTypes[tpe]) }
+    if (isMeta(tpe)) return resolveMeta(tpe.$type)
+    return tpe
+  }
+  const resolvedType = type.$and.map(x => resolveMeta(x))
+
+  if (resolvedType.some(x => !isObj(x))) {
+    return { error: onError(resolvedType), result: 'error' }
+  }
+
+  return {
+    pass: resolvedType.reduce((prev:any, current:any) => {
+      return { ...prev, ...current }
+    }, {})
+  }
+}
 
 const validateUndefined = (value: InputTypes): SimpleValidation =>
   !(value === undefined) ? 'Value is not undefined' : null
@@ -43,7 +61,7 @@ const validateInteger = (value: InputTypes): SimpleValidation =>
 
 const validateString = (value: InputTypes, enums?: string[]): SimpleValidation => {
   if (typeof value !== 'string') return 'Value is not a string'
-  else if (enums && enums.length && !enums.find(x => value === x)) { return `Value needs to be one of the following: [${enums.join(', ')}] ` }
+  else if (enums && enums.length && !enums.some(x => value === x)) { return `Value needs to be one of the following: [${enums.join(', ')}] ` }
   return null
 }
 
@@ -185,8 +203,6 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
 
   if (isObj(type)) { return validateObject(value, type, validateCustom) }
 
-  if (isObjectMeta(type)) { return validateObject(value, type.$object, validateCustom) }
-
   if (isMap(type)) { return validateMap(value, type.$map, validateCustom) }
 
   if (isNumber(type)) { return toResult(validateNumberComplex(value, type.$number.min, type.$number.max), value) }
@@ -194,6 +210,19 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
   if (isMeta(type)) { return validateCustom(type.$type, value) }
 
   if (isString(type)) { return toResult(validateStringObject(value, type), value) }
+  if (isAnd(type)) {
+    const onError = (resolvedType: any):ValidationResult => ({
+      result: 'fail',
+      output: {
+        error: 'SCHEMA error: $and must only contain objects',
+        value: resolvedType
+      }
+    })
+    const combined = combineValidationObjects(type, customTypes, onError)
+    if (combined.result === 'error') return combined.error
+
+    return validateObject(value, combined.pass, validateCustom)
+  }
 
   throw new Error(`Unknown validator:${JSON.stringify(type)}`)
 }

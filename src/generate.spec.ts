@@ -91,7 +91,10 @@ describe('It generates data based on schema', () => {
 
   it('Generates object meta', () => {
     const schema: Validation = {
-      meta: { $object: { here: 'string' } }
+      meta: {
+        name: 'object with name',
+        $type: { here: 'string' }
+      }
     }
     const result = generate(schema)
     expect(result).toHaveProperty('meta')
@@ -298,6 +301,29 @@ describe('It generates data based on schema', () => {
       $types: { $tree: { value: 'string', left: '$tree', right: '$tree' } },
       root: '$tree'
     }
+    expect(() => generate(schema)).toThrowError()
+  })
+
+  it('Can validate to multiple custom types with $and', () => {
+    const schema:Validation = {
+      $types: {
+        $myObject: { value: 'string' },
+        $otherObject: { num: 'number' },
+        $myMetaObject: { $type: { value2: 'string' } }
+      },
+      $and: [{ valueA: 'string' }, '$myObject', '$myMetaObject', { $type: '$otherObject' }]
+    }
+    const generated = generate(schema)
+    expect(typeof generated.value).toBe('string')
+    expect(typeof generated.valueA).toBe('string')
+    expect(typeof generated.value2).toBe('string')
+    expect(typeof generated.num).toBe('number')
+    const validated = validate(schema, generated)
+    expect(validated).toHaveProperty('result', 'pass')
+  })
+
+  it('invalid $and throws', () => {
+    const schema:Validation = { $and: [{ valueA: 'string' }, 'myObject'] }
     expect(() => generate(schema)).toThrowError()
   })
 })

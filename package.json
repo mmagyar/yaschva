@@ -1,6 +1,6 @@
 {
   "name": "yaschva",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Yet another schema validation",
   "keywords": [
     "schema",
@@ -44,7 +44,11 @@
     "rules": {
       "no-unused-vars": "off",
       "no-use-before-define": "off",
-      "@typescript-eslint/no-unused-vars": "error"
+      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/semi": [
+        "error",
+        "never"
+      ]
     }
   },
   "jest": {

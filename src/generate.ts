@@ -1,8 +1,9 @@
 import {
   Validation, isSimpleType, isArray, isEnum,
-  isObj, isObjectMeta, isMap, isNumber, isMeta,
+  isObj, isMap, isNumber, isMeta, isAnd,
   isString, SimpleTypes, isTypeDefValidation, ValueTypes
 } from './validationTypes.js'
+import { combineValidationObjects } from './validate.js'
 import randexp from 'randexp'
 type Options = {
   arrayMin: number
@@ -16,7 +17,7 @@ type Options = {
   maxDepthSoft: number
   maxDepthHard: number
   prefer: 'defined' | 'undefined' | 'none'
-};
+}
 
 export const randomNumber = (isInteger:boolean, min: number, max: number): number => {
   const num = Math.random() * (max - min) + min
@@ -133,8 +134,6 @@ const generateInternal = (
     }, {})
   }
 
-  if (isObjectMeta(type)) { return gen(type.$object) }
-
   if (isMap(type)) {
     const mapType = type
     if (depth >= options.maxDepthSoft) return {}
@@ -159,6 +158,15 @@ const generateInternal = (
     if (type.$string.regex) { return randexp.randexp(type.$string.regex) }
 
     return randomString(type.$string.minLength || type.$string.maxLength || 6)
+  }
+
+  if (isAnd(type)) {
+    const combined = combineValidationObjects(type, customTypes, (x) => x)
+    if (combined.result === 'error') {
+      throw new Error('Schema error, $and types must be objects: ' + JSON.stringify(combined.error, null, 2))
+    }
+
+    return gen(combined.pass)
   }
 
   throw new Error('Unknown type')

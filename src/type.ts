@@ -1,6 +1,7 @@
+import { combineValidationObjects } from './validate.js'
 import {
   Validation, isArray, isEnum, isObj,
-  isString, isMap, isObjectMeta, isNumber, isTypeDefValidation, ValueTypes, isMeta
+  isString, isMap, isNumber, isTypeDefValidation, ValueTypes, isMeta, isAnd
 } from './validationTypes.js'
 
 const containsOptional = (input: Validation) =>
@@ -74,11 +75,18 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: {[key:string]:Vali
 
   if (isMap(type)) { return `{ [key: string] : ${toType(type.$map)}}` }
 
-  if (isObjectMeta(type)) { return toType(type.$object) }
-
   if (isMeta(type)) { return toType(type.$type) }
 
   if (isNumber(type)) { return toType('number') }
+
+  if (isAnd(type)) {
+    const combined = combineValidationObjects(type, customTypes, (x) => x)
+    if (combined.result === 'error') {
+      throw new Error('Schema error, $and types must be objects: ' + JSON.stringify(combined.error, null, 2))
+    }
+
+    return toType(combined.pass)
+  }
 
   throw new Error(`UNSUPPORTED ${JSON.stringify(type, undefined, 2)}`)
 }

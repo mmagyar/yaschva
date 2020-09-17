@@ -382,4 +382,45 @@ describe('validate', () => {
     })
     expect(validated).toHaveProperty('result', 'pass')
   })
+
+  it('Can validate to multiple objects with $and', () => {
+    const schema:Validation = {
+      $and: [
+        { valueA: 'string' },
+        { valueB: 'number' },
+        { $type: { otherValue: 'number' } }]
+    }
+    const validated = validate(schema, { valueA: 'someString', valueB: 32, otherValue: 9 })
+    expect(validated).toHaveProperty('result', 'pass')
+  })
+
+  it('When and $and is specified input must satisfy both objects', () => {
+    const schema:Validation = { $and: [{ valueA: 'string' }, { valueB: 'number' }] }
+    const validated = validate(schema, { valueA: 'someString' })
+    expect(validated).toHaveProperty('result', 'fail')
+  })
+
+  it('$and only accepts object', () => {
+    const schema:Validation = { $and: [{ valueA: 'string' }, 'string'] }
+    const validated = validate(schema, { valueA: 'someString' })
+    expect(validated).toHaveProperty('result', 'fail')
+  })
+
+  it('Can validate to multiple custom types with $and', () => {
+    const schema:Validation = {
+      $types: {
+        $myObject: { value: 'string' },
+        $otherObject: { num: 'number' },
+        $myMetaObject: { $type: { value2: 'string' } }
+      },
+      $and: [{ valueA: 'string' }, '$myObject', '$myMetaObject', { $type: '$otherObject' }]
+    }
+    const validated = validate(schema, {
+      valueA: 'someString',
+      value: 'value',
+      value2: 'value2',
+      num: 88
+    })
+    expect(validated).toHaveProperty('result', 'pass')
+  })
 })

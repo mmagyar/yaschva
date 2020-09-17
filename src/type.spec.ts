@@ -32,8 +32,10 @@ describe('Creates typescript type from a schema', () => {
       .toEqual('{ string: string; number: number; any: any;' +
         ' optional?: undefined; boolean: boolean; integer: number }')
 
-    expect(validationToType({ $object: { str: 'string', num: 'number' } }))
-      .toEqual('{ str: string; num: number }')
+    expect(validationToType({
+      name: 'object with name',
+      $type: { str: 'string', num: 'number' }
+    })).toEqual('{ str: string; num: number }')
   })
   it('Generates type for arrays', () => {
     const schema: Validation = {
@@ -126,5 +128,23 @@ describe('Creates typescript type from a schema', () => {
     }
     const type = validationToType(schema)
     console.log(type)
+  })
+
+  it('Can validate to multiple custom types with $and', () => {
+    const schema:Validation = {
+      $types: {
+        $myObject: { value: 'string' },
+        $otherObject: { num: 'number' },
+        $myMetaObject: { $type: { value2: 'string' } }
+      },
+      $and: [{ valueA: 'string' }, '$myObject', '$myMetaObject', { $type: '$otherObject' }]
+    }
+    const type = validationToType(schema)
+    expect(type).toBe('{ valueA: string; value: string; value2: string; num: number }')
+  })
+
+  it('invalid $and throws', () => {
+    const schema:Validation = { $and: [{ valueA: 'string' }, 'myObject'] }
+    expect(() => validationToType(schema)).toThrowError()
   })
 })
