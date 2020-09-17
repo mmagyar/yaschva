@@ -5,7 +5,7 @@ import { Validation } from './validationTypes.js'
 import fs from 'fs'
 const file = fs.promises.readFile
 describe('validate', () => {
-  it('shows example schema working', async () => {
+  it('Shows example schema working', async () => {
     const example = loadJson(await file('./examples/example1.json', 'utf8'))
     const data = {
       myString: '35p5Rx',
@@ -58,7 +58,7 @@ describe('validate', () => {
     })
   })
 
-  it('passes validation for correct simple values', () => {
+  it('Passes validation for correct simple values', () => {
     expect(validate('string', 'hello')).toHaveProperty('result', 'pass')
     expect(validate('integer', 123)).toHaveProperty('result', 'pass')
     expect(validate('number', 123.3)).toHaveProperty('result', 'pass')
@@ -69,7 +69,7 @@ describe('validate', () => {
     expect(validate({ $type: 'string' }, 'desert')).toHaveProperty('result', 'pass')
   })
 
-  it('fails validation for incorrect simple values', () => {
+  it('Fails validation for incorrect simple values', () => {
     expect(validate('string', 234)).toHaveProperty('result', 'fail')
     expect(validate('integer', 123.4)).toHaveProperty('result', 'fail')
     expect(validate('integer', '123')).toHaveProperty('result', 'fail')
@@ -85,7 +85,7 @@ describe('validate', () => {
     // any does not fail for any data type
   })
 
-  it('passes objects with correct values', () => {
+  it('Passes objects with correct values', () => {
     expect(validate({}, {})).toHaveProperty('result', 'pass')
     expect(validate({ myNumber: 'number' }, { myNumber: 12.3 })).toHaveProperty('result', 'pass')
     expect(validate(
@@ -94,26 +94,26 @@ describe('validate', () => {
     )).toHaveProperty('result', 'pass')
   })
 
-  it('fails objects with missing properties', () => {
+  it('Fails objects with missing properties', () => {
     expect(validate({ myNumber: 'number' }, {})).toHaveProperty('result', 'fail')
     expect(validate({ num: 'number', int: 'integer', str: 'string', bool: 'boolean' },
       { num: 3 })).toHaveProperty('result', 'fail')
   })
 
-  it('fails objects with incorrect values', () => {
+  it('Fails objects with incorrect values', () => {
     expect(validate({}, null)).toHaveProperty('result', 'fail')
     expect(validate({ num: 'number', int: 'integer', str: 'string', bool: 'boolean' },
       JSON.stringify({ num: 12.3, int: 12, str: 'Hello', bool: false })))
       .toHaveProperty('result', 'fail')
   })
 
-  it('can handle multiple type for a single value', () => {
+  it('Can handle multiple type for a single value', () => {
     expect(validate(['integer', 'string'], 'hello')).toHaveProperty('result', 'pass')
     expect(validate(['integer', 'string'], 123)).toHaveProperty('result', 'pass')
     expect(validate(['integer', 'string'], {})).toHaveProperty('result', 'fail')
   })
 
-  it('handles optional values via multi-types', () => {
+  it('Handles optional values via multi-types', () => {
     expect(validate(['integer', 'string', '?'], 'hello')).toHaveProperty('result', 'pass')
     expect(validate(['integer', 'string', '?'], 123)).toHaveProperty('result', 'pass')
     expect(validate(['integer', 'string', '?'], undefined)).toHaveProperty('result', 'pass')
@@ -126,7 +126,7 @@ describe('validate', () => {
     expect(validate(type, undefined)).toHaveProperty('result', 'fail')
   })
 
-  it('handles arrays with special syntax', () => {
+  it('Handles arrays with special syntax', () => {
     expect(validate({ $array: 'string' }, ['hello'])).toHaveProperty('result', 'pass')
     expect(validate({ $array: 'string' }, ['hello', 'abc'])).toHaveProperty('result', 'pass')
     expect(validate({ $array: 'string' }, [2])).toHaveProperty('result', 'fail')
@@ -136,7 +136,7 @@ describe('validate', () => {
     expect(validate(['integer', { $array: ['string'] }], [1])).toHaveProperty('result', 'fail')
   })
 
-  it('handles enums with special syntax', () => {
+  it('Handles enums with special syntax', () => {
     const type: Validation = { $enum: ['ts', 'typescript'] }
     expect(validate(type, 'ts')).toHaveProperty('result', 'pass')
     expect(validate(type, 'typescript')).toHaveProperty('result', 'pass')
@@ -145,7 +145,7 @@ describe('validate', () => {
     expect(validate(type, { $enum: 'ts' })).toHaveProperty('result', 'fail')
   })
 
-  it('provides useful error description', () => {
+  it('Provides useful error description', () => {
     const type: Validation = {
       num: 'number',
       int: 'integer',
@@ -179,7 +179,7 @@ describe('validate', () => {
     })
   })
 
-  it('uses null to signal that there is no error for a given property', () => {
+  it('Uses null to signal that there is no error for a given property', () => {
     const type: Validation =
       { obj: { member: 'boolean', memberId: ['string', '?'], nested: { inside: 'string' } } }
     const result = validate(type, { obj: { member: false, nested: { inside: 'hello' } } })
@@ -194,16 +194,16 @@ describe('validate', () => {
     })
   })
 
-  it('rejects objects with additional keys', () => {
+  it('Rejects objects with additional keys', () => {
     expect(validate({ myValue: 'integer' }, { myValue: 2, ourValue: 3 }))
       .toHaveProperty('result', 'fail')
   })
 
-  it('throws on type definition with empty array of types', () => {
+  it('Throws on type definition with empty array of types', () => {
     expect(() => validate({ myValue: [] }, { myValue: 2 })).toThrowError()
   })
 
-  it('throws on unknown type definition', () => {
+  it('Throws on unknown type definition', () => {
     expect(() => validate({ myValue: 'bigFlout' } as any, { myValue: 2 }))
       .toThrowError('Unknown validator:"bigFlout"')
 
@@ -214,11 +214,11 @@ describe('validate', () => {
       .toThrowError('Type for validation cannot be undefined')
   })
 
-  it('reserves keys starting with $ (dollar sign) for type data', () => {
+  it('Reserves keys starting with $ (dollar sign) for type data', () => {
     expect(() => validate({ $whatever: 'string' }, { $whatever: 2 })).toThrowError()
   })
 
-  it('can validate string length', () => {
+  it('Can validate string length', () => {
     const schema: Validation = { $string: { minLength: 4, maxLength: 6 } }
     expect(validate(schema, 'abc')).toEqual({
       result: 'fail',
@@ -237,7 +237,7 @@ describe('validate', () => {
     expect(validate(schema, 'hello')).toHaveProperty('result', 'pass')
   })
 
-  it('can validate string by regex', () => {
+  it('Can validate string by regex', () => {
     const schema: Validation = { $string: { regex: 'hello \\w+' } }
     expect(validate(schema, 'abc')).toEqual({
       result: 'fail',
@@ -249,7 +249,7 @@ describe('validate', () => {
     expect(validate(schema, 'hello world')).toHaveProperty('result', 'pass')
   })
 
-  it('can enforce maximum / minimum number', () => {
+  it('Can enforce maximum / minimum number', () => {
     const schema: Validation = { $number: { min: 1, max: 66 } }
 
     expect(validate(schema, 0)).toEqual({
@@ -269,14 +269,14 @@ describe('validate', () => {
     expect(validate(schema, 44)).toHaveProperty('result', 'pass')
   })
 
-  it('can validate key value pairs (map)', () => {
+  it('Can validate key value pairs (map)', () => {
     const schema: Validation = { $map: ['number'] }
     expect(validate(schema, { x: 3, y: 4, z: 99 })).toHaveProperty('result', 'pass')
     expect(validate(schema, { x: 3, y: 4, z: '99' })).toHaveProperty('result', 'fail')
     expect(validate(schema, { x: 3, y: 'a string', z: 34 })).toHaveProperty('result', 'fail')
   })
 
-  it('protects against global object prototype injection', () => {
+  it('Protects against global object prototype injection', () => {
     const schema: Validation = { a: 'number', b: ['string', '?'] }
     const input: any = { a: 4 }
     // eslint-disable-next-line no-proto
@@ -286,7 +286,7 @@ describe('validate', () => {
     expect(result).toHaveProperty('output.b.error', 'Did not match any from the listed types')
   })
 
-  it('protects against prototype injection on class', () => {
+  it('Protects against prototype injection on class', () => {
     const schema: Validation = { a: 'number', b: ['string', '?'] }
     // eslint-disable-next-line no-useless-constructor
     class Test1 { constructor (public readonly a: number) {} }
@@ -298,7 +298,7 @@ describe('validate', () => {
     expect(result).toHaveProperty('output.b.error', 'Did not match any from the listed types')
   })
 
-  it('protects against prototype injection from json', () => {
+  it('Protects against prototype injection from json', () => {
     const schema: Validation = { a: 'number', b: ['string', '?'] }
     const input: any = JSON.parse('{ "a": 5, "__proto__": {"b" : 3} }')
     const input2 = { ...input }
@@ -308,7 +308,7 @@ describe('validate', () => {
     expect(result).toHaveProperty('output.b.error', 'Did not match any from the listed types')
   })
 
-  it('can use type definitions', () => {
+  it('Can use type definitions', () => {
     const schema: Validation = {
       $types: { $range: { $number: { min: 1, max: 99 } } },
       a: 'number',
@@ -320,7 +320,7 @@ describe('validate', () => {
     expect(validate(schema, { a: 2, b: 0 })).toHaveProperty('result', 'fail')
   })
 
-  it('type definitions can reference each other.', () => {
+  it('Type definitions can reference each other.', () => {
     const schema: Validation = {
       $types: {
         $myObject: { itsRange: '$range', name: 'string' },
@@ -344,5 +344,42 @@ describe('validate', () => {
     const validated2 = validate({ myNumber: 'number', '\\$escapedDollar': 'string' }, { myNumber: 12.3, $escapedDollar: 234 })
     expect(validated2).toHaveProperty('result', 'fail')
     expect(validated2.output).toHaveProperty('$escapedDollar', { error: 'Value is not a string', value: 234 })
+  })
+
+  it('Root can be a meta type', () => {
+    const validated = validate({ $type: { $array: 'string' } }, ['a', 'b', 'c'])
+    expect(validated).toHaveProperty('result', 'pass')
+  })
+
+  it('Root can be a custom type via a meta type', () => {
+    const validated = validate({
+      $types: { $customType: { value: 'string', nodes: { $array: '$customType' } } },
+      $type: '$customType'
+    }, { value: 'abc', nodes: [{ value: 'xyz', nodes: [] }] })
+    expect(validated).toHaveProperty('result', 'pass')
+  })
+
+  it('Can validated recursive data structure', () => {
+    const schema = {
+      $types: { $tree: { value: 'string', left: ['?', '$tree'], right: ['?', '$tree'] } },
+      root: '$tree'
+    }
+
+    const validated = validate(schema, {
+      root: {
+        value: 'Dcn819x2PCmJV',
+        left: {
+          value: 'mEiX0hq435IXt',
+          left: { value: 'coGEB1xXQmsRS' },
+          right: { value: '6lBoBa' }
+        },
+        right: {
+          value: 'mV9j2',
+          left: { value: 'iL42zyiOv' },
+          right: { value: 'Bx6FbX' }
+        }
+      }
+    })
+    expect(validated).toHaveProperty('result', 'pass')
   })
 })

@@ -2,7 +2,7 @@ import { validationToType } from './type.js'
 import { Validation } from './validationTypes.js'
 
 describe('Creates typescript type from a schema', () => {
-  it('generates simple types', () => {
+  it('Generates simple types', () => {
     expect(validationToType('?')).toEqual('undefined')
     expect(validationToType('null')).toEqual('null')
     expect(validationToType('any')).toEqual('any')
@@ -12,14 +12,14 @@ describe('Creates typescript type from a schema', () => {
     expect(validationToType('string')).toEqual('string')
   })
 
-  it('generates union types', () => {
+  it('Generates union types', () => {
     expect(validationToType(['?', 'boolean'])).toEqual('undefined | boolean')
     expect(validationToType(['any', 'number'])).toEqual('any | number')
     expect(validationToType(['integer', 'boolean', 'string', '?']))
       .toEqual('number | boolean | string | undefined')
   })
 
-  it('generates object of simple types', () => {
+  it('Generates object of simple types', () => {
     const schema: Validation = {
       string: 'string',
       number: 'number',
@@ -35,7 +35,7 @@ describe('Creates typescript type from a schema', () => {
     expect(validationToType({ $object: { str: 'string', num: 'number' } }))
       .toEqual('{ str: string; num: number }')
   })
-  it('generates type for arrays', () => {
+  it('Generates type for arrays', () => {
     const schema: Validation = {
       stringOrNumber: { $array: ['string', 'number'] },
       objArray: { $array: { hello: 'string', world: 'number' } }
@@ -45,17 +45,17 @@ describe('Creates typescript type from a schema', () => {
       ' objArray: { hello: string; world: number }[] }')
   })
 
-  it('generates type for enum', () => {
+  it('Generates type for enum', () => {
     expect(validationToType({ $enum: ['lorem', 'ipsum', 'santa', 'domine'] }))
       .toEqual('"lorem" | "ipsum" | "santa" | "domine"')
   })
 
-  it('generates type for array ofenum', () => {
+  it('Generates type for array ofenum', () => {
     expect(validationToType({ $array: { $enum: ['lorem', 'ipsum', 'santa', 'domine'] } }))
       .toEqual('("lorem" | "ipsum" | "santa" | "domine")[]')
   })
 
-  it('generates type for objects with undefined union if all members are optional', () => {
+  it('Generates type for objects with undefined union if all members are optional', () => {
     const schema: Validation = {
       prop1: ['?', 'string'],
       prop2: ['?', 'number']
@@ -64,15 +64,15 @@ describe('Creates typescript type from a schema', () => {
       .toEqual('{ prop1?: undefined | string; prop2?: undefined | number } | undefined')
   })
 
-  it('does not keep string length constraints in type', () => {
+  it('Does not keep string length constraints in type', () => {
     expect(validationToType({ $string: { minLength: 4, maxLength: 16 } })).toEqual('string')
   })
 
-  it('does not keep number min/max constraints in type', () => {
+  it('Does not keep number min/max constraints in type', () => {
     expect(validationToType({ $number: { min: 3, max: 9 } })).toEqual('number')
   })
 
-  it('generates type for key value pairs (map)', () => {
+  it('Generates type for key value pairs (map)', () => {
     expect(validationToType({ $map: 'number' })).toEqual('{ [key: string] : number}')
     expect(validationToType({ $map: ['number', 'string'] }))
       .toEqual('{ [key: string] : number | string}')
@@ -81,7 +81,7 @@ describe('Creates typescript type from a schema', () => {
       .toEqual('{ [key: string] : number | (string | undefined)[]}')
   })
 
-  it('generates types based on custom type', () => {
+  it('Generates types based on custom type', () => {
     const schema: Validation = {
       $types: { $person: { name: 'string', height: 'number' } },
       string: 'string',
@@ -93,7 +93,7 @@ describe('Creates typescript type from a schema', () => {
       .toEqual('{ string: string; person: { name: string; height: number }; number: number }')
   })
 
-  it('throws on unknown type', () => {
+  it('Throws on unknown type', () => {
     const test = () => {
       const schema: any = { $stringss: { minLength: 77 } }
       validationToType(schema)
@@ -111,5 +111,20 @@ describe('Creates typescript type from a schema', () => {
   it('$ sign can be escaped in the schema and used for data key', () => {
     const validated = validationToType({ myNumber: 'number', '\\$escapedDollar': 'string' })
     expect(validated).toEqual('{ myNumber: number; $escapedDollar: string }')
+  })
+
+  it('Root can be a meta type', () => {
+    const validated = validationToType({ $type: { $array: 'string' } })
+    expect(validated).toBe('string[]')
+  })
+
+  it.skip('Can generate type for recursive data structure', () => {
+    /// THIS DOES NOT WORK YET
+    const schema = {
+      $types: { $tree: { value: 'string', left: ['?', '$tree'], right: ['?', '$tree'] } },
+      root: '$tree'
+    }
+    const type = validationToType(schema)
+    console.log(type)
   })
 })
