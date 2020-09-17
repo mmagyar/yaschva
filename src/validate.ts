@@ -191,7 +191,7 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
 
   if (isNumber(type)) { return toResult(validateNumberComplex(value, type.$number.min, type.$number.max), value) }
 
-  if (isMeta(type)) { return toResult(simpleValidation(type.$type, value), value) }
+  if (isMeta(type)) { return validateCustom(type.$type, value) }
 
   if (isString(type)) { return toResult(validateStringObject(value, type), value) }
 

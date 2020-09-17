@@ -9,9 +9,9 @@ describe('It generates data based on schema', () => {
     expect(result).not.toBeNaN()
     expect(typeof result).toEqual('number')
   }
-  it('generates a random number that is not infinity or NaN', () => {
+  it('Generates a random number that is not infinity or NaN', () => {
     for (let i = 0; i < 32; i += 1) {
-      checkNumber(randomNumber())
+      checkNumber(randomNumber(false, 0, 100))
       const int = randomNumber(true, -10, 99)
       checkNumber(int)
       expect(Number.isSafeInteger(int)).toBeTruthy()
@@ -19,7 +19,7 @@ describe('It generates data based on schema', () => {
       expect(int).toBeLessThanOrEqual(99)
     }
   })
-  it('generates simple types', () => {
+  it('Generates simple types', () => {
     const schema: Validation = {
       string: 'string',
       number: 'number',
@@ -47,7 +47,7 @@ describe('It generates data based on schema', () => {
     expect(anyGenerated.length).toBeGreaterThan(0)
   })
 
-  it('generates on of multiple types', () => {
+  it('Generates on of multiple types', () => {
     const schema: Validation = {
       stringOrNumber: ['string', 'number'],
       optionalString: ['?', 'string']
@@ -59,7 +59,7 @@ describe('It generates data based on schema', () => {
     expect(validate(schema, result)).toHaveProperty('result', 'pass')
   })
 
-  it('generates arrays', () => {
+  it('Generates arrays', () => {
     const schema: Validation = {
       stringOrNumber: { $array: ['string', 'number'] },
       objArray: { $array: { hello: 'string', world: 'number' } }
@@ -79,7 +79,7 @@ describe('It generates data based on schema', () => {
     expect(validate(schema, result)).toHaveProperty('result', 'pass')
   })
 
-  it('generates enum', () => {
+  it('Generates enum', () => {
     const enums = ['lolly', 'pop', 'chewingGum', 'doughnut']
     const schema: Validation = {
       enum: { $enum: enums }
@@ -89,7 +89,7 @@ describe('It generates data based on schema', () => {
     expect(validate(schema, result)).toHaveProperty('result', 'pass')
   })
 
-  it('generates object meta', () => {
+  it('Generates object meta', () => {
     const schema: Validation = {
       meta: { $object: { here: 'string' } }
     }
@@ -100,7 +100,7 @@ describe('It generates data based on schema', () => {
     expect(validate(schema, result)).toHaveProperty('result', 'pass')
   })
 
-  it('generates map (key value pairs)', () => {
+  it('Generates map (key value pairs)', () => {
     const schema: Validation = {
       map: { $map: 'number' }
     }
@@ -114,19 +114,25 @@ describe('It generates data based on schema', () => {
     expect(validate(schema, result)).toHaveProperty('result', 'pass')
   })
 
-  it('generates bound number', () => {
+  it('Generates bound number', () => {
     const schema: Validation = { $number: { min: 33, max: 45 } }
     const result = generate(schema)
     expect(result).toBeGreaterThanOrEqual(33)
     expect(result).toBeLessThanOrEqual(45)
   })
 
-  it('generates extended simple type', () => {
+  it('Generates unbound number', () => {
+    const schema: Validation = { $number: {} }
+    const result = generate(schema)
+    expect(typeof result).toBe('number')
+  })
+
+  it('Generates extended simple type', () => {
     const result = generate({ $type: 'string' })
     expect(typeof result === 'string').toBeTruthy()
   })
 
-  it('generates extended string', () => {
+  it('Generates extended string', () => {
     const result = generate({ $string: { minLength: 77 } })
     expect(typeof result === 'string').toBeTruthy()
     expect(result.length >= 77).toBeTruthy()
@@ -138,7 +144,7 @@ describe('It generates data based on schema', () => {
     expect(generate({ $string: { } })).toHaveLength(6)
   })
 
-  it('throws on unknown type', () => {
+  it('Throws on unknown type', () => {
     const test = () => {
       const schema: any = { $stringss: { minLength: 77 } }
       generate(schema)
@@ -154,25 +160,25 @@ describe('It generates data based on schema', () => {
     expect(test2).toThrowError()
   })
 
-  it('generates example from parsed json', async () => {
+  it('Generates example from parsed json', async () => {
     const a = loadJson(JSON.parse(await file('./examples/example1.json', 'utf8')))
 
     expect(validate(a, generate(a))).toHaveProperty('result', 'pass')
   })
 
-  it('generates example from string', async () => {
+  it('Generates example from string', async () => {
     const a = loadJson(await file('./examples/example1.json', 'utf8'))
 
     expect(validate(a, generate(a))).toHaveProperty('result', 'pass')
   })
 
-  it('generates string based on regex', () => {
+  it('Generates string based on regex', () => {
     const result = generate({ $string: { regex: '\\b(\\w*work\\w*)\\b' } })
     expect(typeof result === 'string').toBeTruthy()
     expect(result.includes('work')).toBeTruthy()
   })
 
-  it('generates uuid based on regex', () => {
+  it('Generates uuid based on regex', () => {
     const regex = '[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}'
     for (var i = 0; i < 240; i++) {
       const result = generate({ id: { $string: { regex } } })
@@ -180,7 +186,7 @@ describe('It generates data based on schema', () => {
     }
   })
 
-  it('does not add property to object if it\'s optionally undefined', () => {
+  it('Does not add property to object if it\'s optionally undefined', () => {
     const undefinedGenerated = []
     for (var i = 0; i < 240; i++) {
       const result = generate({ value: ['string', '?'] })
@@ -200,11 +206,98 @@ describe('It generates data based on schema', () => {
     expect(validated).toHaveProperty('$escapedDollar')
   })
 
-  it('generates empty array for array of undefined', () => {
+  it('Generates empty array for array of undefined', () => {
     const schema = { $array: '?' }
     const generated = generate(schema)
     const validated = validate(schema, generated)
     expect(validated).toHaveProperty('result', 'pass')
     expect(validate(schema, JSON.parse(JSON.stringify(generated)))).toHaveProperty('result', 'pass')
+  })
+
+  it('Can prefer undefined type if present', () => {
+    const schema = {
+      root: 'string',
+      aNumber: ['number'],
+      mayBeUndefined: ['string', '?']
+    }
+    const generated = generate(schema, { prefer: 'undefined' })
+    expect(typeof generated.root).toBe('string')
+    expect(typeof generated.aNumber).toBe('number')
+    expect(typeof generated.mayBeUndefined).toBe('undefined')
+    const validated = validate(schema, generated)
+    expect(validated).toHaveProperty('result', 'pass')
+    expect(validate(schema, JSON.parse(JSON.stringify(generated)))).toHaveProperty('result', 'pass')
+  })
+
+  it('can prefer defined type if present', () => {
+    const schema = {
+      root: 'string',
+      aNumber: ['number'],
+      mayBeUndefined: ['string', '?']
+    }
+    const generated = generate(schema, { prefer: 'defined' })
+    expect(typeof generated.root).toBe('string')
+    expect(typeof generated.aNumber).toBe('number')
+    expect(typeof generated.mayBeUndefined).toBe('string')
+    const validated = validate(schema, generated)
+    expect(validated).toHaveProperty('result', 'pass')
+    expect(validate(schema, JSON.parse(JSON.stringify(generated)))).toHaveProperty('result', 'pass')
+  })
+
+  it('Depth can be limited for recursive data structures', () => {
+    const schema = {
+      $types: { $tree: { value: 'string', left: ['?', '$tree'], right: ['?', '$tree'] } },
+      root: '$tree'
+    }
+    // Set preference to defined values, to make sure that we have a large enough tree
+    const layers3 = generate(schema, { prefer: 'defined', maxDepthSoft: 3 })
+    // Observe that the tree is 3 objects deep
+    expect(layers3?.root?.left).toHaveProperty('left')
+    expect(layers3?.root?.left?.left).not.toHaveProperty('left')
+
+    const layers4 = generate(schema, { prefer: 'defined', maxDepthSoft: 4 })
+    // Observe that the tree is 4 objects deep
+    expect(layers4?.root?.left?.left).toHaveProperty('left')
+    expect(layers4?.root?.left?.left?.left).not.toHaveProperty('left')
+
+    const validated = validate(schema, layers3)
+    expect(validated).toHaveProperty('result', 'pass')
+    expect(validate(schema, JSON.parse(JSON.stringify(layers3)))).toHaveProperty('result', 'pass')
+  })
+
+  it('Depth for nested arrays can be limited', () => {
+    const schema = {
+      $types: { $tree: { value: 'string', nodes: { $array: '$tree' } } },
+      $type: '$tree'
+    }
+    // Set preference to defined values, to make sure that we have a large enough tree
+    const generated = generate(schema, { arrayMin: 1, maxDepthSoft: 3 })
+    expect(generated.nodes.length).toBeGreaterThan(0)
+    // Check that the final layer is an empty array
+    expect(generated.nodes.find((x:any) => x.nodes.find((y:any) => y.nodes.length !== 0))).toBeUndefined()
+    const validated = validate(schema, generated)
+    expect(validated).toHaveProperty('result', 'pass')
+  })
+
+  it('Depth for nested maps can be limited', () => {
+    const schema = {
+      $types: { $tree: { value: 'string', nodes: { $map: '$tree' } } },
+      $type: '$tree'
+    }
+    // Set preference to defined values, to make sure that we have a large enough tree
+    const layers3 = generate(schema, { mapMin: 1, maxDepthSoft: 3 })
+    expect(Object.keys(layers3.nodes).length).toBeGreaterThan(0)
+    // Check that the final layer is an empty map
+    expect(Object.values(layers3.nodes).find((x:any) => Object.keys(x.nodes).length !== 0)).toBeUndefined()
+    const validated = validate(schema, layers3)
+    expect(validated).toHaveProperty('result', 'pass')
+  })
+
+  it('Schema with unescapable circular type will throw an error', () => {
+    const schema = {
+      $types: { $tree: { value: 'string', left: '$tree', right: '$tree' } },
+      root: '$tree'
+    }
+    expect(() => generate(schema)).toThrowError()
   })
 })

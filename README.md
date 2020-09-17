@@ -52,7 +52,8 @@ Sources compiled with Commonjs modules and es6 target can be found under `./cjs`
 JSON schema is a very sharp tool, which tons of features.
 This project is in fact using a json schema to describe it's format, and provide validation and auto completion.
 
-JSON schema syntax can be very noisy and hard to understand, it provides dangerous defaults (everything is optional and additional properties are always accepted).
+JSON schema syntax can be very noisy and hard to understand,
+it provides dangerous defaults (everything is optional and additional properties are always accepted).
 
 This project tries to simplify syntax for better readability, and provide more secure defaults among others.
 
@@ -68,3 +69,4 @@ Note: the `$schema` property is not part of yaschva schema, and will be removed 
 
 ### TODO
 - Add "unique set" restriction to array
+- Add options to generate a recursive type (Will require some redesign on how the types are generated)

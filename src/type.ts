@@ -1,6 +1,6 @@
 import {
   Validation, isArray, isEnum, isObj,
-  isString, isMap, isObjectMeta, isNumber, isTypeDefValidation, ValueTypes
+  isString, isMap, isObjectMeta, isNumber, isTypeDefValidation, ValueTypes, isMeta
 } from './validationTypes.js'
 
 const containsOptional = (input: Validation) =>
@@ -75,6 +75,8 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: {[key:string]:Vali
   if (isMap(type)) { return `{ [key: string] : ${toType(type.$map)}}` }
 
   if (isObjectMeta(type)) { return toType(type.$object) }
+
+  if (isMeta(type)) { return toType(type.$type) }
 
   if (isNumber(type)) { return toType('number') }
 
