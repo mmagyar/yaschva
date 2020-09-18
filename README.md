@@ -2,15 +2,19 @@
 ![Node.js CI](https://github.com/mmagyar/yaschva/workflows/Node.js%20CI/badge.svg?branch=master)
 ![Code coverage](https://img.shields.io/codecov/c/github/mmagyar/yaschva)
 
-#### A simple validation library, aimed at defining schema for api calls.
+#### A simple validation library.
 #### Using a concise definition, with safe defaults.
 
-## Playground
+Playground
+==========
+
 There is an interactive playground, where yaschva can be test driven
 
 [playground.yaschva.com](https://playground.yaschva.com)
 
-## Examples
+Examples
+========
+
 Defining an object with a few properties is as simple this:
 ```json
 {
@@ -24,22 +28,100 @@ Defining an object with a few properties is as simple this:
 ```
 [More examples](https://github.com/mmagyar/yaschva/tree/master/examples)
 
-## Capabilities
+Capabilities
+=====================
+
+Overview
+--------
 
 - Validate data based on a schema defined either in json or in type safe typescript.
-- Give easy to understand error messages.
+- Returns easy to understand error messages on validation failure.
 - Generate random data based on the schema.
 - Generate typescript types from schema.
-- Declare your own types, to keep the schema DRY.
 
-## Limitations
+Strict and safe by default
+--------------------------
+
+Every field is mandatory by default,
+and additional properties are rejected.
+
+Concise definition
+-----------------
+
+The schema syntax is concise, and simple,
+with as little noise as possible.
+
+DRY schema
+----------
+
+Custom types can be defined and reused.
+This enables recursive data structures and
+makes sure that copy paste is not needed
+to fully define the structure.
+
+Helpful failure
+---------------
+
+When a validation fails,
+it's output describes what went wrong
+with the validation, in a way that reflects the original schema,
+for easy troubleshooting.
+
+Written in Typescript
+---------------------
+
+It helps auto complete while using it in the IDE.
+The schema structure is also described in Typescript types.
+
+100% unit test coverage
+-----------------------
+
+All code paths are tested,
+every scenario is covered
+
+Concise, easy to read implementation
+------------------------------------
+
+The whole validation is done in 310 lines of code.
+That includes all the Typescript types.
+
+Includes helpful tools
+----------------------
+
+It contains a random data generator,
+that can generate random data,
+It is useful for testing and mock APIs.
+
+It can generate Typescript types from the schema,
+so after validation you can be sure to have the
+correct type, and Typescript can help you from there on.
+This saves the effort of manually typing out the type and
+precludes the possibility of making an error.
+
+There is also a [playground](https://playground.yaschva.com)
+where you can test out your schemas,
+validate data or
+generate dummy data.
+
+Can self describe the schema
+----------------------------
+
+Yaschva is flexible enough to describe itself.
+This enables the generator to generate
+valid schema definitions.
+
+
+Limitations
+-----------
 
 Property names starting with a $ (dollar sign) are reserved.
 If your data structure has value names starting with $,
 they need to be escaped in the schema: `{ "\\$escapedDollarSign": "string" }`
 
 
-## Project structure
+Project structure
+-----------------
+
 This project is written in typescript. These can be found under `./src`.
 
 The default build will create ES6 Modules with EsNext target,
@@ -57,6 +139,10 @@ it provides dangerous defaults (everything is optional and additional properties
 
 This project tries to simplify syntax for better readability, and provide more secure defaults among others.
 
+JSON schema is very verbose,
+yaschva's schema is defined with both itself and in JSON schema.
+The JSON schema is about twice as long.
+
 ### How to use JSON schema definition when writing yaschva schema
 
 In your yaschva schema file you need to add a property in the root object called:
@@ -67,6 +153,43 @@ This will enable your IDE to help with yaschva's syntax and check for errors.
 
 Note: the `$schema` property is not part of yaschva schema, and will be removed when using the `loadJson` function.
 
-### TODO
-- Add "unique set" restriction to array
-- Add options to generate a recursive type (Will require some redesign on how the types are generated)
+
+What can be improved
+====================
+
+Generating recursive Typescript type
+------------------------------------
+
+This is not currently possible,
+because the type generator is designed to generate a single type,
+unnamed type, but to do it for recursive types,
+it must be named to enable recursion.
+The type generation needs to be reworked a bit for it to work.
+
+Arrays and maps with size constraint are not encoded in Typescript.
+
+More constraints
+----------------
+
+There are a few more constraints
+that are currently not supports but would be helpful
+to implement, like:
+- Array to be unique set
+- Map to be a unique set
+
+Faster happy path validation
+----------------------------
+
+Although Yaschva is very fast,
+it could be speed up for valid values.
+Right now it always builds up an object,
+that reflects the input data structure,
+to mark the problems where they occur.
+
+An alternate validator could forgo this,
+and just throw an error on the first failure.
+After that it could send it to the error
+collection implementation, to generate
+a meaningful error message.
+This creates a tradeoff, the best case speed is improved,
+but the worst case speed is slower.

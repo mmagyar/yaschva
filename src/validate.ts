@@ -122,12 +122,14 @@ ValidationResult => {
     }
     return { result: fail ? 'fail' : 'pass', output: resultArray.flat() }
   }
-  return { result: 'fail', output: { error: 'Value is not an Array', value } }
+  return failValidation('Value is not an Array', value)
 }
 
 const validateObject = (value: InputTypes, validator: ObjectType, validate: validateFn):
  ValidationResult => {
-  if (typeof value !== 'object' || value === null || value === undefined) { return { result: 'fail', output: { error: 'Value is not an Object', value } } }
+  if (typeof value !== 'object' || value === null || value === undefined) {
+    return failValidation('Value is not an Object', value)
+  }
 
   let fail = false
   const output: {[key: string]: ValidationOutputs} = {}
@@ -159,7 +161,7 @@ const validateObject = (value: InputTypes, validator: ObjectType, validate: vali
 const validateMap = (value: InputTypes, validator: MapType, validate: validateFn):
  ValidationResult => {
   if (typeof value !== 'object' || value === null || value === undefined) {
-    return { result: 'fail', output: { error: 'Value is not an Object', value } }
+    return failValidation('Value is not an Object', value)
   }
 
   let fail = false
@@ -242,13 +244,9 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
 
   if (isString(type)) { return toResult(validateStringObject(value, type), value) }
   if (isAnd(type)) {
-    const onError = (resolvedType: any):ValidationResult => ({
-      result: 'fail',
-      output: {
-        error: 'SCHEMA error: $and must only contain objects',
-        value: resolvedType
-      }
-    })
+    const onError = (resolvedType: any):ValidationResult =>
+      failValidation('SCHEMA error: $and must only contain objects', resolvedType)
+
     const combined = combineValidationObjects(type, customTypes, onError)
     if (combined.result === 'error') return combined.error
 

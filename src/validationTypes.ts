@@ -1,8 +1,5 @@
-export type Common = { default: any }
-export declare type TypeMeta = {name?: string, description?: string}
-
 type NonEmptyArray<T> = [T, ...T[]]
-
+export type TypeMeta = {name?: string, description?: string}
 type CustomValueType = string // Maybe use nominal typing to prevent arbitrary strings
 export type ValueTypes = ValueType | NonEmptyArray<ValueType>
 export type TypeDef = {$types: {[key:string]:ValueTypes}} & ObjectType
@@ -19,7 +16,6 @@ export declare type NumberType = TypeMeta & {
   postfix?: string
   $number: { min?: number, max?: number, step?: number }
 }
-
 export declare type MetaType = TypeMeta & { $type: ValueTypes }
 
 export type ValueType =
