@@ -276,6 +276,13 @@ describe('validate', () => {
     expect(validate(schema, { x: 3, y: 'a string', z: 34 })).toHaveProperty('result', 'fail')
   })
 
+  it('Key value pair keys can be regex validated', () => {
+    const schema: Validation = { $map: ['number'], regex: '^ab[a-z]' }
+    expect(validate(schema, { abx: 3, aby: 4, abz: 99 })).toHaveProperty('result', 'pass')
+    expect(validate(schema, { x: 3, y: 4, z: 99 })).toHaveProperty('result', 'fail')
+    expect(validate(schema, { abx: 3, aby: 'a string', abz: 34 })).toHaveProperty('result', 'fail')
+  })
+
   it('Protects against global object prototype injection', () => {
     const schema: Validation = { a: 'number', b: ['string', '?'] }
     const input: any = { a: 4 }

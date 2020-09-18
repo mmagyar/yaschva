@@ -140,7 +140,8 @@ const generateInternal = (
     const count = randomNumber(true, options.mapMin, options.mapMax)
     return Array.from(Array(count))
       .reduce((prev: any) => {
-        prev[simpleGeneration('string', options)] = gen(mapType.$map, true)
+        const str = mapType.regex ? randexp.randexp(mapType.regex) : simpleGeneration('string', options)
+        prev[str] = gen(mapType.$map, true)
         return prev
       }, {})
   }

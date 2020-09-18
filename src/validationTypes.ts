@@ -15,7 +15,7 @@ export type SimpleTypes = 'string' | 'boolean' | 'number' | 'integer' | 'null' |
 export type ObjectType = { [key: string]: ValueTypes }
 export type EnumType = TypeMeta & {showSelect?: boolean, $enum: string[]}
 export type ArrayType = TypeMeta & { multiSelect?: string, $array: ValueTypes}
-export type MapType = TypeMeta & { $map: ValueTypes }
+export type MapType = TypeMeta & { $map: ValueTypes, regex?: string }
 export type AndType = TypeMeta & { $and: (ObjectType | CustomValueType)[] }
 export type StringType = TypeMeta & { select?: string, $string: {
   minLength?: number, maxLength?: number, regex?: string}}

@@ -117,6 +117,13 @@ describe('It generates data based on schema', () => {
     expect(validate(schema, result)).toHaveProperty('result', 'pass')
   })
 
+  it('Key value pair keys can be regex validated', () => {
+    const schema: Validation = { $map: ['number'], regex: '^ab[a-z]' }
+    const generated = generate(schema, { mapMin: 5 })
+    expect(Object.keys(generated).length).toBeGreaterThan(1)
+    expect(validate(schema, generated)).toHaveProperty('result', 'pass')
+  })
+
   it('Generates bound number', () => {
     const schema: Validation = { $number: { min: 33, max: 45 } }
     const result = generate(schema)

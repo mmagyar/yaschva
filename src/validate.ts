@@ -1,7 +1,7 @@
 import {
   Validation, StringType, ArrayType, ObjectType, SimpleTypes,
   isSimpleType, isArray, isEnum, isObj,
-  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType
+  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType
 } from './validationTypes.js'
 
 type InputTypes = any | string | number | object | void | boolean | null
@@ -145,17 +145,28 @@ const validateObject = (value: InputTypes, validator: ObjectType, validate: vali
   return { result: fail ? 'fail' : 'pass', output }
 }
 
-const validateMap = (value: InputTypes, validator: Validation, validate: validateFn):
+const validateMap = (value: InputTypes, validator: MapType, validate: validateFn):
  ValidationResult => {
-  if (typeof value !== 'object' || value === null || value === undefined) { return { result: 'fail', output: { error: 'Value is not an Object', value } } }
+  if (typeof value !== 'object' || value === null || value === undefined) {
+    return { result: 'fail', output: { error: 'Value is not an Object', value } }
+  }
 
   let fail = false
   const output: {[key: string]: ValidationOutputs} = {}
   for (const key of Object.keys(value)) {
-    const { result, output: outputInternal } = validate(validator, value[key])
+    if (validator.regex) {
+      const regex = new RegExp(validator.regex, 'u')
+      if (!regex.test(key)) {
+        fail = true
+        output[key] = { error: 'String did not match required regex', value: value }
+        continue
+      }
+    }
+    const { result, output: outputInternal } = validate(validator.$map, value[key])
     if (result === 'fail') fail = true
     output[key] = outputInternal
   }
+
   return { result: fail ? 'fail' : 'pass', output }
 }
 const simpleValidation = (type: SimpleTypes, value: any): SimpleValidation => {
@@ -203,7 +214,7 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
 
   if (isObj(type)) { return validateObject(value, type, validateCustom) }
 
-  if (isMap(type)) { return validateMap(value, type.$map, validateCustom) }
+  if (isMap(type)) { return validateMap(value, type, validateCustom) }
 
   if (isNumber(type)) { return toResult(validateNumberComplex(value, type.$number.min, type.$number.max), value) }
 

@@ -8,20 +8,53 @@
         "(\\$schema)": {
           "type": "string"
         },
-        "(\\$types)":{
-            "type": "object",
-            "patternProperties": {
+        "(\\$types)": {
+          "type": "object",
+          "patternProperties": {
             "(^\\$)": {
               "$ref": "#/definitions/typesAll"
             }
           },
-          "additionalProperties":false
+          "additionalProperties": false
         },
         "(.*?)": {
           "$ref": "#/definitions/typesAll"
         }
       },
       "additionalProperties": false
+    },
+    "objectMetaType": {
+      "description": "meta type",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "onlyIn": {
+          "type": "string",
+          "enum": [
+            "request",
+            "response"
+          ]
+        },
+        "$type": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/objectType"
+            },
+            {
+              "$ref": "#/definitions/objectMetaType"
+            }
+          ]
+        }
+      },
+      "required": [
+        "$type"
+      ]
     },
     "objectType": {
       "description": "Object type, can have any properties with any types, but properties should not start with $",
@@ -152,7 +185,9 @@
                 "response"
               ]
             },
-            "postfix":{"type":"string"},
+            "postfix": {
+              "type": "string"
+            },
             "$number": {
               "type": "object",
               "additionalProperties": false,
@@ -177,12 +212,20 @@
           "properties": {
             "$and": {
               "$type": "array",
-              "items": [{
-                "$ref": "#/definitions/objectType"
-              }, {
-                  "type": "string",
-                  "pattern": "^\\$"
-              }]
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/objectMetaType"
+                  },
+                  {
+                    "$ref": "#/definitions/objectType"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$"
+                  }
+                ]
+              }
             }
           },
           "required": [
@@ -206,6 +249,9 @@
                 "request",
                 "response"
               ]
+            },
+            "regex": {
+              "type": "string"
             },
             "$map": {
               "$ref": "#/definitions/typesAll"
@@ -275,14 +321,7 @@
               ]
             },
             "$type": {
-              "type": "string",
-              "enum": [
-                "boolean",
-                "string",
-                "number",
-                "integer",
-                "?"
-              ]
+              "$ref": "#/definitions/typesAll"
             }
           },
           "required": [
