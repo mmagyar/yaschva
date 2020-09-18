@@ -3,7 +3,7 @@ import { generate, randomNumber } from './generate.js'
 import { loadJson, validate } from './validate.js'
 import fs from 'fs'
 const file = fs.promises.readFile
-describe('It generates data based on schema', () => {
+describe('generates data based on schema', () => {
   const checkNumber = (result: number) => {
     expect(result).not.toEqual(Infinity)
     expect(result).not.toBeNaN()
@@ -225,7 +225,7 @@ describe('It generates data based on schema', () => {
   })
 
   it('Can prefer undefined type if present', () => {
-    const schema = {
+    const schema : Validation = {
       root: 'string',
       aNumber: ['number'],
       mayBeUndefined: ['string', '?']
@@ -240,7 +240,7 @@ describe('It generates data based on schema', () => {
   })
 
   it('can prefer defined type if present', () => {
-    const schema = {
+    const schema :Validation = {
       root: 'string',
       aNumber: ['number'],
       mayBeUndefined: ['string', '?']
@@ -255,7 +255,7 @@ describe('It generates data based on schema', () => {
   })
 
   it('Depth can be limited for recursive data structures', () => {
-    const schema = {
+    const schema: Validation = {
       $types: { $tree: { value: 'string', left: ['?', '$tree'], right: ['?', '$tree'] } },
       root: '$tree'
     }
@@ -332,5 +332,21 @@ describe('It generates data based on schema', () => {
   it('invalid $and throws', () => {
     const schema:Validation = { $and: [{ valueA: 'string' }, 'myObject'] }
     expect(() => generate(schema)).toThrowError()
+  })
+
+  it('Will limit array size to be between bounds', () => {
+    const schema :Validation = { $array: 'string', minLength: 2, maxLength: 6 }
+    for (let i = 0; i < 32; i++) {
+      const generated = generate(schema)
+      expect(validate(schema, generated)).toHaveProperty('result', 'pass')
+    }
+  })
+
+  it('Will limit map size to be between bounds', () => {
+    const schema :Validation = { $map: 'string', minLength: 2, maxLength: 6 }
+    for (let i = 0; i < 32; i++) {
+      const generated = generate(schema)
+      expect(validate(schema, generated)).toHaveProperty('result', 'pass')
+    }
   })
 })

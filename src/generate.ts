@@ -119,7 +119,9 @@ const generateInternal = (
   if (isArray(type)) {
     const arrayType = type
     if (depth > options.maxDepthSoft) return []
-    return Array.from(Array(randomNumber(true, options.arrayMin, options.arrayMax)))
+    const min = typeof arrayType.minLength === 'number' ? arrayType.minLength : options.arrayMin
+    const max = typeof arrayType.maxLength === 'number' ? arrayType.maxLength : options.arrayMax
+    return Array.from(Array(randomNumber(true, min, max)))
       .map(() => gen(arrayType.$array, true)).filter(x => typeof x !== 'undefined')
   }
 
@@ -136,8 +138,10 @@ const generateInternal = (
 
   if (isMap(type)) {
     const mapType = type
-    if (depth >= options.maxDepthSoft) return {}
-    const count = randomNumber(true, options.mapMin, options.mapMax)
+    const min = typeof mapType.minLength === 'number' ? mapType.minLength : options.mapMin
+    const max = typeof mapType.maxLength === 'number' ? mapType.maxLength : options.mapMax
+    if (depth >= options.maxDepthSoft && (mapType.minLength || 0) <= 0) return {}
+    const count = randomNumber(true, min, max)
     return Array.from(Array(count))
       .reduce((prev: any) => {
         const str = mapType.regex ? randexp.randexp(mapType.regex) : simpleGeneration('string', options)

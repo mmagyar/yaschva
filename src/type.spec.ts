@@ -122,7 +122,7 @@ describe('Creates typescript type from a schema', () => {
 
   it.skip('Can generate type for recursive data structure', () => {
     /// THIS DOES NOT WORK YET
-    const schema = {
+    const schema:Validation = {
       $types: { $tree: { value: 'string', left: ['?', '$tree'], right: ['?', '$tree'] } },
       root: '$tree'
     }

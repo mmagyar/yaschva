@@ -19,6 +19,14 @@ export type ValidationFailed = { message: string }
 type SimpleValidation = string | null
 type validateFn = (type: Validation, value: InputTypes) => ValidationResult
 
+const failValidation = (error:string, value:any, output?: ValidationOutputs):ValidationResult => {
+  const content: ValidationOutputs = { error, value }
+  return {
+    result: 'fail',
+    output: output ? { ...content, output } : content
+  }
+}
+
 export const combineValidationObjects = <T>(type:AndType, customTypes:any, onError: (input:any)=>T)
   :{result: 'error', error:T} | {pass: ObjectType, result? : void} => {
   const resolveMeta = (tpe: Validation) : Validation => {
@@ -82,7 +90,7 @@ const validateBool = (value: InputTypes): SimpleValidation =>
 
 const validateOneOf = (value: InputTypes, validator: ValueType[], validate: validateFn):
  ValidationResult => {
-  if (!validator.length) throw new Error('one of type needs at least one type')
+  if (!validator.length) throw new Error('Array of types can not be empty')
 
   const errors: ValidationOutput[] = []
   for (const i of validator) {
@@ -92,16 +100,19 @@ const validateOneOf = (value: InputTypes, validator: ValueType[], validate: vali
     else errors.push(result.output)
   }
 
-  return {
-    result: 'fail',
-    output:
-  { error: 'Did not match any from the listed types', value, output: errors }
-  }
+  return failValidation('Did not match any from the listed types', value, errors)
 }
 
 const validateArray = (value: InputTypes, validator: ArrayType, validate: validateFn):
 ValidationResult => {
   if (Array.isArray(value)) {
+    const maxLength = validator.maxLength || Number.MAX_SAFE_INTEGER
+    const minLength = validator.minLength || 0
+    if (value.length < minLength || value.length > maxLength) {
+      return failValidation(
+        `Array length needs to be between ${minLength} - ${maxLength}`,
+        value.length)
+    }
     const resultArray: ValidationOutputs[] = []
     let fail = false
     for (const x of value) {
@@ -153,7 +164,16 @@ const validateMap = (value: InputTypes, validator: MapType, validate: validateFn
 
   let fail = false
   const output: {[key: string]: ValidationOutputs} = {}
-  for (const key of Object.keys(value)) {
+  const keys = Object.keys(value)
+  const keyCount = keys.length
+  const maxLength = validator.maxLength || Number.MAX_SAFE_INTEGER
+  const minLength = validator.minLength || 0
+  if (keyCount < minLength || keyCount > maxLength) {
+    return failValidation(
+        `Map needs to have member count to be between ${minLength} - ${maxLength}`,
+        keyCount)
+  }
+  for (const key of keys) {
     if (validator.regex) {
       const regex = new RegExp(validator.regex, 'u')
       if (!regex.test(key)) {

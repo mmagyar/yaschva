@@ -129,6 +129,7 @@ describe('validate', () => {
   it('Handles arrays with special syntax', () => {
     expect(validate({ $array: 'string' }, ['hello'])).toHaveProperty('result', 'pass')
     expect(validate({ $array: 'string' }, ['hello', 'abc'])).toHaveProperty('result', 'pass')
+    expect(validate({ $array: 'string' }, [])).toHaveProperty('result', 'pass')
     expect(validate({ $array: 'string' }, [2])).toHaveProperty('result', 'fail')
     expect(validate({ $array: 'string' }, 'hello')).toHaveProperty('result', 'fail')
     expect(validate(['integer', { $array: ['string'] }], ['true', 'this']))
@@ -200,6 +201,7 @@ describe('validate', () => {
   })
 
   it('Throws on type definition with empty array of types', () => {
+    // @ts-expect-error
     expect(() => validate({ myValue: [] }, { myValue: 2 })).toThrowError()
   })
 
@@ -367,7 +369,7 @@ describe('validate', () => {
   })
 
   it('Can validated recursive data structure', () => {
-    const schema = {
+    const schema :Validation = {
       $types: { $tree: { value: 'string', left: ['?', '$tree'], right: ['?', '$tree'] } },
       root: '$tree'
     }
@@ -429,5 +431,35 @@ describe('validate', () => {
       num: 88
     })
     expect(validated).toHaveProperty('result', 'pass')
+  })
+
+  it('Will reject arrays that are too short', () => {
+    expect(validate({ $array: 'string', minLength: 3 }, ['abc', 'efg']))
+      .toHaveProperty('result', 'fail')
+  })
+
+  it('Will reject arrays that are too long', () => {
+    expect(validate({ $array: 'string', maxLength: 3 }, ['abc', 'efg', 'some', 'value']))
+      .toHaveProperty('result', 'fail')
+  })
+
+  it('Will accept arrays that has a length between the constraints', () => {
+    expect(validate({ $array: 'string', minLength: 1, maxLength: 3 }, ['some', 'value']))
+      .toHaveProperty('result', 'pass')
+  })
+
+  it('Will reject maps with too few properties', () => {
+    expect(validate({ $map: 'string', minLength: 3 }, { a: 'abc', b: 'efg' }))
+      .toHaveProperty('result', 'fail')
+  })
+
+  it('Will reject maps with too many properties', () => {
+    expect(validate({ $map: 'string', maxLength: 3 }, { a: 'abc', e: 'efg', c: 'some', d: 'value' }))
+      .toHaveProperty('result', 'fail')
+  })
+
+  it('Will accept maps that has a property count between constraints', () => {
+    expect(validate({ $map: 'string', minLength: 1, maxLength: 3 }, { a: 'some', x: 'value' }))
+      .toHaveProperty('result', 'pass')
   })
 })
