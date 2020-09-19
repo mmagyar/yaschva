@@ -1,6 +1,6 @@
 {
   "name": "yaschva",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "description": "Yet another schema validation",
   "keywords": [
     "schema",
@@ -19,6 +19,7 @@
   "scripts": {
     "prepack": "npm run build && npm run build:commonjs",
     "build": "tsc",
+    "watch": "tsc --watch",
     "build:commonjs": "tsc --module \"CommonJS\" -t \"es6\" --outDir \"./cjs\"",
     "watch:commonjs": "tsc --module \"CommonJS\" -t \"es6\" --outDir \"./cjs\" --watch",
     "test": "npm run build:commonjs && jest",

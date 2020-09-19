@@ -131,11 +131,11 @@
             "description": {
               "type": "string"
             },
-            "minLength" : {
-              "type":"number"
+            "minLength": {
+              "type": "number"
             },
-            "maxLength" : {
-              "type":"number"
+            "maxLength": {
+              "type": "number"
             },
             "$array": {
               "$ref": "#/definitions/typesAll"
@@ -175,6 +175,9 @@
                 },
                 "max": {
                   "type": "number"
+                },
+                "integer":{
+                  "type":"boolean"
                 }
               }
             }
@@ -224,11 +227,22 @@
             "regex": {
               "type": "string"
             },
-            "minLength" : {
-              "type":"number"
+            "minLength": {
+              "type": "number"
             },
-            "maxLength" : {
-              "type":"number"
+            "maxLength": {
+              "type": "number"
+            },
+            "keySpecificType": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/objectType"
+                },
+                {
+                  "pattern": "^\\$.{1,}$",
+                  "type": "string"
+                }
+              ]
             },
             "$map": {
               "$ref": "#/definitions/typesAll"
@@ -300,7 +314,7 @@
         },
         {
           "type": "string",
-          "pattern": "^\\$"
+          "pattern": "^\\$.{1,}$"
         }
       ]
     },

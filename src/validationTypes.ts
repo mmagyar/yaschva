@@ -8,13 +8,17 @@ export type SimpleTypes = 'string' | 'boolean' | 'number' | 'integer' | 'null' |
 export type ObjectType = { [key: string]: ValueTypes }
 export type EnumType = TypeMeta & { $enum: string[]}
 export type ArrayType = TypeMeta & { $array: ValueTypes, minLength?: number, maxLength?:number}
-export type MapType = TypeMeta & { $map: ValueTypes, regex?: string, minLength?: number, maxLength?:number }
+export type MapType = TypeMeta & { $map: ValueTypes,
+  regex?: string,
+  minLength?: number,
+  maxLength?: number
+  keySpecificType?: {[key:string]:ValueTypes} }
 export type AndType = TypeMeta & { $and: (ObjectType | CustomValueType)[] }
 export type StringType = TypeMeta & { select?: string, $string: {
   minLength?: number, maxLength?: number, regex?: string}}
 export declare type NumberType = TypeMeta & {
   postfix?: string
-  $number: { min?: number, max?: number, step?: number }
+  $number: { min?: number, max?: number, integer?: boolean }
 }
 export declare type MetaType = TypeMeta & { $type: ValueTypes }
 

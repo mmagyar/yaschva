@@ -3,6 +3,9 @@
 import { validate, loadJson } from './validate.js'
 import { Validation } from './validationTypes.js'
 import fs from 'fs'
+import { inspect } from 'util'
+inspect.defaultOptions.depth = null
+
 const file = fs.promises.readFile
 describe('validate', () => {
   it('Shows example schema working', async () => {
@@ -56,6 +59,12 @@ describe('validate', () => {
         myAddress: { error: 'Value is not an Object', value: undefined }
       }
     })
+  })
+
+  it('Can validate itself with itself', async () => {
+    const example = loadJson(await file('./selfSchema.json', 'utf8'))
+    const validated = validate(example, example)
+    expect(validated).toHaveProperty('result', 'pass')
   })
 
   it('Passes validation for correct simple values', () => {
@@ -256,18 +265,25 @@ describe('validate', () => {
 
     expect(validate(schema, 0)).toEqual({
       result: 'fail',
-      output: {
-        error: 'Value is smaller than the required minimum', value: 0
-      }
+      output: { error: 'Value is smaller than the required minimum', value: 0 }
     })
 
     expect(validate(schema, 67)).toEqual({
       result: 'fail',
-      output: {
-        error: 'Value is bigger than the required maximum', value: 67
-      }
+      output: { error: 'Value is bigger than the required maximum', value: 67 }
     })
 
+    expect(validate(schema, 44.5)).toHaveProperty('result', 'pass')
+  })
+
+  it('Can enforce maximum / minimum number as integers', () => {
+    const schema: Validation = { $number: { min: 1, max: 66, integer: true } }
+
+    expect(validate(schema, 0)).toHaveProperty('result', 'fail')
+
+    expect(validate(schema, 67)).toHaveProperty('result', 'fail')
+
+    expect(validate(schema, 44.5)).toHaveProperty('result', 'fail')
     expect(validate(schema, 44)).toHaveProperty('result', 'pass')
   })
 
@@ -461,5 +477,18 @@ describe('validate', () => {
   it('Will accept maps that has a property count between constraints', () => {
     expect(validate({ $map: 'string', minLength: 1, maxLength: 3 }, { a: 'some', x: 'value' }))
       .toHaveProperty('result', 'pass')
+  })
+
+  it('Can specify types for some keys in map', () => {
+    expect(validate({ $map: 'string', keySpecificType: { a: 'number' } }, { a: 12, x: 'value' }))
+      .toHaveProperty('result', 'pass')
+
+    expect(validate({ $map: 'string', keySpecificType: { a: 'number' } }, { a: 'str', x: 'value' }))
+      .toHaveProperty('result', 'fail')
+  })
+
+  it('Map specified keys are mandatory', () => {
+    expect(validate({ $map: 'string', keySpecificType: { a: 'number' } }, { x: 'value' }))
+      .toHaveProperty('result', 'fail')
   })
 })

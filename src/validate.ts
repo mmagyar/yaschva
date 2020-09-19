@@ -1,7 +1,7 @@
 import {
   Validation, StringType, ArrayType, ObjectType, SimpleTypes,
   isSimpleType, isArray, isEnum, isObj,
-  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType
+  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType
 } from './validationTypes.js'
 
 type InputTypes = any | string | number | object | void | boolean | null
@@ -56,8 +56,9 @@ const validateNull = (value: InputTypes): SimpleValidation =>
 const validateNumber = (value: InputTypes): SimpleValidation =>
   !Number.isFinite(value) || typeof value !== 'number' ? 'Value is not a number' : null
 
-const validateNumberComplex = (value: InputTypes, min?: number, max?: number): SimpleValidation => {
-  const res = validateNumber(value)
+const validateNumberComplex = (value: InputTypes, validation: NumberType): SimpleValidation => {
+  const { min, max, integer } = validation.$number
+  const res = integer ? validateInteger(value) : validateNumber(value)
   if (!res) {
     if (min !== undefined && value < min) return 'Value is smaller than the required minimum'
     if (max !== undefined && value > max) return 'Value is bigger than the required maximum'
@@ -127,7 +128,11 @@ ValidationResult => {
 
 const validateObject = (value: InputTypes, validator: ObjectType, validate: validateFn):
  ValidationResult => {
-  if (typeof value !== 'object' || value === null || value === undefined) {
+  if (typeof value !== 'object' ||
+    value === null ||
+    value === undefined ||
+    Array.isArray(value)
+  ) {
     return failValidation('Value is not an Object', value)
   }
 
@@ -175,7 +180,19 @@ const validateMap = (value: InputTypes, validator: MapType, validate: validateFn
         `Map needs to have member count to be between ${minLength} - ${maxLength}`,
         keyCount)
   }
+  if (validator.keySpecificType) {
+    for (const key of Object.keys(validator.keySpecificType)) {
+      const keyS = key.startsWith('\\$') ? key.slice(1) : key
+      const { result, output: outputInternal } = validate(validator.keySpecificType[key], value[keyS])
+      if (result === 'fail') fail = true
+      output[keyS] = outputInternal
+    }
+  }
+
   for (const key of keys) {
+    if (validator.keySpecificType?.[key]) {
+      continue
+    }
     if (validator.regex) {
       const regex = new RegExp(validator.regex, 'u')
       if (!regex.test(key)) {
@@ -184,6 +201,7 @@ const validateMap = (value: InputTypes, validator: MapType, validate: validateFn
         continue
       }
     }
+
     const { result, output: outputInternal } = validate(validator.$map, value[key])
     if (result === 'fail') fail = true
     output[key] = outputInternal
@@ -219,7 +237,7 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
   }
 
   const validateCustom :validateFn = (type:Validation, value:any) => validateInternal(type, value, customTypes)
-
+  // console.log('VALIDATING', type)
   if (isSimpleType(type)) {
     if (customTypes[type]) {
       return validateCustom(customTypes[type], value)
@@ -238,7 +256,7 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
 
   if (isMap(type)) { return validateMap(value, type, validateCustom) }
 
-  if (isNumber(type)) { return toResult(validateNumberComplex(value, type.$number.min, type.$number.max), value) }
+  if (isNumber(type)) { return toResult(validateNumberComplex(value, type), value) }
 
   if (isMeta(type)) { return validateCustom(type.$type, value) }
 

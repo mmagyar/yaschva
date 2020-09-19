@@ -157,6 +157,12 @@ Note: the `$schema` property is not part of yaschva schema, and will be removed 
 What can be improved
 ====================
 
+Schema can not validate if the custom types are correct without actually running the validation
+-----------------------------------------------------------------------------------------------
+
+Right now, there is no way to define
+that a string must exist as a key of another object.
+
 Generating recursive Typescript type
 ------------------------------------
 

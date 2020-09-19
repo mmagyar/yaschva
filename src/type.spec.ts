@@ -147,4 +147,9 @@ describe('Creates typescript type from a schema', () => {
     const schema:Validation = { $and: [{ valueA: 'string' }, 'myObject'] }
     expect(() => validationToType(schema)).toThrowError()
   })
+
+  it('Can specify types for some keys in map', () => {
+    const schema = { $map: 'string', keySpecificType: { a: 'number', x: 'string' } }
+    expect(validationToType(schema)).toBe('{ [key: string] : string} & { a: number; x: string }')
+  })
 })

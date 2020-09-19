@@ -73,7 +73,13 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: {[key:string]:Vali
 
   if (isString(type)) { return toType('string') }
 
-  if (isMap(type)) { return `{ [key: string] : ${toType(type.$map)}}` }
+  if (isMap(type)) {
+    let objType = ''
+    if (type.keySpecificType) {
+      objType = toType(type.keySpecificType)
+    }
+    return `{ [key: string] : ${toType(type.$map)}}${objType ? ' & ' + objType : ''}`
+  }
 
   if (isMeta(type)) { return toType(type.$type) }
 

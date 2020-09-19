@@ -1,0 +1,226 @@
+{
+  "$schema": "./schema.json",
+  "$types": {
+    "$customTypes": {
+      "\\$types": [
+        {
+          "regex": "^\\$[a-zA-Z0-9_]{1,128}$",
+          "$map": "$valueTypes"
+        },
+        "?"
+      ]
+    },
+    "$simpleTypes": [
+      {
+        "$enum": [
+          "string",
+          "boolean",
+          "number",
+          "integer",
+          "null",
+          "?",
+          "any"
+        ]
+      },
+      {
+        "$string": {
+          "regex": "^\\$([a-zA-Z0-9_]{1,128})$"
+        }
+      }
+    ],
+    "$enumType": {
+      "name": [
+        "?",
+        "string"
+      ],
+      "description": [
+        "?",
+        "string"
+      ],
+      "\\$enum": {
+        "minLength": 1,
+        "$array": "string"
+      }
+    },
+    "$objectType": {
+      "$map": "$valueTypes"
+    },
+    "$arrayType": {
+      "name": [
+        "?",
+        "string"
+      ],
+      "description": [
+        "?",
+        "string"
+      ],
+      "minLength": [
+        "?",
+        {
+          "$number": {
+            "min": 0,
+            "integer": true
+          }
+        }
+      ],
+      "maxLength": [
+        "?",
+        {
+          "$number": {
+            "min": 0,
+            "integer": true
+          }
+        }
+      ],
+      "\\$array": "$valueTypes"
+    },
+    "$stringType": {
+      "\\$string": [
+        {
+          "minLength": [
+            "?",
+            {
+              "$number": {
+                "min": 0,
+                "integer": true
+              }
+            }
+          ],
+          "maxLength": [
+            "?",
+            {
+              "$number": {
+                "min": 0,
+                "integer": true
+              }
+            }
+          ]
+        },
+        {
+          "regex": [
+            "?",
+            "string"
+          ]
+        }
+      ]
+    },
+    "$numberType": {
+      "\\$number": {
+        "min": [
+          "?",
+          "number"
+        ],
+        "max": [
+          "?",
+          "number"
+        ],
+        "integer": [
+          "?",
+          "boolean"
+        ]
+      }
+    },
+    "$metaType": {
+      "name": [
+        "?",
+        "string"
+      ],
+      "description": [
+        "?",
+        "string"
+      ],
+      "\\$type": "$valueTypes"
+    },
+    "$mapType": {
+      "minLength": [
+        "?",
+        {
+          "$number": {
+            "min": 0,
+            "integer": true
+          }
+        }
+      ],
+      "maxLength": [
+        "?",
+        {
+          "$number": {
+            "min": 0,
+            "integer": true
+          }
+        }
+      ],
+      "regex": [
+        "?",
+        "string"
+      ],
+      "keySpecificType": [
+        "?",
+        {
+          "$map": "$valueTypes"
+        }
+      ],
+      "\\$map": "$valueTypes"
+    },
+    "$valueType": [
+      "$simpleTypes",
+      "$enumType",
+      "$objectType",
+      "$arrayType",
+      "$stringType",
+      "$numberType",
+      "$metaType",
+      "$mapType"
+    ],
+    "$valueTypes": [
+      {
+        "minLength": 1,
+        "$array": "$valueType"
+      },
+      "$valueType"
+    ],
+    "$validation": [
+      "$valueTypes",
+      {
+        "$and": [
+          "$customTypes",
+          "$arrayType"
+        ]
+      },
+      {
+        "$and": [
+          "$customTypes",
+          "$stringType"
+        ]
+      },
+      {
+        "$and": [
+          "$customTypes",
+          "$numberType"
+        ]
+      },
+      {
+        "$and": [
+          "$customTypes",
+          "$metaType"
+        ]
+      },
+      {
+        "$and": [
+          "$customTypes",
+          "$mapType"
+        ]
+      },
+      {
+        "$map": "$valueTypes",
+        "keySpecificType": {
+          "\\$types": {
+            "regex": "^\\$[a-zA-Z0-9_]{1,128}$",
+            "$map": "$valueTypes"
+          }
+        }
+      }
+    ]
+  },
+  "$type": "$validation"
+}

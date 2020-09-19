@@ -17,20 +17,28 @@ type Options = {
   maxDepthSoft: number
   maxDepthHard: number
   prefer: 'defined' | 'undefined' | 'none'
+  absoluteMaxStringSize: number
 }
 
-export const randomNumber = (isInteger:boolean, min: number, max: number): number => {
+const saneMaximumSize = 12
+export const randomNumber = (isInteger:boolean, c1: number, c2: number): number => {
+  const min = Math.min(c1, c2)
+  const max = Math.max(c1, c2)
   const num = Math.random() * (max - min) + min
   if (isInteger) return Math.round(num)
   return num
 }
 
 const simpleTypes: SimpleTypes[] = ['number', 'integer', '?', 'string', 'boolean']
-const randomString = (length: number) => {
+const randomString = (options: Options, lengthIn?: number) => {
+  const length = lengthIn ||
+   randomNumber(true, options.minStringLength, options.maxStringLength)
+
   let result = ''
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   const charactersLength = characters.length
-  for (let i = 0; i < length; i += 1) { result += characters.charAt(Math.floor(Math.random() * charactersLength)) }
+  const max = Math.min(length, options.absoluteMaxStringSize)
+  for (let i = 0; i < max; i += 1) { result += characters.charAt(Math.floor(Math.random() * charactersLength)) }
 
   return result
 }
@@ -41,8 +49,7 @@ const simpleGeneration = (type: SimpleTypes, options:Options): any => {
     case 'null': return null
     case 'number': return randomNumber(false, options.minNumber, options.maxNumber)
     case 'integer': return randomNumber(true, options.minNumber, options.maxNumber)
-    case 'string': return randomString(
-      randomNumber(true, options.minStringLength, options.maxStringLength))
+    case 'string': return randomString(options)
     case 'boolean': return Math.random() > 0.5
     default: throw new Error(`Unknown validator:${JSON.stringify(type)}`)
   }
@@ -61,25 +68,27 @@ const applyPreference = (input: Validation[], options:Options) => {
 export const generate = (type: Validation, options: Partial<Options> = {}) :any => {
   const defaultOptions : Options = {
     arrayMin: 1,
-    arrayMax: 90,
+    arrayMax: 16,
     mapMin: 1,
-    mapMax: 33,
+    mapMax: 16,
     minNumber: -Number.MAX_SAFE_INTEGER,
     maxNumber: Number.MAX_SAFE_INTEGER,
     minStringLength: 3,
     maxStringLength: 16,
     maxDepthSoft: 4,
     maxDepthHard: 32,
-    prefer: 'none'
+    prefer: 'none',
+    absoluteMaxStringSize: 8192
   }
-  return generateInternal(type, { ...defaultOptions, ...options }, {}, 0)
+  return generateInternal(type, { ...defaultOptions, ...options }, {}, 0, type)
 }
 
 const generateInternal = (
   typeIn: Validation,
   options: Options,
   typesIn: {[key:string] : Validation },
-  depth :number
+  depth :number,
+  rootType: Validation
 ): any => {
   if (depth >= options.maxDepthHard) {
     throw new Error(`Maximum depth reached: ${depth} --
@@ -96,7 +105,7 @@ const generateInternal = (
   }
 
   const gen = (type:Validation, increaseDepth:boolean = false) =>
-    generateInternal(type, options, customTypes, increaseDepth ? depth + 1 : depth)
+    generateInternal(type, options, customTypes, increaseDepth ? depth + 1 : depth, rootType)
 
   if (isSimpleType(type)) {
     if (customTypes[type]) {
@@ -118,10 +127,12 @@ const generateInternal = (
 
   if (isArray(type)) {
     const arrayType = type
-    if (depth > options.maxDepthSoft) return []
+    if (depth > options.maxDepthSoft && !arrayType.minLength) return []
     const min = typeof arrayType.minLength === 'number' ? arrayType.minLength : options.arrayMin
-    const max = typeof arrayType.maxLength === 'number' ? arrayType.maxLength : options.arrayMax
-    return Array.from(Array(randomNumber(true, min, max)))
+    const max = Math.min(
+      typeof arrayType.maxLength === 'number' ? arrayType.maxLength : options.arrayMax,
+      saneMaximumSize)
+    return Array.from(Array(randomNumber(true, Math.min(min, max), max)))
       .map(() => gen(arrayType.$array, true)).filter(x => typeof x !== 'undefined')
   }
 
@@ -129,7 +140,21 @@ const generateInternal = (
 
   if (isObj(type)) {
     return Object.entries(type).reduce((prev: any, [key, value]) => {
-      const generated = gen(value, true)
+      let val:any | Validation = value
+      // This is strictly needed to generate a schema that makes sense
+      const num = { $number: { min: 0, max: 16, integer: true } }
+      if ((key === 'minLength' || key === 'maxLength') && (value === 'number')) {
+        val = num
+      }
+      if ((key === 'minLength' || key === 'maxLength') && (value as any).$number) {
+        val = { $number: { ...(value as any).$number, ...num.$number } }
+      }
+      if ((key === 'minLength' || key === 'maxLength') &&
+        Array.isArray(value) && value.some((x:any) => x.$number)) {
+        val = value.map((x:any) => x.$number ? { $number: { ...x.$number, ...num.$number } } : x)
+      }
+
+      const generated = gen(val, true)
       const keyC = key.startsWith('\\$') ? key.slice(1) : key
       if (typeof generated !== 'undefined') prev[keyC] = generated
       return prev
@@ -139,11 +164,22 @@ const generateInternal = (
   if (isMap(type)) {
     const mapType = type
     const min = typeof mapType.minLength === 'number' ? mapType.minLength : options.mapMin
-    const max = typeof mapType.maxLength === 'number' ? mapType.maxLength : options.mapMax
-    if (depth >= options.maxDepthSoft && (mapType.minLength || 0) <= 0) return {}
+    const max = Math.min(
+      typeof mapType.maxLength === 'number' ? mapType.maxLength : options.mapMax,
+      saneMaximumSize)
+    if (depth >= options.maxDepthSoft && !mapType.minLength) return {}
     const count = randomNumber(true, min, max)
+    if (min <= 0 || max > 64) {
+      throw new Error(`Too big, too small, size does matter after all, ${count}, min: ${min}, max: ${max}`)
+    }
+    const specKey = mapType.keySpecificType || {}
     return Array.from(Array(count))
       .reduce((prev: any) => {
+        const specKeys = Object.keys(specKey)
+        if (specKeys.length) {
+          const key = specKeys[0].startsWith('\\$') ? specKeys[0].slice(1) : specKeys[0]
+          prev[key] = gen(specKey[specKeys[0]], true)
+        }
         const str = mapType.regex ? randexp.randexp(mapType.regex) : simpleGeneration('string', options)
         prev[str] = gen(mapType.$map, true)
         return prev
@@ -152,7 +188,7 @@ const generateInternal = (
 
   if (isNumber(type)) {
     return randomNumber(
-      false,
+      type.$number.integer || false,
       type.$number.min == null ? options.minNumber : type.$number.min,
       type.$number.max == null ? options.maxNumber : type.$number.max)
   }
@@ -160,9 +196,18 @@ const generateInternal = (
   if (isMeta(type)) { return gen(type.$type) }
 
   if (isString(type)) {
-    if (type.$string.regex) { return randexp.randexp(type.$string.regex) }
+    if (type.$string.regex) {
+      const types = Object.keys((rootType as any)?.$types || {})
+      if (type.$string.regex === '^\\$([a-zA-Z0-9_]{1,128})$' && types.length) {
+        const i = randomNumber(true, 0, types.length)
+        return types[i]
+      } else {
+        const regexString = randexp.randexp(type.$string.regex)
+        return regexString
+      }
+    }
 
-    return randomString(type.$string.minLength || type.$string.maxLength || 6)
+    return randomString(options, type.$string.minLength || type.$string.maxLength)
   }
 
   if (isAnd(type)) {
@@ -174,5 +219,5 @@ const generateInternal = (
     return gen(combined.pass)
   }
 
-  throw new Error('Unknown type')
+  throw new Error('Unknown type: ' + JSON.stringify(typeIn, null, 2))
 }

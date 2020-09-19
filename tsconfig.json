@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "es6",
-    "target": "esnext",
+    "target": "es2019",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "preserveConstEnums": true,
@@ -21,7 +21,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "lib": [
-    "esnext"
+    "es2019"
     ]
   },
   "include": [ "src/**/*" ],

@@ -2,6 +2,9 @@ import { Validation } from './validationTypes.js'
 import { generate, randomNumber } from './generate.js'
 import { loadJson, validate } from './validate.js'
 import fs from 'fs'
+import { inspect } from 'util'
+inspect.defaultOptions.depth = null
+
 const file = fs.promises.readFile
 describe('generates data based on schema', () => {
   const checkNumber = (result: number) => {
@@ -151,7 +154,7 @@ describe('generates data based on schema', () => {
     expect(typeof result2 === 'string').toBeTruthy()
     expect(result2.length <= 33).toBeTruthy()
 
-    expect(generate({ $string: { } })).toHaveLength(6)
+    expect(typeof generate({ $string: { } })).toBe('string')
   })
 
   it('Throws on unknown type', () => {
@@ -347,6 +350,45 @@ describe('generates data based on schema', () => {
     for (let i = 0; i < 32; i++) {
       const generated = generate(schema)
       expect(validate(schema, generated)).toHaveProperty('result', 'pass')
+    }
+  })
+
+  it('Can specify types for some keys in map', () => {
+    const schema = { $map: 'string', keySpecificType: { a: 'number' } }
+    const generated = generate(schema)
+    expect(validate(schema, generated)).toHaveProperty('result', 'pass')
+  })
+
+  it.skip('Can generate a valid schema, that can generate data that is valid to the schema', async () => {
+    const example = loadJson(await file('./selfSchema.json', 'utf8'))
+    expect.assertions(64)
+    let generatedSchema
+    let generated
+    let validated
+    try {
+      for (let i = 0; i < 2; i++) {
+        generatedSchema = generate(example)
+        const validSchema = validate(example, generatedSchema)
+        expect(validSchema).toHaveProperty('result', 'pass')
+        generated = generate(generatedSchema)
+        validated = validate(generatedSchema, generated)
+        expect(validated).toHaveProperty('result', 'pass')
+      }
+    } catch (e) {
+      console.error(e.message, generated, generatedSchema)
+      if (validated?.result === 'fail') {
+        console.error(validated.output)
+      }
+    }
+  })
+
+  it.skip('Can generate a valid schema based on the schema definition', async () => {
+    const example = loadJson(await file('./selfSchema.json', 'utf8'))
+    expect.assertions(32)
+    for (let i = 0; i < 2; i++) {
+      const generated = generate(example)
+      const validated = validate(example, generated)
+      expect(validated).toHaveProperty('result', 'pass')
     }
   })
 })
