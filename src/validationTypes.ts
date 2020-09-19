@@ -9,13 +9,13 @@ export type ObjectType = { [key: string]: ValueTypes }
 export type EnumType = TypeMeta & { $enum: string[]}
 export type ArrayType = TypeMeta & { $array: ValueTypes, minLength?: number, maxLength?:number}
 export type MapType = TypeMeta & { $map: ValueTypes,
-  regex?: string,
   minLength?: number,
   maxLength?: number
+  key?: StringType,
   keySpecificType?: {[key:string]:ValueTypes} }
 export type AndType = TypeMeta & { $and: (ObjectType | CustomValueType)[] }
 export type StringType = TypeMeta & { select?: string, $string: {
-  minLength?: number, maxLength?: number, regex?: string}}
+  minLength?: number, maxLength?: number, regex?: string, rootKey?:boolean}}
 export declare type NumberType = TypeMeta & {
   postfix?: string
   $number: { min?: number, max?: number, integer?: boolean }

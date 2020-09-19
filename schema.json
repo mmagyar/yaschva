@@ -49,6 +49,39 @@
         "$type"
       ]
     },
+    "stringType": {
+      "description": "string type",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "$string": {
+          "type": "object",
+          "properties": {
+            "minLength": {
+              "type": "integer"
+            },
+            "maxLength": {
+              "type": "integer"
+            },
+            "regex": {
+              "type": "string"
+            },
+            "rootKey": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "required": [
+        "$string"
+      ]
+    },
     "objectType": {
       "description": "Object type, can have any properties with any types, but properties should not start with $",
       "type": "object",
@@ -233,6 +266,9 @@
             "maxLength": {
               "type": "number"
             },
+            "key" : {
+              "$ref": "#/definitions/stringType"
+            },
             "keySpecificType": {
               "oneOf": [
                 {
@@ -253,34 +289,8 @@
           ]
         },
         {
-          "description": "string type",
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "$string": {
-              "type": "object",
-              "properties": {
-                "minLength": {
-                  "type": "integer"
-                },
-                "maxLength": {
-                  "type": "integer"
-                },
-                "regex": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "required": [
-            "$string"
-          ]
+          "$ref": "#/definitions/stringType"
+
         },
         {
           "description": "meta type",

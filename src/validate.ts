@@ -163,12 +163,13 @@ const validateObject = (value: InputTypes, validator: ObjectType, validate: vali
   return { result: fail ? 'fail' : 'pass', output }
 }
 
-const validateMap = (value: InputTypes, validator: MapType, validate: validateFn):
+const validateMap = (value: InputTypes, validator: MapType, validate: validateFn,
+  customTypes: {[key:string] : ValueTypes}
+):
  ValidationResult => {
-  if (typeof value !== 'object' || value === null || value === undefined) {
-    return failValidation('Value is not an Object', value)
+  if (typeof value !== 'object' || value == null || Array.isArray(value)) {
+    return failValidation('Value is not a Map (freeform Object)', value)
   }
-
   let fail = false
   const output: {[key: string]: ValidationOutputs} = {}
   const keys = Object.keys(value)
@@ -181,9 +182,15 @@ const validateMap = (value: InputTypes, validator: MapType, validate: validateFn
         keyCount)
   }
   if (validator.keySpecificType) {
-    for (const key of Object.keys(validator.keySpecificType)) {
+    let types:any = validator.keySpecificType
+    while (typeof types === 'string') {
+      if (!types.startsWith('$')) throw new Error('Invalid keySpecificType: ' + types)
+      types = customTypes[types]
+    }
+
+    for (const key of Object.keys(types)) {
       const keyS = key.startsWith('\\$') ? key.slice(1) : key
-      const { result, output: outputInternal } = validate(validator.keySpecificType[key], value[keyS])
+      const { result, output: outputInternal } = validate(types[key], (value as any)[keyS])
       if (result === 'fail') fail = true
       output[keyS] = outputInternal
     }
@@ -193,16 +200,17 @@ const validateMap = (value: InputTypes, validator: MapType, validate: validateFn
     if (validator.keySpecificType?.[key]) {
       continue
     }
-    if (validator.regex) {
-      const regex = new RegExp(validator.regex, 'u')
-      if (!regex.test(key)) {
+
+    if (validator.key) {
+      const result = validate(validator.key, key)
+      if (result.result === 'fail') {
         fail = true
-        output[key] = { error: 'String did not match required regex', value: value }
+        output[key] = result.output
         continue
       }
     }
 
-    const { result, output: outputInternal } = validate(validator.$map, value[key])
+    const { result, output: outputInternal } = validate(validator.$map, (value as any)[key])
     if (result === 'fail') fail = true
     output[key] = outputInternal
   }
@@ -237,7 +245,6 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
   }
 
   const validateCustom :validateFn = (type:Validation, value:any) => validateInternal(type, value, customTypes)
-  // console.log('VALIDATING', type)
   if (isSimpleType(type)) {
     if (customTypes[type]) {
       return validateCustom(customTypes[type], value)
@@ -254,7 +261,7 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
 
   if (isObj(type)) { return validateObject(value, type, validateCustom) }
 
-  if (isMap(type)) { return validateMap(value, type, validateCustom) }
+  if (isMap(type)) { return validateMap(value, type, validateCustom, customTypes) }
 
   if (isNumber(type)) { return toResult(validateNumberComplex(value, type), value) }
 

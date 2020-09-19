@@ -172,7 +172,14 @@ const generateInternal = (
     if (min <= 0 || max > 64) {
       throw new Error(`Too big, too small, size does matter after all, ${count}, min: ${min}, max: ${max}`)
     }
-    const specKey = mapType.keySpecificType || {}
+    let specKey:any = mapType.keySpecificType
+    while (typeof specKey === 'string') {
+      if (!specKey.startsWith('$')) throw new Error('Invalid keySpecificType: ' + specKey)
+      specKey = customTypes[specKey]
+    }
+
+    if (!specKey) specKey = {}
+
     return Array.from(Array(count))
       .reduce((prev: any) => {
         const specKeys = Object.keys(specKey)
@@ -180,7 +187,7 @@ const generateInternal = (
           const key = specKeys[0].startsWith('\\$') ? specKeys[0].slice(1) : specKeys[0]
           prev[key] = gen(specKey[specKeys[0]], true)
         }
-        const str = mapType.regex ? randexp.randexp(mapType.regex) : simpleGeneration('string', options)
+        const str = mapType.key ? gen(mapType.key) : simpleGeneration('string', options)
         prev[str] = gen(mapType.$map, true)
         return prev
       }, {})
