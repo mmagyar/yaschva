@@ -20,7 +20,10 @@ describe('validate', () => {
   })
   const validSchema = (schema:Validation):Validation => {
     const validated = validate(loaded, schema)
-    expect(validated).toHaveProperty('result', 'pass')
+    if (validated.result !== 'pass') {
+      throw new Error(JSON.stringify(validated, null, 2) +
+        '\n\nInvalid Schema\n\n')
+    }
     return schema
   }
 
@@ -35,14 +38,17 @@ describe('validate', () => {
   const valid = (schema:Validation, data:any) => {
     const dataValid = validate(validSchema(schema), data)
     if (dataValid.result !== 'pass') {
-      throw new Error(JSON.stringify(dataValid, null, 2))
+      throw new Error(JSON.stringify(dataValid, null, 2) +
+      '\n\nData validation failed, but it should have passed\n')
     }
   }
 
   const invalid = (schema:Validation, data:any) => {
     const dataValid = validate(validSchema(schema), data)
-    if (dataValid.result === 'pass') console.log(dataValid.output)
-    expect(dataValid).toHaveProperty('result', 'fail')
+    if (dataValid.result !== 'fail') {
+      throw new Error(JSON.stringify(dataValid, null, 2) +
+      '\n\nData validation passed, but it should have failed\n')
+    }
   }
 
   it('Shows example schema working', async () => {
@@ -534,5 +540,16 @@ describe('validate', () => {
 
   it('Map specified keys are mandatory', () => {
     invalid({ $map: 'string', keySpecificType: { a: 'number' } }, { x: 'value' })
+  })
+
+  it('can restrict a string to be one of the root keys', () => {
+    const schema = {
+      keyA: 'number',
+      keyB: 'number',
+      myRes: { $map: 'string', key: { $enum: '' } }
+    }
+    valid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyB: 'b' } })
+    // This does not work yet
+    // invalid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyC: 'b' } })
   })
 })

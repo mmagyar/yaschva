@@ -4,7 +4,11 @@
     "$customTypes": {
       "\\$types": [
         {
-          "key": {"$string": {"regex": "^\\$[a-zA-Z0-9_]{1,128}$"}},
+          "key": {
+            "$string": {
+              "regex": "^\\$[a-zA-Z0-9_]{1,128}$"
+            }
+          },
           "$map": "$valueTypes"
         },
         "?"
@@ -37,10 +41,15 @@
         "?",
         "string"
       ],
-      "\\$enum": {
-        "minLength": 1,
-        "$array": "string"
-      }
+      "\\$enum": [
+        {
+          "minLength": 1,
+          "$array": "string"
+        },
+        {
+          "$enum": "\\$types"
+        }
+      ]
     },
     "$objectType": {
       "$map": "$valueTypes"
@@ -101,9 +110,6 @@
             "?",
             "string"
           ]
-        },
-        {
-          "rootKey":["?", "boolean"]
         }
       ]
     },
@@ -153,7 +159,11 @@
           }
         }
       ],
-      "key": [ "?", "$stringType"],
+      "key": [
+        "?",
+        "$stringType",
+        "$enumType"
+      ],
       "keySpecificType": [
         "?",
         {

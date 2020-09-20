@@ -58,7 +58,8 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: {[key:string]:Vali
       ? `(${typeRet})[]` : `${typeRet}[]`
   }
 
-  if (isEnum(type)) { return type.$enum.map(x => `"${x}"`).join(' | ') }
+  if (isEnum(type) && Array.isArray(type.$enum)) { return type.$enum.map(x => `"${x}"`).join(' | ') }
+  if (isEnum(type)) { return '' /** TODO **/ }
 
   if (isObj(type)) {
     const optionalPostfix = (value: Validation) => containsOptional(value) ? '?' : ''

@@ -202,6 +202,7 @@ const validateMap = (value: InputTypes, validator: MapType, validate: validateFn
     }
 
     if (validator.key) {
+      // console.log(validator.key, key, isEnum(validator.key) || false)
       const result = validate(validator.key, key)
       if (result.result === 'fail') {
         fail = true
@@ -245,11 +246,12 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
   }
 
   const validateCustom :validateFn = (type:Validation, value:any) => validateInternal(type, value, customTypes)
-  if (isSimpleType(type)) {
-    if (customTypes[type]) {
-      return validateCustom(customTypes[type], value)
-    }
 
+  while (isSimpleType(type) && customTypes[type]) {
+    type = customTypes[type]
+  }
+
+  if (isSimpleType(type)) {
     return toResult(simpleValidation(type, value), value)
   }
 
@@ -257,7 +259,10 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
 
   if (isArray(type)) { return validateArray(value, type, validateCustom) }
 
-  if (isEnum(type)) { return toResult(validateString(value, type.$enum), value) }
+  if (isEnum(type)) {
+    // TODO resolve if enum is not an array
+    return toResult(validateString(value, Array.isArray(type.$enum) ? type.$enum : []), value)
+  }
 
   if (isObj(type)) { return validateObject(value, type, validateCustom) }
 
@@ -265,7 +270,7 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
 
   if (isNumber(type)) { return toResult(validateNumberComplex(value, type), value) }
 
-  if (isMeta(type)) { return validateCustom(type.$type, value) }
+  if (isMeta(type)) { return validateInternal(type.$type, value, customTypes) }
 
   if (isString(type)) { return toResult(validateStringObject(value, type), value) }
   if (isAnd(type)) {

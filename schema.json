@@ -82,6 +82,36 @@
         "$string"
       ]
     },
+    "enumType": {
+      "description": "enum type",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "$enum": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "$enum"
+      ]
+    },
     "objectType": {
       "description": "Object type, can have any properties with any types, but properties should not start with $",
       "type": "object",
@@ -131,27 +161,7 @@
           "$ref": "#/definitions/objectType"
         },
         {
-          "description": "enum type",
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "$enum": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minItems": 1
-            }
-          },
-          "required": [
-            "$enum"
-          ]
+          "$ref": "#/definitions/enumType"
         },
         {
           "description": "array type",
@@ -209,8 +219,8 @@
                 "max": {
                   "type": "number"
                 },
-                "integer":{
-                  "type":"boolean"
+                "integer": {
+                  "type": "boolean"
                 }
               }
             }
@@ -266,8 +276,15 @@
             "maxLength": {
               "type": "number"
             },
-            "key" : {
-              "$ref": "#/definitions/stringType"
+            "key": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/stringType"
+                },
+                {
+                  "$ref": "#/definitions/enumType"
+                }
+              ]
             },
             "keySpecificType": {
               "oneOf": [
@@ -290,7 +307,6 @@
         },
         {
           "$ref": "#/definitions/stringType"
-
         },
         {
           "description": "meta type",
