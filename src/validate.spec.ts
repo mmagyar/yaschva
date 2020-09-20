@@ -550,6 +550,6 @@ describe('validate', () => {
     }
     valid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyB: 'b' } })
     // This does not work yet
-    // invalid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyC: 'b' } })
+    invalid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyC: 'b' } })
   })
 })

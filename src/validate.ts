@@ -4,6 +4,7 @@ import {
   isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType
 } from './validationTypes.js'
 
+type Custom = {[key:string] : ValueTypes}
 type InputTypes = any | string | number | object | void | boolean | null
 export type ValidationOutputs= ValidationOutput|ValidationOutput[]
 export type ValidationOutput =
@@ -89,13 +90,13 @@ const validateStringObject = (value: InputTypes, validator: StringType): SimpleV
 const validateBool = (value: InputTypes): SimpleValidation =>
   typeof value !== 'boolean' ? 'Value is not a boolean' : null
 
-const validateOneOf = (value: InputTypes, validator: ValueType[], validate: validateFn):
+const validateOneOf = (value: InputTypes, validator: ValueType[], customTypes: Custom):
  ValidationResult => {
   if (!validator.length) throw new Error('Array of types can not be empty')
 
   const errors: ValidationOutput[] = []
   for (const i of validator) {
-    const result = validate(i, value)
+    const result = validateRecursive(i, value, customTypes)
     if (result.result === 'pass') return result
     if (Array.isArray(result.output)) result.output.forEach(x => errors.push(x))
     else errors.push(result.output)
@@ -104,7 +105,7 @@ const validateOneOf = (value: InputTypes, validator: ValueType[], validate: vali
   return failValidation('Did not match any from the listed types', value, errors)
 }
 
-const validateArray = (value: InputTypes, validator: ArrayType, validate: validateFn):
+const validateArray = (value: InputTypes, validator: ArrayType, customTypes: Custom):
 ValidationResult => {
   if (Array.isArray(value)) {
     const maxLength = validator.maxLength || Number.MAX_SAFE_INTEGER
@@ -117,7 +118,7 @@ ValidationResult => {
     const resultArray: ValidationOutputs[] = []
     let fail = false
     for (const x of value) {
-      const res = validate(validator.$array, x)
+      const res = validateRecursive(validator.$array, x, customTypes)
       if (res.result === 'fail') fail = true
       resultArray.push(res.output)
     }
@@ -126,7 +127,7 @@ ValidationResult => {
   return failValidation('Value is not an Array', value)
 }
 
-const validateObject = (value: InputTypes, validator: ObjectType, validate: validateFn):
+const validateObject = (value: InputTypes, validator: ObjectType, customTypes: Custom):
  ValidationResult => {
   if (typeof value !== 'object' ||
     value === null ||
@@ -145,7 +146,7 @@ const validateObject = (value: InputTypes, validator: ObjectType, validate: vali
       fail = true
       output[key] = { error: 'Key does not exist on validator', value: value[key] }
     } else {
-      const { result, output: outputInternal } = validate(validator[validatorKey], value[key])
+      const { result, output: outputInternal } = validateRecursive(validator[validatorKey], value[key], customTypes)
       if (result === 'fail') fail = true
       output[key] = outputInternal
     }
@@ -154,7 +155,7 @@ const validateObject = (value: InputTypes, validator: ObjectType, validate: vali
   for (const validatorKey of Object.keys(validator)) {
     const key = validatorKey.startsWith('\\$') ? validatorKey.slice(1) : validatorKey
     if (!Object.prototype.hasOwnProperty.call(output, key)) {
-      const { result, output: outputInternal } = validate(validator[validatorKey], value[key])
+      const { result, output: outputInternal } = validateRecursive(validator[validatorKey], value[key], customTypes)
       if (result === 'fail') fail = true
       output[key] = outputInternal
     }
@@ -162,10 +163,7 @@ const validateObject = (value: InputTypes, validator: ObjectType, validate: vali
 
   return { result: fail ? 'fail' : 'pass', output }
 }
-
-const validateMap = (value: InputTypes, validator: MapType, validate: validateFn,
-  customTypes: {[key:string] : ValueTypes}
-):
+const validateMap = (value: InputTypes, validator: MapType, customTypes: Custom):
  ValidationResult => {
   if (typeof value !== 'object' || value == null || Array.isArray(value)) {
     return failValidation('Value is not a Map (freeform Object)', value)
@@ -190,7 +188,7 @@ const validateMap = (value: InputTypes, validator: MapType, validate: validateFn
 
     for (const key of Object.keys(types)) {
       const keyS = key.startsWith('\\$') ? key.slice(1) : key
-      const { result, output: outputInternal } = validate(types[key], (value as any)[keyS])
+      const { result, output: outputInternal } = validateRecursive(types[key], (value as any)[keyS], customTypes)
       if (result === 'fail') fail = true
       output[keyS] = outputInternal
     }
@@ -203,7 +201,7 @@ const validateMap = (value: InputTypes, validator: MapType, validate: validateFn
 
     if (validator.key) {
       // console.log(validator.key, key, isEnum(validator.key) || false)
-      const result = validate(validator.key, key)
+      const result = validateRecursive(validator.key, key, customTypes)
       if (result.result === 'fail') {
         fail = true
         output[key] = result.output
@@ -211,7 +209,7 @@ const validateMap = (value: InputTypes, validator: MapType, validate: validateFn
       }
     }
 
-    const { result, output: outputInternal } = validate(validator.$map, (value as any)[key])
+    const { result, output: outputInternal } = validateRecursive(validator.$map, (value as any)[key], customTypes)
     if (result === 'fail') fail = true
     output[key] = outputInternal
   }
@@ -234,7 +232,10 @@ const simpleValidation = (type: SimpleTypes, value: any): SimpleValidation => {
 const toResult = (res: SimpleValidation, value: InputTypes): ValidationResult =>
   ({ result: res ? 'fail' : 'pass', output: res ? { error: res, value } : null })
 
-const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: {[key:string] : ValueTypes}): ValidationResult => {
+const validateRecursive = (
+  typeIn: Validation,
+  value: InputTypes,
+  customTypesIn: Custom): ValidationResult => {
   if (typeof typeIn === 'undefined') throw new Error('Type for validation cannot be undefined')
 
   let type: ValueTypes = typeIn
@@ -245,8 +246,6 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
     delete type.$types
   }
 
-  const validateCustom :validateFn = (type:Validation, value:any) => validateInternal(type, value, customTypes)
-
   while (isSimpleType(type) && customTypes[type]) {
     type = customTypes[type]
   }
@@ -255,22 +254,22 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
     return toResult(simpleValidation(type, value), value)
   }
 
-  if (Array.isArray(type)) { return validateOneOf(value, type, validateCustom) }
+  if (Array.isArray(type)) { return validateOneOf(value, type, customTypes) }
 
-  if (isArray(type)) { return validateArray(value, type, validateCustom) }
+  if (isArray(type)) { return validateArray(value, type, customTypes) }
 
   if (isEnum(type)) {
     // TODO resolve if enum is not an array
     return toResult(validateString(value, Array.isArray(type.$enum) ? type.$enum : []), value)
   }
 
-  if (isObj(type)) { return validateObject(value, type, validateCustom) }
+  if (isObj(type)) { return validateObject(value, type, customTypes) }
 
-  if (isMap(type)) { return validateMap(value, type, validateCustom, customTypes) }
+  if (isMap(type)) { return validateMap(value, type, customTypes) }
 
   if (isNumber(type)) { return toResult(validateNumberComplex(value, type), value) }
 
-  if (isMeta(type)) { return validateInternal(type.$type, value, customTypes) }
+  if (isMeta(type)) { return validateRecursive(type.$type, value, customTypes) }
 
   if (isString(type)) { return toResult(validateStringObject(value, type), value) }
   if (isAnd(type)) {
@@ -280,14 +279,14 @@ const validateInternal = (typeIn: Validation, value: InputTypes, customTypesIn: 
     const combined = combineValidationObjects(type, customTypes, onError)
     if (combined.result === 'error') return combined.error
 
-    return validateObject(value, combined.pass, validateCustom)
+    return validateObject(value, combined.pass, customTypes)
   }
 
   throw new Error(`Unknown validator:${JSON.stringify(type)}`)
 }
 
 export const validate = (type: Validation, value: InputTypes): ValidationResult => {
-  return validateInternal(type, value, {})
+  return validateRecursive(type, value, {})
 }
 
 export const loadJson = (json: string | object): Validation => {
