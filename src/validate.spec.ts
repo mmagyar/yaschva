@@ -516,6 +516,22 @@ describe('validate', () => {
     invalid({ $map: 'string', keySpecificType: { a: 'number' } }, { a: 'str', x: 'value' })
   })
 
+  it('Can specify types for some keys in map, use a defined type', () => {
+    const schema = {
+      $types: { $customNumber: { $number: { min: 2 } } },
+      $map: 'string',
+      keySpecificType: { a: '$customNumber' }
+    }
+    valid(schema, { a: 3, x: 'value' })
+    invalid(schema, { a: 1, x: 'value' })
+  })
+
+  it('Map specified keys most be either an object or a defined type, simple string will throw', () => {
+    expect(() => validate({ $map: 'string', keySpecificType: 'some' }, { x: 'value' })).toThrowError()
+    // TODO this should be like this:
+    // expect(() => validate(invalidSchema({ $map: 'string', keySpecificType: 'some' }), { x: 'value' })).toThrowError()
+  })
+
   it('Map specified keys are mandatory', () => {
     invalid({ $map: 'string', keySpecificType: { a: 'number' } }, { x: 'value' })
   })
