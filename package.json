@@ -21,19 +21,19 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "build:commonjs": "tsc --module \"CommonJS\" -t \"es6\" --outDir \"./cjs\"",
-    "watch:commonjs": "tsc --module \"CommonJS\" -t \"es6\" --outDir \"./cjs\" --watch",
-    "test": "npm run build:commonjs && jest",
     "clean:test": "jest --clearCache",
     "watch:test": "jest --watchAll",
     "standard": "standardx **/*.ts",
     "standard:fix": "standardx --fix **/*.ts",
-    "test:coverage": "npm run build:commonjs && npm run standard && jest --coverage"
+    "test": "npm run build && npm run test:coverage",
+    "test:coverage": "c8 --all --exclude \"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**}\"  --reporter=text --reporter=json ava --verbose",
+    "test:fast": "ava",
+    "test:watch": "tsc-watch --onSuccess \"c8 --all --exclude \\\"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**}\\\" --reporter=lcov ava\""
   },
   "author": "mmagyar.com",
   "license": "MIT",
   "standardx": {
     "env": [
-      "jest",
       "es6"
     ],
     "parser": "@typescript-eslint/parser",
@@ -62,11 +62,19 @@
     "@types/jest": "^26.0.13",
     "@typescript-eslint/eslint-plugin": "^4.1.1",
     "@typescript-eslint/parser": "^4.1.1",
+    "ava": "^3.12.1",
+    "c8": "^7.3.0",
     "jest": "^26.4.2",
     "standardx": "^5.0.0",
+    "tsc-watch": "^4.2.9",
     "typescript": "^4.0.2"
   },
   "dependencies": {
     "randexp": "^0.5.3"
+  },
+  "ava": {
+    "files": [
+      "!cjs"
+    ]
   }
 }
