@@ -16,15 +16,7 @@
     },
     "$simpleTypes": [
       {
-        "$enum": [
-          "string",
-          "boolean",
-          "number",
-          "integer",
-          "null",
-          "?",
-          "any"
-        ]
+        "$enum": ["string", "boolean", "number", "integer", "null", "?", "any"]
       },
       {
         "$string": {
@@ -33,33 +25,21 @@
       }
     ],
     "$enumType": {
-      "name": [
-        "?",
-        "string"
-      ],
-      "description": [
-        "?",
-        "string"
-      ],
+      "name": ["?", "string"],
+      "description": ["?", "string"],
       "\\$enum": [
         {
           "minLength": 1,
           "$array": "string"
-        },{ "$string" : {"minLength": 0,"maxLength": 0}},{"$enum":""}
+        }
       ]
     },
     "$objectType": {
       "$map": "$valueTypes"
     },
     "$arrayType": {
-      "name": [
-        "?",
-        "string"
-      ],
-      "description": [
-        "?",
-        "string"
-      ],
+      "name": ["?", "string"],
+      "description": ["?", "string"],
       "minLength": [
         "?",
         {
@@ -103,38 +83,20 @@
           ]
         },
         {
-          "regex": [
-            "?",
-            "string"
-          ]
+          "regex": ["?", "string"]
         }
       ]
     },
     "$numberType": {
       "\\$number": {
-        "min": [
-          "?",
-          "number"
-        ],
-        "max": [
-          "?",
-          "number"
-        ],
-        "integer": [
-          "?",
-          "boolean"
-        ]
+        "min": ["?", "number"],
+        "max": ["?", "number"],
+        "integer": ["?", "boolean"]
       }
     },
     "$metaType": {
-      "name": [
-        "?",
-        "string"
-      ],
-      "description": [
-        "?",
-        "string"
-      ],
+      "name": ["?", "string"],
+      "description": ["?", "string"],
       "\\$type": "$valueTypes"
     },
     "$mapType": {
@@ -156,11 +118,7 @@
           }
         }
       ],
-      "key": [
-        "?",
-        "$stringType",
-        "$enumType"
-      ],
+      "key": ["?", "$stringType", "$enumType", "$keyOfType"],
       "keySpecificType": [
         "?",
         {
@@ -168,6 +126,27 @@
         }
       ],
       "\\$map": "$valueTypes"
+    },
+    "$keyOfType": {
+      "\\$keyOf": [
+        {
+          "minLength": 0,
+          "maxLength": 0,
+          "$array": "?"
+        },
+        {
+          "minLength": 1,
+          "maxLength": 1,
+          "$array": { "$keyOf": [] }
+        },
+        {
+          "minLength": 2,
+          "$array": "string"
+        }
+      ]
+    },
+    "$literalType": {
+      "\\$literal": ["string", "number", "null"]
     },
     "$valueType": [
       "$simpleTypes",
@@ -177,7 +156,9 @@
       "$stringType",
       "$numberType",
       "$metaType",
-      "$mapType"
+      "$mapType",
+      "$keyOfType",
+      "$literalType"
     ],
     "$valueTypes": [
       {
@@ -189,34 +170,19 @@
     "$validation": [
       "$valueTypes",
       {
-        "$and": [
-          "$customTypes",
-          "$arrayType"
-        ]
+        "$and": ["$customTypes", "$arrayType"]
       },
       {
-        "$and": [
-          "$customTypes",
-          "$stringType"
-        ]
+        "$and": ["$customTypes", "$stringType"]
       },
       {
-        "$and": [
-          "$customTypes",
-          "$numberType"
-        ]
+        "$and": ["$customTypes", "$numberType"]
       },
       {
-        "$and": [
-          "$customTypes",
-          "$metaType"
-        ]
+        "$and": ["$customTypes", "$metaType"]
       },
       {
-        "$and": [
-          "$customTypes",
-          "$mapType"
-        ]
+        "$and": ["$customTypes", "$mapType"]
       },
       {
         "$map": "$valueTypes",

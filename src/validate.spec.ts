@@ -546,7 +546,7 @@ describe('validate', () => {
       keyA: 'number',
       keyB: 'number',
       keyC: ['number', '?'],
-      myRes: { $map: 'string', key: { $enum: '' } }
+      myRes: { $map: 'string', key: { $keyOf: [] } }
     })
     valid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyB: 'b' } })
     valid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyB: 'b' } })
@@ -562,12 +562,20 @@ describe('validate', () => {
       },
       keyB: 'number',
       keyC: ['number', '?'],
-      myRes: { $map: 'string', key: { $enum: 'keyA' } }
+      myRes: { $map: 'string', key: { $keyOf: ['keyA'] } }
     })
     valid(schema, { keyA: { x: 1, y: 2 }, keyB: 2, myRes: { x: 'one', y: 'two' } })
     valid(schema, { keyA: { x: 1, y: 2 }, keyB: 2, myRes: { x: 'one' } })
 
     invalid(schema, { keyA: { x: 1 }, keyB: 2, myRes: { x: 'one', y: 'two' } })
     invalid(schema, { keyA: { x: 1, y: 2 }, keyB: 2, myRes: { keyA: 'a', keyB: 'b' } })
+  })
+
+  it('invalid keyOf detected at schema validation', () => {
+    const schema = invalidSchema({
+      keyA: 'number',
+      keyB: { $keyOf: ['axz'] }
+    })
+    expect(validate(schema, { keyA: 2 })).toHaveProperty('result', 'fail')
   })
 })

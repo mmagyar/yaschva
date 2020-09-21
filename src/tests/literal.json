@@ -1,0 +1,27 @@
+{
+  "schema": {
+    "$schema": "../../schema.json",
+    "valueA": { "$literal": "myValue" },
+    "valueB": ["?", "string"]
+  },
+  "scenarios": [
+    {
+      "data": {
+        "valueA": "myValue",
+        "valueB": "anything"
+      },
+      "valid": true
+    }, {
+      "data": {
+        "valueA": "ourValue",
+        "valueB": "anything"
+      },
+      "valid": false
+    },{
+      "data": {
+        "valueA": "yourValue"
+      },
+      "valid": false
+    }
+  ]
+}

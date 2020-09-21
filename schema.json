@@ -45,9 +45,7 @@
           ]
         }
       },
-      "required": [
-        "$type"
-      ]
+      "required": ["$type"]
     },
     "stringType": {
       "description": "string type",
@@ -78,9 +76,7 @@
           }
         }
       },
-      "required": [
-        "$string"
-      ]
+      "required": ["$string"]
     },
     "enumType": {
       "description": "enum type",
@@ -94,23 +90,34 @@
           "type": "string"
         },
         "$enum": {
-          "oneOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minItems": 1
-            },
-            {
-              "type": "string"
-            }
-          ]
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
         }
       },
-      "required": [
-        "$enum"
-      ]
+      "required": ["$enum"]
+    },"keyOfType": {
+      "description": "key of type",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "$keyOf": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 0
+        }
+      },
+      "required": ["$keyOf"]
     },
     "objectType": {
       "description": "Object type, can have any properties with any types, but properties should not start with $",
@@ -128,18 +135,14 @@
               "$enum": {}
             },
             "additionalProperties": false,
-            "required": [
-              "$enum"
-            ]
+            "required": ["$enum"]
           },
           {
             "properties": {
               "$array": {}
             },
             "additionalProperties": false,
-            "required": [
-              "$array"
-            ]
+            "required": ["$array"]
           }
         ]
       }
@@ -159,6 +162,9 @@
       "oneOf": [
         {
           "$ref": "#/definitions/objectType"
+        },
+        {
+          "$ref": "#/definitions/keyOfType"
         },
         {
           "$ref": "#/definitions/enumType"
@@ -184,9 +190,7 @@
               "$ref": "#/definitions/typesAll"
             }
           },
-          "required": [
-            "$array"
-          ]
+          "required": ["$array"]
         },
         {
           "description": "number type",
@@ -201,10 +205,7 @@
             },
             "onlyIn": {
               "type": "string",
-              "enum": [
-                "request",
-                "response"
-              ]
+              "enum": ["request", "response"]
             },
             "postfix": {
               "type": "string"
@@ -225,9 +226,7 @@
               }
             }
           },
-          "required": [
-            "$number"
-          ]
+          "required": ["$number"]
         },
         {
           "description": "and type",
@@ -252,9 +251,7 @@
               }
             }
           },
-          "required": [
-            "$and"
-          ]
+          "required": ["$and"]
         },
         {
           "description": "map type",
@@ -283,6 +280,9 @@
                 },
                 {
                   "$ref": "#/definitions/enumType"
+                },
+                {
+                  "$ref": "#/definitions/keyOfType"
                 }
               ]
             },
@@ -301,9 +301,7 @@
               "$ref": "#/definitions/typesAll"
             }
           },
-          "required": [
-            "$map"
-          ]
+          "required": ["$map"]
         },
         {
           "$ref": "#/definitions/stringType"
@@ -323,20 +321,11 @@
               "$ref": "#/definitions/typesAll"
             }
           },
-          "required": [
-            "$type"
-          ]
+          "required": ["$type"]
         },
         {
           "type": "string",
-          "enum": [
-            "boolean",
-            "string",
-            "number",
-            "integer",
-            "null",
-            "?"
-          ]
+          "enum": ["boolean", "string", "number", "integer", "null", "?"]
         },
         {
           "type": "string",

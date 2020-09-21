@@ -185,6 +185,11 @@ to implement, like:
 - Key most be present on the validation
 - KeyOf that can be used deeper than one level
 
+Literal Types
+-------------
+
+yeah, that
+
 Faster happy path validation
 ----------------------------
 
@@ -219,6 +224,13 @@ the root will be marked invalid.
 One solution should be to return an error report,
 based on the input data, thus changing the error's
 direction from top to bottom first.
+
+Validate more then the root and first child properties at schema level in keyOf
+-------------------------------------------------------------------------------
+
+Right now, the implementation only has limited capability at self checking.
+To solve this, keyOf may need to evolve into a `propertyPath`
+or something similar
 
 Decisions, Decisions, Decisions for the future
 ==============================================

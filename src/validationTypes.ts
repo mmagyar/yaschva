@@ -6,13 +6,14 @@ export type TypeDef = {$types: {[key:string]:ValueTypes}} & ObjectType
 export type Validation = ValueTypes | TypeDef
 export type SimpleTypes = 'string' | 'boolean' | 'number' | 'integer' | 'null' | '?' | 'any' | CustomValueType
 export type ObjectType = { [key: string]: ValueTypes }
-export type EnumType = TypeMeta & { $enum: string[] | string}
+export type EnumType = TypeMeta & { $enum: string[] }
 export type KeyOfType = TypeMeta & { $keyOf: string[] }
 export type ArrayType = TypeMeta & { $array: ValueTypes, minLength?: number, maxLength?:number}
+export type LiteralType = TypeMeta & {$literal: string | number | null }
 export type MapType = TypeMeta & { $map: ValueTypes,
   minLength?: number,
   maxLength?: number
-  key?: StringType | EnumType,
+  key?: StringType | EnumType | KeyOfType,
   keySpecificType?: {[key:string]:ValueTypes} }
 export type AndType = TypeMeta & { $and: (ObjectType | CustomValueType)[] }
 export type StringType = TypeMeta & { select?: string, $string: {
@@ -33,6 +34,8 @@ export type ValueType =
   | MetaType
   | MapType
   | AndType
+  | KeyOfType
+  | LiteralType
 
 export const isSimpleType = (tbd: any): tbd is SimpleTypes => typeof tbd === 'string'
 export const isArray = (tbd: any): tbd is ArrayType => tbd.$array
@@ -44,4 +47,6 @@ export const isEnum = (tbd: any): tbd is EnumType => typeof tbd.$enum !== 'undef
 export const isObj = (tbd: any): tbd is ObjectType =>
   tbd instanceof Object && !Object.keys(tbd).some(x => x.startsWith('$'))
 export const isTypeDefValidation = (tbd: any): tbd is TypeDef => tbd.$types
-export const isAnd = (tbd: any): tbd is TypeDef => tbd.$and
+export const isAnd = (tbd: any): tbd is AndType => tbd.$and
+export const isKeyOf = (tbd: any): tbd is KeyOfType => tbd.$keyOf
+export const isLiteral = (tbd: any): tbd is LiteralType => tbd.$literal
