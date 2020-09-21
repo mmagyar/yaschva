@@ -45,10 +45,7 @@
         {
           "minLength": 1,
           "$array": "string"
-        },
-        {
-          "$enum": "\\$types"
-        }
+        },{ "$string" : {"minLength": 0,"maxLength": 0}},{"$enum":""}
       ]
     },
     "$objectType": {

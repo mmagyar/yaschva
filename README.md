@@ -182,6 +182,8 @@ that are currently not supports but would be helpful
 to implement, like:
 - Array to be unique set
 - Map to be a unique set
+- Key most be present on the validation
+- KeyOf that can be used deeper than one level
 
 Faster happy path validation
 ----------------------------
@@ -199,3 +201,24 @@ collection implementation, to generate
 a meaningful error message.
 This creates a tradeoff, the best case speed is improved,
 but the worst case speed is slower.
+
+Better error output for complex, recursive schemas
+--------------------------------------------------
+
+The current error reporting is based on the validation
+structure, not the input data.
+
+This works fairly well for simpler data structures,
+but anything more complicated, like the schema
+describing itself, will return a hard to understand,
+and verbose error report.
+
+This happens, because if any error happens down the line,
+the root will be marked invalid.
+
+One solution should be to return an error report,
+based on the input data, thus changing the error's
+direction from top to bottom first.
+
+Decisions, Decisions, Decisions for the future
+==============================================

@@ -218,7 +218,7 @@ const generateInternal = (
   }
 
   if (isAnd(type)) {
-    const combined = combineValidationObjects(type, customTypes, (x) => x)
+    const combined = combineValidationObjects(type, { root: {}, custom: customTypes }, (x) => x)
     if (combined.result === 'error') {
       throw new Error('Schema error, $and types must be objects: ' + JSON.stringify(combined.error, null, 2))
     }

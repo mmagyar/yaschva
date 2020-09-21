@@ -533,23 +533,41 @@ describe('validate', () => {
   })
 
   it('Map specified keys most be either an object or a defined type, simple string will throw', () => {
-    expect(() => validate({ $map: 'string', keySpecificType: 'some' }, { x: 'value' })).toThrowError()
-    // TODO this should be like this:
-    // expect(() => validate(invalidSchema({ $map: 'string', keySpecificType: 'some' }), { x: 'value' })).toThrowError()
+    const schema = invalidSchema({ $map: 'string', keySpecificType: 'some' })
+    expect(() => validate(schema, { x: 'value' })).toThrowError(new Error('Invalid keySpecificType: some'))
   })
 
   it('Map specified keys are mandatory', () => {
     invalid({ $map: 'string', keySpecificType: { a: 'number' } }, { x: 'value' })
   })
 
-  it('can restrict a string to be one of the root keys', () => {
-    const schema = {
+  it('can restrict a string to be one of the keys of the root object on the input', () => {
+    const schema = validSchema({
       keyA: 'number',
       keyB: 'number',
+      keyC: ['number', '?'],
       myRes: { $map: 'string', key: { $enum: '' } }
-    }
+    })
     valid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyB: 'b' } })
-    // This does not work yet
+    valid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyB: 'b' } })
     invalid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyC: 'b' } })
+    invalid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyX: 'b' } })
+  })
+
+  it('can restrict a string to be one of the keys on an object under root on the input', () => {
+    const schema = validSchema({
+      keyA: {
+        x: 'number',
+        y: ['?', 'number']
+      },
+      keyB: 'number',
+      keyC: ['number', '?'],
+      myRes: { $map: 'string', key: { $enum: 'keyA' } }
+    })
+    valid(schema, { keyA: { x: 1, y: 2 }, keyB: 2, myRes: { x: 'one', y: 'two' } })
+    valid(schema, { keyA: { x: 1, y: 2 }, keyB: 2, myRes: { x: 'one' } })
+
+    invalid(schema, { keyA: { x: 1 }, keyB: 2, myRes: { x: 'one', y: 'two' } })
+    invalid(schema, { keyA: { x: 1, y: 2 }, keyB: 2, myRes: { keyA: 'a', keyB: 'b' } })
   })
 })

@@ -4,7 +4,7 @@ import {
   isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType
 } from './validationTypes.js'
 
-type Custom = {[key:string] : ValueTypes}
+type Custom = {custom: {[key:string] : ValueTypes}, root: any, type?:Validation}
 type InputTypes = any | string | number | object | void | boolean | null
 export type ValidationOutputs= ValidationOutput|ValidationOutput[]
 export type ValidationOutput =
@@ -18,7 +18,6 @@ export type ValidationResult = {
 }
 export type ValidationFailed = { message: string }
 type SimpleValidation = string | null
-type validateFn = (type: Validation, value: InputTypes) => ValidationResult
 
 const failValidation = (error:string, value:any, output?: ValidationOutputs):ValidationResult => {
   const content: ValidationOutputs = { error, value }
@@ -28,10 +27,10 @@ const failValidation = (error:string, value:any, output?: ValidationOutputs):Val
   }
 }
 
-export const combineValidationObjects = <T>(type:AndType, customTypes:any, onError: (input:any)=>T)
+export const combineValidationObjects = <T>(type:AndType, customTypes:Custom, onError: (input:any)=>T)
   :{result: 'error', error:T} | {pass: ObjectType, result? : void} => {
   const resolveMeta = (tpe: Validation) : Validation => {
-    if (typeof tpe === 'string') { return resolveMeta(customTypes[tpe]) }
+    if (typeof tpe === 'string') { return resolveMeta(customTypes.custom[tpe]) }
     if (isMeta(tpe)) return resolveMeta(tpe.$type)
     return tpe
   }
@@ -102,7 +101,7 @@ const validateOneOf = (value: InputTypes, validator: ValueType[], customTypes: C
     else errors.push(result.output)
   }
 
-  return failValidation('Did not match any from the listed types', value, errors)
+  return failValidation('Did not match any from the listed types', undefined, errors)
 }
 
 const validateArray = (value: InputTypes, validator: ArrayType, customTypes: Custom):
@@ -183,7 +182,7 @@ const validateMap = (value: InputTypes, validator: MapType, customTypes: Custom)
     let types:any = validator.keySpecificType
     while (typeof types === 'string') {
       if (!types.startsWith('$')) throw new Error('Invalid keySpecificType: ' + types)
-      types = customTypes[types]
+      types = customTypes.custom[types]
     }
 
     for (const key of Object.keys(types)) {
@@ -200,7 +199,6 @@ const validateMap = (value: InputTypes, validator: MapType, customTypes: Custom)
     }
 
     if (validator.key) {
-      // console.log(validator.key, key, isEnum(validator.key) || false)
       const result = validateRecursive(validator.key, key, customTypes)
       if (result.result === 'fail') {
         fail = true
@@ -239,15 +237,15 @@ const validateRecursive = (
   if (typeof typeIn === 'undefined') throw new Error('Type for validation cannot be undefined')
 
   let type: ValueTypes = typeIn
-  let customTypes: {[key:string] : ValueTypes} = customTypesIn
+  const customTypes: Custom = customTypesIn
   if (isTypeDefValidation(typeIn)) {
-    customTypes = typeIn.$types
+    customTypes.custom = typeIn.$types
     type = { ...typeIn }
     delete type.$types
   }
 
-  while (isSimpleType(type) && customTypes[type]) {
-    type = customTypes[type]
+  while (isSimpleType(type) && customTypes.custom[type]) {
+    type = customTypes.custom[type]
   }
 
   if (isSimpleType(type)) {
@@ -259,8 +257,22 @@ const validateRecursive = (
   if (isArray(type)) { return validateArray(value, type, customTypes) }
 
   if (isEnum(type)) {
-    // TODO resolve if enum is not an array
-    return toResult(validateString(value, Array.isArray(type.$enum) ? type.$enum : []), value)
+    if (Array.isArray(type.$enum)) {
+      return toResult(validateString(value, type.$enum), value)
+    } else {
+      const values = type.$enum === ''
+      // customTypes.root validated based on value
+      // customTypes.type validated based on schema
+        ? Object.keys(customTypes.root || {})
+        : Object.keys((customTypes.root as any)[type.$enum] || {})
+
+      if (values.length === 0) {
+        return toResult(type.$enum
+          ? `There where no keys under { ${type.$enum} } ${Object.keys(customTypes.type || {})}`
+          : 'Root does not have any keys', value)
+      }
+      return toResult(validateString(value, values), value)
+    }
   }
 
   if (isObj(type)) { return validateObject(value, type, customTypes) }
@@ -286,7 +298,7 @@ const validateRecursive = (
 }
 
 export const validate = (type: Validation, value: InputTypes): ValidationResult => {
-  return validateRecursive(type, value, {})
+  return validateRecursive(type, value, { root: value, custom: {}, type })
 }
 
 export const loadJson = (json: string | object): Validation => {

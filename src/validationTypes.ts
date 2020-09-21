@@ -7,6 +7,7 @@ export type Validation = ValueTypes | TypeDef
 export type SimpleTypes = 'string' | 'boolean' | 'number' | 'integer' | 'null' | '?' | 'any' | CustomValueType
 export type ObjectType = { [key: string]: ValueTypes }
 export type EnumType = TypeMeta & { $enum: string[] | string}
+export type KeyOfType = TypeMeta & { $keyOf: string[] }
 export type ArrayType = TypeMeta & { $array: ValueTypes, minLength?: number, maxLength?:number}
 export type MapType = TypeMeta & { $map: ValueTypes,
   minLength?: number,
