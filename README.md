@@ -184,6 +184,7 @@ to implement, like:
 - Map to be a unique set
 - Key most be present on the validation
 - KeyOf that can be used deeper than one level
+- Require that a string is used as a key somewhere (maybe)
 
 Literal Types
 -------------

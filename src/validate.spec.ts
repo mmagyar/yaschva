@@ -111,6 +111,7 @@ test('Shows example schema working', async (t) => {
 test('Can validate itself with itself', async (t) => {
   const example = loadJson(await file('./selfSchema.json', 'utf8'))
   const validated = validate(example, example)
+  fs.writeFileSync('../test_out.json', JSON.stringify(validated, null, 2))
   t.is(validated['result'], 'pass')
 })
 

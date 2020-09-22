@@ -98,7 +98,8 @@
         }
       },
       "required": ["$enum"]
-    },"keyOfType": {
+    },
+    "keyOfType": {
       "description": "key of type",
       "type": "object",
       "additionalProperties": false,
@@ -283,7 +284,8 @@
                 },
                 {
                   "$ref": "#/definitions/keyOfType"
-                }
+                },
+                { "type": "string", "pattern": "^\\$.{1,}$" }
               ]
             },
             "keySpecificType": {

@@ -1,38 +1,39 @@
 {
   "$schema": "./schema.json",
   "$types": {
-    "$customTypes": {
+    "$customType": { "$keyOf": ["$types"] },
+    "$customTypeDef": {
       "\\$types": [
         "?",
         {
           "key": {
             "$string": {
-              "regex": "^\\$[a-zA-Z0-9_]{1,128}$"
+              "regex": "^\\$([a-zA-Z0-9_]{1,128})$"
             }
           },
           "$map": "$valueTypes"
         }
       ]
     },
-    "$simpleTypes": [
+    "$optionalPositiveInteger": [
+      "?",
       {
-        "$enum": ["string", "boolean", "number", "integer", "null", "?", "any"]
-      },
-      {
-        "$string": {
-          "regex": "^\\$([a-zA-Z0-9_]{1,128})$"
+        "$number": {
+          "min": 0,
+          "integer": true
         }
       }
     ],
+    "$simpleTypes": {
+      "$enum": ["string", "boolean", "number", "integer", "null", "?", "any"]
+    },
     "$enumType": {
       "name": ["?", "string"],
       "description": ["?", "string"],
-      "\\$enum": [
-        {
-          "minLength": 1,
-          "$array": "string"
-        }
-      ]
+      "\\$enum": {
+        "minLength": 1,
+        "$array": "string"
+      }
     },
     "$objectType": {
       "key": {
@@ -45,47 +46,15 @@
     "$arrayType": {
       "name": ["?", "string"],
       "description": ["?", "string"],
-      "minLength": [
-        "?",
-        {
-          "$number": {
-            "min": 0,
-            "integer": true
-          }
-        }
-      ],
-      "maxLength": [
-        "?",
-        {
-          "$number": {
-            "min": 0,
-            "integer": true
-          }
-        }
-      ],
+      "minLength": "$optionalPositiveInteger",
+      "maxLength": "$optionalPositiveInteger",
       "\\$array": "$valueTypes"
     },
     "$stringType": {
       "\\$string": [
         {
-          "minLength": [
-            "?",
-            {
-              "$number": {
-                "min": 0,
-                "integer": true
-              }
-            }
-          ],
-          "maxLength": [
-            "?",
-            {
-              "$number": {
-                "min": 0,
-                "integer": true
-              }
-            }
-          ]
+          "minLength": "$optionalPositiveInteger",
+          "maxLength": "$optionalPositiveInteger"
         },
         {
           "regex": ["?", "string"]
@@ -105,35 +74,15 @@
       "\\$type": "$valueTypes"
     },
     "$mapType": {
-      "minLength": [
-        "?",
-        {
-          "$number": {
-            "min": 0,
-            "integer": true
-          }
-        }
-      ],
-      "maxLength": [
-        "?",
-        {
-          "$number": {
-            "min": 0,
-            "integer": true
-          }
-        }
-      ],
-      "key": ["?", "$stringType", "$enumType", "$keyOfType"],
+      "minLength": "$optionalPositiveInteger",
+      "maxLength": "$optionalPositiveInteger",
+      "key": ["?", "$stringType", "$enumType", "$keyOfType", "$customType"],
       "keySpecificType": [
         "?",
         {
           "$map": "$valueTypes"
         },
-        {
-          "$string": {
-            "regex": "^\\$([a-zA-Z0-9_]{1,128})$"
-          }
-        }
+        "$customType"
       ],
       "\\$map": "$valueTypes"
     },
@@ -160,14 +109,7 @@
     },
     "$andType": {
       "\\$and": {
-        "$array": [
-          "$objectType",
-          {
-            "$string": {
-              "regex": "^\\$[a-zA-Z0-9_]{1,128}$"
-            }
-          }
-        ]
+        "$array": ["$objectType", "$customType"]
       }
     },
     "$valueType": [
@@ -181,7 +123,8 @@
       "$mapType",
       "$keyOfType",
       "$literalType",
-      "$andType"
+      "$andType",
+      "$customType"
     ],
     "$valueTypes": [
       {
@@ -200,25 +143,25 @@
             "regex": "(^(?!\\$).*)|(\\$types)"
           }
         },
-        "keySpecificType": "$customTypes"
+        "keySpecificType": "$customTypeDef"
       },
       {
-        "$and": ["$customTypes", "$arrayType"]
+        "$and": ["$customTypeDef", "$arrayType"]
       },
       {
-        "$and": ["$customTypes", "$stringType"]
+        "$and": ["$customTypeDef", "$stringType"]
       },
       {
-        "$and": ["$customTypes", "$numberType"]
+        "$and": ["$customTypeDef", "$numberType"]
       },
       {
-        "$and": ["$customTypes", "$metaType"]
+        "$and": ["$customTypeDef", "$metaType"]
       },
       {
-        "$and": ["$customTypes", "$mapType"]
+        "$and": ["$customTypeDef", "$mapType"]
       },
       {
-        "$and": ["$customTypes", "$andType"]
+        "$and": ["$customTypeDef", "$andType"]
       },
       {
         "minLength": 1,
