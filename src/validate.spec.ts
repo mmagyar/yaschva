@@ -373,8 +373,6 @@ test('Protects against prototype injection from json', (t) => {
   const input2 = { ...input }
   const result :any = validate(schema, input2)
 
-  for (const a in input2) console.log('YEAH', a, input2.b)
-  // t.true(input2.b === 3)
   t.is(result['output']?.a, null)
   t.is(result.output.b.error, 'Value is not a number')
 })
@@ -473,8 +471,8 @@ test('When and $and is specified input must satisfy both objects', (t) => {
 })
 
 test('$and only accepts object', (t) => {
-  const schema:Validation = { $and: [{ valueA: 'string' }, 'string'] }
-  invalid(schema, { valueA: 'someString' }, t)
+  const schema = invalidSchema({ $and: [{ valueA: 'string' }, 'string'] }, t)
+  t.is(validate(schema, { valueA: 2 })['result'], 'fail')
 })
 
 test('Can validate to multiple custom types with $and', (t) => {
