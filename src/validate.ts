@@ -141,7 +141,7 @@ const validateObject = (value: InputTypes, validator: ObjectType, customTypes: C
 
   for (const key of Object.keys(value)) {
     const validatorKey = key.startsWith('$') ? `\\${key}` : key
-    if (!validator[validatorKey]) {
+    if (!Object.prototype.hasOwnProperty.call(validator, validatorKey)) {
       fail = true
       output[key] = { error: 'Key does not exist on validator', value: value[key] }
     } else {
@@ -178,8 +178,9 @@ const validateMap = (value: InputTypes, validator: MapType, customTypes: Custom)
         `Map needs to have member count to be between ${minLength} - ${maxLength}`,
         keyCount)
   }
-  if (validator.keySpecificType) {
-    let types:any = validator.keySpecificType
+  let types:any = validator.keySpecificType
+
+  if (types) {
     while (typeof types === 'string') {
       if (!types.startsWith('$')) throw new Error('Invalid keySpecificType: ' + types)
       types = customTypes.custom[types]
@@ -194,7 +195,7 @@ const validateMap = (value: InputTypes, validator: MapType, customTypes: Custom)
   }
 
   for (const key of keys) {
-    if (validator.keySpecificType?.[key]) {
+    if (typeof output[key] !== 'undefined') {
       continue
     }
 

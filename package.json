@@ -28,7 +28,8 @@
     "test": "npm run build && npm run test:coverage",
     "test:coverage": "c8 --all --exclude \"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**}\"  --reporter=text --reporter=json ava --verbose",
     "test:fast": "ava",
-    "test:watch": "tsc-watch --onSuccess \"c8 --all --exclude \\\"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**}\\\" --reporter=lcov ava\""
+    "test:watch": "tsc-watch --onSuccess \"c8 --all --exclude \\\"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**}\\\" --reporter=text-summary --reporter=json ava\"",
+    "test:watchOne": "tsc-watch --onSuccess \"c8 --all --exclude \\\"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**}\\\" --reporter=text ava --match \\\"Can handle multiple type for a single value\\\" \""
   },
   "author": "mmagyar.com",
   "license": "MIT",

@@ -44,6 +44,16 @@ const invalid = (schema:Validation, data:any, t:ExecutionContext) => {
       '\n\nData validation passed, but it should have failed\n')
 }
 
+test('e1', async (t) => {
+  const e1 :any = {
+    $types: {
+      $addressType: 'string'
+    },
+    myAddress: '$addressType'
+  }
+
+  validSchema(e1, t)
+})
 test('Shows example schema working', async (t) => {
   const example = loadJson(await file('./examples/example1.json', 'utf8'))
   validSchema(example, t)
@@ -358,14 +368,15 @@ test('Protects against prototype injection on class', (t) => {
 })
 
 test('Protects against prototype injection from json', (t) => {
-  const schema = validSchema({ a: 'number', b: ['string', '?'] }, t)
-  const input: any = JSON.parse('{ "a": 5, "__proto__": {"b" : 3} }')
+  const schema = validSchema({ a: 'number', b: 'number' }, t)
+  const input: any = JSON.parse('{ "a": 5, "__proto__": {"b" : "some other"} }')
   const input2 = { ...input }
   const result :any = validate(schema, input2)
-  t.is(input2.b, 3)
+
+  for (const a in input2) console.log('YEAH', a, input2.b)
+  // t.true(input2.b === 3)
   t.is(result['output']?.a, null)
-  t.is(result.output.b.error, 'output.b.error',
-    'Did not match any from the listed types')
+  t.is(result.output.b.error, 'Value is not a number')
 })
 
 test('Can use type definitions', (t) => {
