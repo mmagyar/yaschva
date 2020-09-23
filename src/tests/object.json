@@ -1,0 +1,26 @@
+[
+  {
+    "schema": {},
+    "validData": [{}],
+    "invalidData": [null, { "any": "thing" }, [], "{}"]
+  },
+  {
+    "schema": { "myNumber": "number" },
+    "validData": [{ "myNumber": 234 }],
+    "invalidData": [{}, { "myNumber": "234" }, null, []]
+  },
+  {
+    "schema": {
+      "num": "number",
+      "int": "integer",
+      "str": "string",
+      "bool": "boolean"
+    },
+    "validData": [{ "num": 12.3, "int": 12, "str": "Hello", "bool": false }],
+    "invalidData": [
+      {},
+      { "num": 3 },
+      "{ \"num\": 12.3, \"int\": 12, \"str\": \"Hello\", \"bool\": false }"
+    ]
+  }
+]

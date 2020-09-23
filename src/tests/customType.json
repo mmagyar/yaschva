@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Throws on unknown custom type",
+    "invalidSchema": "$bigFloat",
+    "throws": "Unknown validator:\"$bigFloat\"",
+    "invalidData": [{}, null, "", 2]
+  },
+  {
+    "name": "Throws on unknown object key starting with $",
+    "invalidSchema": {"$whatever" : "bigFloat"},
+    "throws": "Unknown validator:{\"$whatever\":\"bigFloat\"}",
+    "invalidData": [{}, null, "", 2]
+  }
+]

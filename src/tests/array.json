@@ -1,0 +1,12 @@
+[
+  {
+    "schema": { "$array": "string" },
+    "validData": [[], ["hello"], ["hello", "there"]],
+    "invalidData": [[2], "hello"]
+  },
+  {
+    "schema": ["number", { "$array": "string" }],
+    "validData": [[], 2, ["hello"], ["hello", "there"]],
+    "invalidData": [[2], "hello"]
+  }
+]

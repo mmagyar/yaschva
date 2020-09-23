@@ -1,0 +1,8 @@
+[
+  {
+    "name": "",
+    "schema": { "$enum": ["ts", "typescript"] },
+    "validData": ["ts", "typescript"],
+    "invalidData": ["js", "javascript", ["ts"], { "$enum": "ts" }]
+  }
+]

@@ -1,0 +1,1204 @@
+{
+  "result": "fail",
+  "output": {
+    "error": "Did not match any from the listed types",
+    "output": [
+      {
+        "error": "Did not match any from the listed types",
+        "output": [
+          {
+            "error": "Value is not an Array",
+            "value": {
+              "$types": {
+                "$addressType": "string"
+              },
+              "myAddress": "$addressType"
+            }
+          },
+          {
+            "error": "Did not match any from the listed types",
+            "output": [
+              {
+                "error": "Did not match any from the listed types",
+                "output": [
+                  {
+                    "error": "Value is not a string",
+                    "value": {
+                      "$types": {
+                        "$addressType": "string"
+                      },
+                      "myAddress": "$addressType"
+                    }
+                  },
+                  {
+                    "error": "Value is not a string",
+                    "value": {
+                      "$types": {
+                        "$addressType": "string"
+                      },
+                      "myAddress": "$addressType"
+                    }
+                  }
+                ]
+              },
+              {
+                "$types": {
+                  "error": "Key does not exist on validator",
+                  "value": {
+                    "$addressType": "string"
+                  }
+                },
+                "myAddress": {
+                  "error": "Key does not exist on validator",
+                  "value": "$addressType"
+                },
+                "name": null,
+                "description": null,
+                "$enum": {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not an Array"
+                    }
+                  ]
+                }
+              },
+              {
+                "$types": {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not an Array",
+                      "value": {
+                        "$addressType": "string"
+                      }
+                    },
+                    {
+                      "error": "Did not match any from the listed types",
+                      "output": [
+                        {
+                          "error": "Did not match any from the listed types",
+                          "output": [
+                            {
+                              "error": "Value is not a string",
+                              "value": {
+                                "$addressType": "string"
+                              }
+                            },
+                            {
+                              "error": "Value is not a string",
+                              "value": {
+                                "$addressType": "string"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "$addressType": {
+                            "error": "Key does not exist on validator",
+                            "value": "string"
+                          },
+                          "name": null,
+                          "description": null,
+                          "$enum": {
+                            "error": "Did not match any from the listed types",
+                            "output": [
+                              {
+                                "error": "Value is not an Array"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "$addressType": {
+                            "error": "String did not match required regex: (^(?!\\$).*)|(\\$enum|\\$array|\\$type|\\$string|\\$number|\\$types)",
+                            "value": "$addressType"
+                          }
+                        },
+                        {
+                          "$addressType": {
+                            "error": "Key does not exist on validator",
+                            "value": "string"
+                          },
+                          "name": null,
+                          "description": null,
+                          "minLength": null,
+                          "maxLength": null,
+                          "$array": {
+                            "error": "Did not match any from the listed types",
+                            "output": [
+                              {
+                                "error": "Value is not an Array"
+                              },
+                              {
+                                "error": "Did not match any from the listed types",
+                                "output": [
+                                  {
+                                    "error": "Did not match any from the listed types",
+                                    "output": [
+                                      {
+                                        "error": "Value is not a string"
+                                      },
+                                      {
+                                        "error": "Value is not a string"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not a Map (freeform Object)"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "$addressType": {
+                            "error": "Key does not exist on validator",
+                            "value": "string"
+                          },
+                          "$string": {
+                            "error": "Did not match any from the listed types",
+                            "output": [
+                              {
+                                "error": "Value is not an Object"
+                              },
+                              {
+                                "error": "Value is not an Object"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "$addressType": {
+                            "error": "Key does not exist on validator",
+                            "value": "string"
+                          },
+                          "$number": {
+                            "error": "Value is not an Object"
+                          }
+                        },
+                        {
+                          "$addressType": {
+                            "error": "Key does not exist on validator",
+                            "value": "string"
+                          },
+                          "name": null,
+                          "description": null,
+                          "$type": {
+                            "error": "Did not match any from the listed types",
+                            "output": [
+                              {
+                                "error": "Value is not an Array"
+                              },
+                              {
+                                "error": "Did not match any from the listed types",
+                                "output": [
+                                  {
+                                    "error": "Did not match any from the listed types",
+                                    "output": [
+                                      {
+                                        "error": "Value is not a string"
+                                      },
+                                      {
+                                        "error": "Value is not a string"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not a Map (freeform Object)"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "$addressType": {
+                            "error": "Key does not exist on validator",
+                            "value": "string"
+                          },
+                          "minLength": null,
+                          "maxLength": null,
+                          "key": null,
+                          "keySpecificType": null,
+                          "$map": {
+                            "error": "Did not match any from the listed types",
+                            "output": [
+                              {
+                                "error": "Value is not an Array"
+                              },
+                              {
+                                "error": "Did not match any from the listed types",
+                                "output": [
+                                  {
+                                    "error": "Did not match any from the listed types",
+                                    "output": [
+                                      {
+                                        "error": "Value is not a string"
+                                      },
+                                      {
+                                        "error": "Value is not a string"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not a Map (freeform Object)"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  },
+                                  {
+                                    "error": "Value is not an Object"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "$addressType": {
+                            "error": "Key does not exist on validator",
+                            "value": "string"
+                          },
+                          "$keyOf": {
+                            "error": "Did not match any from the listed types",
+                            "output": [
+                              {
+                                "error": "Value is not an Array"
+                              },
+                              {
+                                "error": "Value is not an Array"
+                              },
+                              {
+                                "error": "Value is not an Array"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "$addressType": {
+                            "error": "Key does not exist on validator",
+                            "value": "string"
+                          },
+                          "$literal": {
+                            "error": "Did not match any from the listed types",
+                            "output": [
+                              {
+                                "error": "Value is not a string"
+                              },
+                              {
+                                "error": "Value is not a number"
+                              },
+                              {
+                                "error": "Value is not null"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "myAddress": null
+              },
+              {
+                "$types": {
+                  "error": "Key does not exist on validator",
+                  "value": {
+                    "$addressType": "string"
+                  }
+                },
+                "myAddress": {
+                  "error": "Key does not exist on validator",
+                  "value": "$addressType"
+                },
+                "name": null,
+                "description": null,
+                "minLength": null,
+                "maxLength": null,
+                "$array": {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not an Array"
+                    },
+                    {
+                      "error": "Did not match any from the listed types",
+                      "output": [
+                        {
+                          "error": "Did not match any from the listed types",
+                          "output": [
+                            {
+                              "error": "Value is not a string"
+                            },
+                            {
+                              "error": "Value is not a string"
+                            }
+                          ]
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not a Map (freeform Object)"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "$types": {
+                  "error": "Key does not exist on validator",
+                  "value": {
+                    "$addressType": "string"
+                  }
+                },
+                "myAddress": {
+                  "error": "Key does not exist on validator",
+                  "value": "$addressType"
+                },
+                "$string": {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not an Object"
+                    },
+                    {
+                      "error": "Value is not an Object"
+                    }
+                  ]
+                }
+              },
+              {
+                "$types": {
+                  "error": "Key does not exist on validator",
+                  "value": {
+                    "$addressType": "string"
+                  }
+                },
+                "myAddress": {
+                  "error": "Key does not exist on validator",
+                  "value": "$addressType"
+                },
+                "$number": {
+                  "error": "Value is not an Object"
+                }
+              },
+              {
+                "$types": {
+                  "error": "Key does not exist on validator",
+                  "value": {
+                    "$addressType": "string"
+                  }
+                },
+                "myAddress": {
+                  "error": "Key does not exist on validator",
+                  "value": "$addressType"
+                },
+                "name": null,
+                "description": null,
+                "$type": {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not an Array"
+                    },
+                    {
+                      "error": "Did not match any from the listed types",
+                      "output": [
+                        {
+                          "error": "Did not match any from the listed types",
+                          "output": [
+                            {
+                              "error": "Value is not a string"
+                            },
+                            {
+                              "error": "Value is not a string"
+                            }
+                          ]
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not a Map (freeform Object)"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "$types": {
+                  "error": "Key does not exist on validator",
+                  "value": {
+                    "$addressType": "string"
+                  }
+                },
+                "myAddress": {
+                  "error": "Key does not exist on validator",
+                  "value": "$addressType"
+                },
+                "minLength": null,
+                "maxLength": null,
+                "key": null,
+                "keySpecificType": null,
+                "$map": {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not an Array"
+                    },
+                    {
+                      "error": "Did not match any from the listed types",
+                      "output": [
+                        {
+                          "error": "Did not match any from the listed types",
+                          "output": [
+                            {
+                              "error": "Value is not a string"
+                            },
+                            {
+                              "error": "Value is not a string"
+                            }
+                          ]
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not a Map (freeform Object)"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        },
+                        {
+                          "error": "Value is not an Object"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "$types": {
+                  "error": "Key does not exist on validator",
+                  "value": {
+                    "$addressType": "string"
+                  }
+                },
+                "myAddress": {
+                  "error": "Key does not exist on validator",
+                  "value": "$addressType"
+                },
+                "$keyOf": {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not an Array"
+                    },
+                    {
+                      "error": "Value is not an Array"
+                    },
+                    {
+                      "error": "Value is not an Array"
+                    }
+                  ]
+                }
+              },
+              {
+                "$types": {
+                  "error": "Key does not exist on validator",
+                  "value": {
+                    "$addressType": "string"
+                  }
+                },
+                "myAddress": {
+                  "error": "Key does not exist on validator",
+                  "value": "$addressType"
+                },
+                "$literal": {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not a string"
+                    },
+                    {
+                      "error": "Value is not a number"
+                    },
+                    {
+                      "error": "Value is not null"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "$types": {
+          "$addressType": null
+        },
+        "myAddress": {
+          "error": "Key does not exist on validator",
+          "value": "$addressType"
+        },
+        "name": null,
+        "description": null,
+        "minLength": null,
+        "maxLength": null,
+        "$array": {
+          "error": "Did not match any from the listed types",
+          "output": [
+            {
+              "error": "Value is not an Array"
+            },
+            {
+              "error": "Did not match any from the listed types",
+              "output": [
+                {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not a string"
+                    },
+                    {
+                      "error": "Value is not a string"
+                    }
+                  ]
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not a Map (freeform Object)"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "$types": {
+          "$addressType": null
+        },
+        "myAddress": {
+          "error": "Key does not exist on validator",
+          "value": "$addressType"
+        },
+        "$string": {
+          "error": "Did not match any from the listed types",
+          "output": [
+            {
+              "error": "Value is not an Object"
+            },
+            {
+              "error": "Value is not an Object"
+            }
+          ]
+        }
+      },
+      {
+        "$types": {
+          "$addressType": null
+        },
+        "myAddress": {
+          "error": "Key does not exist on validator",
+          "value": "$addressType"
+        },
+        "$number": {
+          "error": "Value is not an Object"
+        }
+      },
+      {
+        "$types": {
+          "$addressType": null
+        },
+        "myAddress": {
+          "error": "Key does not exist on validator",
+          "value": "$addressType"
+        },
+        "name": null,
+        "description": null,
+        "$type": {
+          "error": "Did not match any from the listed types",
+          "output": [
+            {
+              "error": "Value is not an Array"
+            },
+            {
+              "error": "Did not match any from the listed types",
+              "output": [
+                {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not a string"
+                    },
+                    {
+                      "error": "Value is not a string"
+                    }
+                  ]
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not a Map (freeform Object)"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "$types": {
+          "$addressType": null
+        },
+        "myAddress": {
+          "error": "Key does not exist on validator",
+          "value": "$addressType"
+        },
+        "minLength": null,
+        "maxLength": null,
+        "key": null,
+        "keySpecificType": null,
+        "$map": {
+          "error": "Did not match any from the listed types",
+          "output": [
+            {
+              "error": "Value is not an Array"
+            },
+            {
+              "error": "Did not match any from the listed types",
+              "output": [
+                {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not a string"
+                    },
+                    {
+                      "error": "Value is not a string"
+                    }
+                  ]
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not a Map (freeform Object)"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                },
+                {
+                  "error": "Value is not an Object"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "$string": {
+          "error": "Did not match any from the listed types",
+          "output": [
+            {
+              "error": "Value is not an Object"
+            },
+            {
+              "error": "Value is not an Object"
+            }
+          ]
+        },
+        "$types": {
+          "error": "Did not match any from the listed types",
+          "output": [
+            {
+              "error": "Value is not an Array",
+              "value": {
+                "$addressType": "string"
+              }
+            },
+            {
+              "error": "Did not match any from the listed types",
+              "output": [
+                {
+                  "error": "Did not match any from the listed types",
+                  "output": [
+                    {
+                      "error": "Value is not a string",
+                      "value": {
+                        "$addressType": "string"
+                      }
+                    },
+                    {
+                      "error": "Value is not a string",
+                      "value": {
+                        "$addressType": "string"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "$addressType": {
+                    "error": "Key does not exist on validator",
+                    "value": "string"
+                  },
+                  "name": null,
+                  "description": null,
+                  "$enum": {
+                    "error": "Did not match any from the listed types",
+                    "output": [
+                      {
+                        "error": "Value is not an Array"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "$addressType": {
+                    "error": "String did not match required regex: (^(?!\\$).*)|(\\$enum|\\$array|\\$type|\\$string|\\$number|\\$types)",
+                    "value": "$addressType"
+                  }
+                },
+                {
+                  "$addressType": {
+                    "error": "Key does not exist on validator",
+                    "value": "string"
+                  },
+                  "name": null,
+                  "description": null,
+                  "minLength": null,
+                  "maxLength": null,
+                  "$array": {
+                    "error": "Did not match any from the listed types",
+                    "output": [
+                      {
+                        "error": "Value is not an Array"
+                      },
+                      {
+                        "error": "Did not match any from the listed types",
+                        "output": [
+                          {
+                            "error": "Did not match any from the listed types",
+                            "output": [
+                              {
+                                "error": "Value is not a string"
+                              },
+                              {
+                                "error": "Value is not a string"
+                              }
+                            ]
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not a Map (freeform Object)"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "$addressType": {
+                    "error": "Key does not exist on validator",
+                    "value": "string"
+                  },
+                  "$string": {
+                    "error": "Did not match any from the listed types",
+                    "output": [
+                      {
+                        "error": "Value is not an Object"
+                      },
+                      {
+                        "error": "Value is not an Object"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "$addressType": {
+                    "error": "Key does not exist on validator",
+                    "value": "string"
+                  },
+                  "$number": {
+                    "error": "Value is not an Object"
+                  }
+                },
+                {
+                  "$addressType": {
+                    "error": "Key does not exist on validator",
+                    "value": "string"
+                  },
+                  "name": null,
+                  "description": null,
+                  "$type": {
+                    "error": "Did not match any from the listed types",
+                    "output": [
+                      {
+                        "error": "Value is not an Array"
+                      },
+                      {
+                        "error": "Did not match any from the listed types",
+                        "output": [
+                          {
+                            "error": "Did not match any from the listed types",
+                            "output": [
+                              {
+                                "error": "Value is not a string"
+                              },
+                              {
+                                "error": "Value is not a string"
+                              }
+                            ]
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not a Map (freeform Object)"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "$addressType": {
+                    "error": "Key does not exist on validator",
+                    "value": "string"
+                  },
+                  "minLength": null,
+                  "maxLength": null,
+                  "key": null,
+                  "keySpecificType": null,
+                  "$map": {
+                    "error": "Did not match any from the listed types",
+                    "output": [
+                      {
+                        "error": "Value is not an Array"
+                      },
+                      {
+                        "error": "Did not match any from the listed types",
+                        "output": [
+                          {
+                            "error": "Did not match any from the listed types",
+                            "output": [
+                              {
+                                "error": "Value is not a string"
+                              },
+                              {
+                                "error": "Value is not a string"
+                              }
+                            ]
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not a Map (freeform Object)"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          },
+                          {
+                            "error": "Value is not an Object"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "$addressType": {
+                    "error": "Key does not exist on validator",
+                    "value": "string"
+                  },
+                  "$keyOf": {
+                    "error": "Did not match any from the listed types",
+                    "output": [
+                      {
+                        "error": "Value is not an Array"
+                      },
+                      {
+                        "error": "Value is not an Array"
+                      },
+                      {
+                        "error": "Value is not an Array"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "$addressType": {
+                    "error": "Key does not exist on validator",
+                    "value": "string"
+                  },
+                  "$literal": {
+                    "error": "Did not match any from the listed types",
+                    "output": [
+                      {
+                        "error": "Value is not a string"
+                      },
+                      {
+                        "error": "Value is not a number"
+                      },
+                      {
+                        "error": "Value is not null"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "myAddress": null
+      }
+    ]
+  }
+}
