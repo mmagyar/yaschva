@@ -1,0 +1,94 @@
+[
+  {
+    "name": "keyOf can be used as string",
+    "schema": {
+      "id": "string",
+      "valueA": "number",
+      "valueB": { "$keyOf": [] }
+    },
+    "validData": [
+      { "id": "a", "valueA": 4, "valueB": "id" },
+      { "id": "a", "valueA": 4, "valueB": "valueA" },
+      { "id": "a", "valueA": 4, "valueB": "valueB" }
+    ],
+    "invalidData": [
+      { "id": "a", "valueA": 4, "valueB": "" },
+      { "id": "a", "valueA": 4, "valueB": {} },
+      { "id": "a", "valueA": 4, "valueB": "idc" }
+    ]
+  },
+  {
+    "name": "keys are checked on the input data, not the validation",
+    "schema": {
+      "id": "string",
+      "valueA": ["?", "number"],
+      "valueB": { "$keyOf": [] }
+    },
+    "validData": [
+      { "id": "a", "valueA": 4, "valueB": "id" },
+      { "id": "a", "valueB": "id" },
+      { "id": "a", "valueA": 4, "valueB": "valueA" },
+      { "id": "a", "valueA": 4, "valueB": "valueB" }
+    ],
+    "invalidData": [
+      { "id": "a",  "valueB": "valueA" },
+      {}
+    ]
+  },
+  {
+    "name": "can restrict a string to be one of the keys of the root object on the input",
+    "schema": {
+      "keyA": "number",
+      "keyB": "number",
+      "keyC": ["number", "?"],
+      "myRes": { "$map": "string", "key": { "$keyOf": [] } }
+    },
+    "validData": [
+      { "keyA": 1, "keyB": 2, "myRes": { "keyA": "a", "keyB": "b" } },
+      { "keyA": 1, "keyB": 2, "keyC": 3, "myRes": { "keyA": "a", "keyC": "b" } }
+    ],
+    "invalidData": [
+      { "keyA": 1, "keyB": 2, "myRes": { "keyA": "a", "keyC": "b" } },
+      { "keyA": 1, "keyB": 2, "myRes": { "keyA": "a", "keyX": "b" } }
+    ]
+  },
+  {
+    "name": "can restrict a string to be one of the keys on an object under root on the input",
+    "schema": {
+      "keyA": { "x": "number", "y": ["?", "number"] },
+      "keyB": "number",
+      "keyC": ["number", "?"],
+      "myRes": { "$map": "string", "key": { "$keyOf": ["keyA"] } }
+    },
+    "validData": [
+      {
+        "keyA": { "x": 1, "y": 2 },
+        "keyB": 2,
+        "myRes": { "x": "one", "y": "two" }
+      },
+      { "keyA": { "x": 1, "y": 2 }, "keyB": 2, "myRes": { "x": "one" } }
+    ],
+    "invalidData": [
+      { "keyA": { "x": 1 }, "keyB": 2, "myRes": { "x": "one", "y": "two" } },
+      {
+        "keyA": { "x": 1, "y": 2 },
+        "keyB": 2,
+        "myRes": { "keyA": "a", "keyB": "b" }
+      }
+    ]
+  },
+  {
+    "name": "Keys specified deeper than the 2 levels are only checked at runtime (for now",
+    "schema": { "myValue": { "$keyOf": ["myValue", "yourValue"] } },
+    "validData": [],
+    "invalidData": ["abc"]
+  },
+  {
+    "name": "Schema referencing a non existing key is invalid",
+    "invalidSchema": {
+      "keyA": "number",
+      "keyB": { "$keyOf": ["axz"] }
+    },
+    "invalidData": [{ "keyA": 2 }, { "keyA": 4, "keyB": "keyA" }]
+  }
+]

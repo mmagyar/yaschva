@@ -89,6 +89,7 @@
         "$array": ["$objectOnlyMetaType", "$objectType", "$customObjectType"]
       }
     },
+    "$tupleType": { "\\$tuple": { "$array": "$valueTypes", "minLength": 1 } },
     "$valueType": [
       "$simpleTypes",
       "$enumType",
@@ -101,12 +102,14 @@
       "$keyOfType",
       "$literalType",
       "$andType",
-      "$customType"
+      "$customType",
+      "$tupleType"
     ],
     "$valueTypes": [{ "$array": "$valueType", "minLength": 1 }, "$valueType"],
     "$validation": [
       "$simpleTypes",
       "$enumType",
+      "$literalType",
       {
         "$map": "$valueTypes",
         "key": { "$string": { "regex": "(^(?!\\$).*)|(\\$types)" } },
@@ -118,6 +121,7 @@
       { "$and": ["$customTypeDef", "$metaType"] },
       { "$and": ["$customTypeDef", "$mapType"] },
       { "$and": ["$customTypeDef", "$andType"] },
+      { "$and": ["$customTypeDef", "$tupleType"] },
       { "minLength": 1, "$array": "$valueType" }
     ]
   },

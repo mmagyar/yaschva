@@ -1,7 +1,7 @@
 import {
   Validation, StringType, ArrayType, ObjectType, SimpleTypes,
   isSimpleType, isArray, isEnum, isObj,
-  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType, isKeyOf, isLiteral, KeyOfType
+  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType, isKeyOf, isLiteral, KeyOfType, isTuple
 } from './validationTypes.js'
 
 type Custom = {custom: {[key:string] : ValueTypes}, root: any, type?:Validation}
@@ -310,6 +310,31 @@ const validateRecursive = (
 
   if (isLiteral(type)) {
     return toResult(value === type.$literal ? '' : `Value did not match literal: ${type.$literal}`, value)
+  }
+
+  if (isTuple(type)) {
+    if (!Array.isArray(value)) {
+      return toResult('Value must be an array for tuple type', value)
+    }
+
+    if (value.length > type.$tuple.length) {
+      return toResult('Array larger then tuple', value)
+    }
+    const results = type.$tuple.map((validation, index) => validateRecursive(validation, value[index], customTypes))
+    const failed = results.some(x => x.result === 'fail')
+    const output:ValidationOutputs = results.reduce((p: {[key:number]: ValidationOutputs}, c, i) => {
+      p[i] = c.output
+      return p
+    }, {})
+
+    return {
+      result: failed ? 'fail' : 'pass',
+      output: {
+        error: 'Some values did not match expected types',
+        output,
+        value: value as any
+      }
+    }
   }
 
   if (isObj(type)) { return validateObject(value, type, customTypes) }

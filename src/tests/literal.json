@@ -1,27 +1,22 @@
-{
-  "schema": {
-    "$schema": "../../schema.json",
-    "valueA": { "$literal": "myValue" },
-    "valueB": ["?", "string"]
+[
+  {
+    "schema": { "$literal": "myValue" },
+    "validData": ["myValue"],
+    "invalidData": ["ourValue", "yourValue", {}, 42, ["yes"]]
   },
-  "scenarios": [
-    {
-      "data": {
-        "valueA": "myValue",
-        "valueB": "anything"
-      },
-      "valid": true
-    }, {
-      "data": {
-        "valueA": "ourValue",
-        "valueB": "anything"
-      },
-      "valid": false
-    },{
-      "data": {
-        "valueA": "yourValue"
-      },
-      "valid": false
-    }
-  ]
-}
+  {
+    "name": "usage in object",
+    "schema": {
+      "valueA": { "$literal": "myValue" },
+      "valueB": ["?", "string"]
+    },
+    "validData": [
+      { "valueA": "myValue", "valueB": "anything" },
+      { "valueA": "myValue" }
+    ],
+    "invalidData": [
+      { "valueA": "ourValue", "valueB": "anything" },
+      { "valueA": "yourValue" }
+    ]
+  }
+]

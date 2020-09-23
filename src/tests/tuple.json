@@ -1,0 +1,25 @@
+[{
+  "schema": {
+    "$tuple": [
+      "string",
+      "number",
+      ["number", { "prop": "string" }],
+      ["?", { "$map": "string" }]
+    ]
+  },
+  "validData": [
+    ["abc", 12, 14],
+    ["abc", 12, { "prop": "abc" }],
+    ["xyz", 19, 89, {}],
+    ["xyz", 19, 89, { "something": "hello" }]
+  ],
+  "invalidData": [
+    ["abc", "12", { "prop": "v" }],
+    [3, 12, { "prop": "v" }],
+    ["abc", 12, { "prop": 12 }],
+    ["abc", 12, "prop"],
+    "input",
+    {},
+    ["abc", 12, { "prop": 12 }, {}, 12]
+  ]
+}]

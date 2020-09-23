@@ -4,6 +4,7 @@ import test, { ExecutionContext } from 'ava'
 import { validate, loadJson } from './validate.js'
 import { Validation } from './validationTypes.js'
 import fs from 'fs'
+import path from 'path'
 import { inspect } from 'util'
 inspect.defaultOptions.depth = null
 
@@ -43,6 +44,54 @@ const invalid = (schema:Validation, data:any, t:ExecutionContext) => {
   t.is(dataValid.result, 'fail', JSON.stringify(dataValid, null, 2) +
       '\n\nData validation passed, but it should have failed\n')
 }
+const loadAndAddTestsBasedOnJsonDefinitions = () => {
+  const testJsonFolder = './src/tests'
+  const dirs = fs.readdirSync(testJsonFolder)
+
+  dirs.forEach(x => {
+    if (x.endsWith('json')) {
+      const file = fs.readFileSync(path.join(testJsonFolder, x), 'utf-8')
+      const json = JSON.parse(file)
+      json.forEach((element:any, i:number) => {
+        const indexName = element.name ? ` ${element.name}` : json.length > 1 ? ` > ${i}` : ''
+
+        if (element.invalidSchema) {
+          const invalidData = element.invalidData || []
+          if (!invalidData.length) {
+            test(`${x}${indexName} > invalid schema`, t => {
+              invalidSchema(element.invalidSchema, t)
+            })
+          } else {
+            invalidData.forEach((z:any, j:number) => {
+              test(`${x}${indexName} > invalid data > ${j}`, t => {
+                const schema = invalidSchema(element.invalidSchema, t)
+                if (element.throws) {
+                  t.throws(() => validate(schema, z))
+                } else {
+                  t.is(validate(schema, z).result, 'fail')
+                }
+              })
+            })
+          }
+        }
+
+        if (element.schema) {
+          const validData = element.validData || []
+          const invalidData = element.invalidData || []
+          validData.forEach((z:any, j:number) => {
+            test(`${x}${indexName} > valid data > ${j}`, (t) => valid(element.schema, z, t))
+          })
+
+          invalidData.forEach((z:any, j:number) => {
+            test(`${x}${indexName} > invalid data > ${j}`, (t) => invalid(element.schema, z, t))
+          })
+        }
+      })
+    }
+  })
+}
+
+loadAndAddTestsBasedOnJsonDefinitions()
 
 test('Shows example schema working', async (t) => {
   const example = loadJson(await file('./examples/example1.json', 'utf8'))
@@ -541,42 +590,4 @@ test('Map specified keys most be either an object or a defined type, simple stri
 
 test('Map specified keys are mandatory', (t) => {
   invalid({ $map: 'string', keySpecificType: { a: 'number' } }, { x: 'value' }, t)
-})
-
-test('can restrict a string to be one of the keys of the root object on the input', (t) => {
-  const schema = validSchema({
-    keyA: 'number',
-    keyB: 'number',
-    keyC: ['number', '?'],
-    myRes: { $map: 'string', key: { $keyOf: [] } }
-  }, t)
-  valid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyB: 'b' } }, t)
-  valid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyB: 'b' } }, t)
-  invalid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyC: 'b' } }, t)
-  invalid(schema, { keyA: 1, keyB: 2, myRes: { keyA: 'a', keyX: 'b' } }, t)
-})
-
-test('can restrict a string to be one of the keys on an object under root on the input', (t) => {
-  const schema = validSchema({
-    keyA: {
-      x: 'number',
-      y: ['?', 'number']
-    },
-    keyB: 'number',
-    keyC: ['number', '?'],
-    myRes: { $map: 'string', key: { $keyOf: ['keyA'] } }
-  }, t)
-  valid(schema, { keyA: { x: 1, y: 2 }, keyB: 2, myRes: { x: 'one', y: 'two' } }, t)
-  valid(schema, { keyA: { x: 1, y: 2 }, keyB: 2, myRes: { x: 'one' } }, t)
-
-  invalid(schema, { keyA: { x: 1 }, keyB: 2, myRes: { x: 'one', y: 'two' } }, t)
-  invalid(schema, { keyA: { x: 1, y: 2 }, keyB: 2, myRes: { keyA: 'a', keyB: 'b' } }, t)
-})
-
-test('invalid keyOf detected at schema validation', (t) => {
-  const schema = invalidSchema({
-    keyA: 'number',
-    keyB: { $keyOf: ['axz'] }
-  }, t)
-  t.is(validate(schema, { keyA: 2 })['result'], 'fail')
 })

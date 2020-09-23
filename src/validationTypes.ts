@@ -10,6 +10,7 @@ export type EnumType = TypeMeta & { $enum: string[] }
 export type KeyOfType = TypeMeta & { $keyOf: string[], valueType?: ValueTypes }
 export type ArrayType = TypeMeta & { $array: ValueTypes, minLength?: number, maxLength?:number}
 export type LiteralType = TypeMeta & {$literal: string | number | null }
+export type TupleType = TypeMeta & {$tuple:NonEmptyArray<ValueType>}
 export type MapType = TypeMeta & { $map: ValueTypes,
   minLength?: number,
   maxLength?: number
@@ -36,6 +37,7 @@ export type ValueType =
   | AndType
   | KeyOfType
   | LiteralType
+  | TupleType
 
 export const isSimpleType = (tbd: any): tbd is SimpleTypes => typeof tbd === 'string'
 export const isArray = (tbd: any): tbd is ArrayType => tbd.$array
@@ -50,3 +52,4 @@ export const isTypeDefValidation = (tbd: any): tbd is TypeDef => tbd.$types
 export const isAnd = (tbd: any): tbd is AndType => tbd.$and
 export const isKeyOf = (tbd: any): tbd is KeyOfType => tbd.$keyOf
 export const isLiteral = (tbd: any): tbd is LiteralType => tbd.$literal
+export const isTuple = (tbd: any): tbd is TupleType => tbd.$tuple
