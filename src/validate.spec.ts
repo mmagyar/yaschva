@@ -44,16 +44,6 @@ const invalid = (schema:Validation, data:any, t:ExecutionContext) => {
       '\n\nData validation passed, but it should have failed\n')
 }
 
-test('e1', async (t) => {
-  const e1 :any = {
-    $types: {
-      $addressType: 'string'
-    },
-    myAddress: '$addressType'
-  }
-
-  validSchema(e1, t)
-})
 test('Shows example schema working', async (t) => {
   const example = loadJson(await file('./examples/example1.json', 'utf8'))
   validSchema(example, t)

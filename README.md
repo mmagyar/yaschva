@@ -184,8 +184,7 @@ that are currently not supports but would be helpful
 to implement, like:
 - Array to be unique set
 - Map to be a unique set
-- Key most be present on the validation
-- KeyOf that can be used deeper than one level
+- Tuple type
 - Require that a string is used as a key somewhere (maybe)
 
 Literal Types
