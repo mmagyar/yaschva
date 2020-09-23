@@ -466,6 +466,17 @@ test('Can validate to multiple objects with $and', (t) => {
   valid(schema, { valueA: 'someString', valueB: 32, otherValue: 9 }, t)
 })
 
+test('Schema is invalid if $and refers to custom type that is not an object', (t) => {
+  const schema:Validation = invalidSchema({
+    $types: {
+      $myCustom: 'string'
+    },
+    $and: [
+      { valueA: 'string' }, '$myCustom']
+  }, t)
+  t.is(validate(schema, { valueA: 'someString', ohWell: 'xpc' }).result, 'fail')
+})
+
 test('When and $and is specified input must satisfy both objects', (t) => {
   invalid({ $and: [{ valueA: 'string' }, { valueB: 'number' }] },
     { valueA: 'someString' }, t)

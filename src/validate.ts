@@ -1,7 +1,7 @@
 import {
   Validation, StringType, ArrayType, ObjectType, SimpleTypes,
   isSimpleType, isArray, isEnum, isObj,
-  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType, isKeyOf, isLiteral
+  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType, isKeyOf, isLiteral, KeyOfType
 } from './validationTypes.js'
 
 type Custom = {custom: {[key:string] : ValueTypes}, root: any, type?:Validation}
@@ -162,6 +162,7 @@ const validateObject = (value: InputTypes, validator: ObjectType, customTypes: C
 
   return { result: fail ? 'fail' : 'pass', output }
 }
+
 const validateMap = (value: InputTypes, validator: MapType, customTypes: Custom):
  ValidationResult => {
   if (typeof value !== 'object' || value == null || Array.isArray(value)) {
@@ -215,6 +216,44 @@ const validateMap = (value: InputTypes, validator: MapType, customTypes: Custom)
 
   return { result: fail ? 'fail' : 'pass', output }
 }
+
+const validateKeyOf = (value: InputTypes, type: KeyOfType, customTypes: Custom):
+ ValidationResult => {
+  const current = type.$keyOf.reduce((p, c) => p?.[c], customTypes.root)
+  const values = Object.keys(current || {})
+
+  if (values.length === 0) {
+    if (type.$keyOf.length) {
+      const route = type.$keyOf.reduce((p: {current: any, root?:any}, c) => {
+        p.current[c] = {}
+        return { current: p.current[c], root: p.root || p.current }
+      }, { current: {}, root: undefined })
+      return toResult(`There where no keys under ${JSON.stringify(route, null, 2)}}`, value)
+    }
+    return toResult('Root does not have any keys', value)
+  }
+
+  const validated = validateString(value, values)
+  if (validated) return toResult(validated, value)
+
+  if (type.valueType && current) {
+    const result = validateRecursive(type.valueType, current[value], customTypes)
+    if (result.result === 'fail') { return toResult(`Key ${value} did not have the required type`, value) }
+  }
+
+  return toResult(validated, value)
+}
+
+const validateAnd = (value: InputTypes, validator: AndType, customTypes: Custom):
+ ValidationResult => {
+  const onError = (resolvedType: any):ValidationResult =>
+    failValidation('SCHEMA error: $and must only contain objects', resolvedType)
+
+  const combined = combineValidationObjects(validator, customTypes, onError)
+  if (combined.result === 'error') return combined.error
+
+  return validateObject(value, combined.pass, customTypes)
+}
 const simpleValidation = (type: SimpleTypes, value: any): SimpleValidation => {
   switch (type) {
     case 'any': return null
@@ -249,46 +288,15 @@ const validateRecursive = (
     type = customTypes.custom[type]
   }
 
-  if (isSimpleType(type)) {
-    return toResult(simpleValidation(type, value), value)
-  }
+  if (isSimpleType(type)) { return toResult(simpleValidation(type, value), value) }
 
   if (Array.isArray(type)) { return validateOneOf(value, type, customTypes) }
 
   if (isArray(type)) { return validateArray(value, type, customTypes) }
 
-  if (isEnum(type)) {
-    return toResult(validateString(value, type.$enum), value)
-  }
+  if (isEnum(type)) { return toResult(validateString(value, type.$enum), value) }
 
-  if (isKeyOf(type)) {
-    const root = customTypes.root
-    let values
-    if (type.$keyOf.length === 0) {
-      values = Object.keys(root || {})
-    } else {
-      const current = type.$keyOf.reduce((p, c) => p?.[c], root)
-      values = Object.keys(current || {})
-    }
-    // const values = type.$enum === ''
-    //   // customTypes.root validated based on value
-    //   // customTypes.type validated based on schema
-    //   ? Object.keys(customTypes.root || {})
-    //   : Object.keys((customTypes.root as any)[type.$enum] || {})
-
-    if (values.length === 0) {
-      const route = type.$keyOf.reduce((p: {current: any, root?:any}, c) => {
-        p.current[c] = {}
-        return { current: p.current[c], root: p.root || p.current }
-      }, { current: {}, root: undefined })
-      return toResult(type.$keyOf
-        ? `There where no keys under ${JSON.stringify(route, null, 2)}}`
-        : 'Root does not have any keys', value)
-    }
-    return toResult(validateString(value, values), value)
-  }
-
-  if (isObj(type)) { return validateObject(value, type, customTypes) }
+  if (isKeyOf(type)) { return validateKeyOf(value, type, customTypes) }
 
   if (isMap(type)) { return validateMap(value, type, customTypes) }
 
@@ -297,19 +305,14 @@ const validateRecursive = (
   if (isMeta(type)) { return validateRecursive(type.$type, value, customTypes) }
 
   if (isString(type)) { return toResult(validateStringObject(value, type), value) }
-  if (isAnd(type)) {
-    const onError = (resolvedType: any):ValidationResult =>
-      failValidation('SCHEMA error: $and must only contain objects', resolvedType)
 
-    const combined = combineValidationObjects(type, customTypes, onError)
-    if (combined.result === 'error') return combined.error
-
-    return validateObject(value, combined.pass, customTypes)
-  }
+  if (isAnd(type)) { return validateAnd(value, type, customTypes) }
 
   if (isLiteral(type)) {
     return toResult(value === type.$literal ? '' : `Value did not match literal: ${type.$literal}`, value)
   }
+
+  if (isObj(type)) { return validateObject(value, type, customTypes) }
 
   throw new Error(`Unknown validator:${JSON.stringify(type)}`)
 }

@@ -110,6 +110,9 @@
         "description": {
           "type": "string"
         },
+        "valueType": {
+          "$ref": "#/definitions/typesAll"
+        },
         "$keyOf": {
           "type": "array",
           "items": {

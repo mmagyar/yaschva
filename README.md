@@ -107,6 +107,8 @@ Can self describe the schema
 ----------------------------
 
 Yaschva is flexible enough to describe itself.
+
+Schemas can be checked for errors that way, and
 This enables the generator to generate
 valid schema definitions.
 
