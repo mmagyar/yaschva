@@ -1,15 +1,18 @@
 [
   {
+    "name": "Empty object is a valid schema",
     "schema": {},
     "validData": [{}],
     "invalidData": [null, { "any": "thing" }, [], "{}"]
   },
   {
+    "name": "A type needs to be defined for each member of the object",
     "schema": { "myNumber": "number" },
     "validData": [{ "myNumber": 234 }],
     "invalidData": [{}, { "myNumber": "234" }, null, []]
   },
   {
+    "name": "Object can have any number of properties and they can have any type",
     "schema": {
       "num": "number",
       "int": "integer",
@@ -21,6 +24,18 @@
       {},
       { "num": 3 },
       "{ \"num\": 12.3, \"int\": 12, \"str\": \"Hello\", \"bool\": false }"
+    ]
+  },
+  {
+    "name": "properties starting with $ needs to be escaped in the schema",
+    "schema": { "myNumber": "number", "\\$escapedDollar": "string" },
+    "validData": [
+      { "myNumber": 12.3, "$escapedDollar": "value" },
+      { "myNumber": 5, "$escapedDollar": "some other thing" }
+    ],
+    "invalidData": [
+      { "myNumber": 12.3, "$escapedDollar": 234 },
+      { "myNumber": "12", "$escapedDollar": "a" }
     ]
   }
 ]

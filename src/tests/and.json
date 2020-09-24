@@ -1,0 +1,72 @@
+[
+  {
+    "name": "When $and is used, input must satisfy both objects",
+    "schema": { "$and": [{ "valueA": "string" }, { "valueB": "number" }] },
+    "validData": [{ "valueA": "someString", "valueB": 93 }],
+    "invalidData": [
+      { "valueA": "someString" },
+      { "valueB": 32 },
+      { "valueB": "someString" }
+    ]
+  },
+  {
+    "name": "Any number of objects can be merged, meta type can be used",
+    "schema": {
+      "$and": [
+        { "valueA": "string" },
+        { "valueB": "number" },
+        { "$type": { "otherValue": "number" } }
+      ]
+    },
+    "validData": [{ "valueA": "someString", "valueB": 32, "otherValue": 9 }],
+    "invalidData": [
+      { "valueA": "someString", "valueB": 32, "otherValue": "9" },
+      {},
+      []
+    ]
+  },
+  {
+    "name": "Only accept objects",
+    "invalidSchema": { "$and": [{ "valueA": "string" }, "string"] },
+    "invalidData": [{ "valueA": 2 }, "abc"]
+  },
+  {
+    "name": "Custom types must resolve to an object",
+    "invalidSchema": {
+      "$types": {
+        "$myCustom": "string"
+      },
+      "$and": [{ "valueA": "string" }, "$myCustom"]
+    },
+    "invalidData": [{ "valueA": "someString", "ohWell": "xpc" }]
+  },
+  {
+    "name": "Handle Custom types",
+    "schema": {
+      "$types": {
+        "$myObject": { "value": "string" },
+        "$otherObject": { "num": "number" },
+        "$myMetaObject": { "$type": { "value2": "string" } }
+      },
+      "$and": [
+        { "valueA": "string" },
+        "$myObject",
+        "$myMetaObject",
+        { "$type": "$otherObject" }
+      ]
+    },
+    "validData": [
+      {
+        "valueA": "someString",
+        "value": "value",
+        "value2": "value2",
+        "num": 88
+      }
+    ],
+    "invalidData": [
+      {},
+      { "valueA": "someString", "value": "abc", "value2": "sdf", "num": "88" },
+      { "valueA": "someString", "value": "abc", "value2": 23, "num": 88 }
+    ]
+  }
+]

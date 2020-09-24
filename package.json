@@ -45,8 +45,6 @@
   "eslintConfig": {
     "rules": {
       "no-unused-vars": "off",
-      "quote-props":["error","always"],
-      "quotes":["error","double"],
       "no-use-before-define": "off",
       "@typescript-eslint/no-unused-vars": "error",
       "@typescript-eslint/semi": [

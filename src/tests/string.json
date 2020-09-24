@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Simple string validation",
+    "schema": "string",
+    "validData": ["", "abc", "hello you"],
+    "invalidData": [1, 23, null, [], {}, { "hello": "you" }, ["hello"]]
+  },
+  {
+    "name": "Validate with regex",
+    "schema": { "$string": { "regex": "hello \\w+" } },
+    "validData": ["hello world", "hello me, it's me again"],
+    "invalidData": ["goodbye", "goodBye world", {}, [], null, ["hello world"]]
+  },
+  {
+    "name": "Constrain string size",
+    "schema": { "$string": { "minLength": 4, "maxLength": 6 } },
+    "validData": ["hello", "you "],
+    "invalidData": ["abc", "Lorem ipsum", ["hello"]]
+  }
+]

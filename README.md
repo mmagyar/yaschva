@@ -137,7 +137,7 @@ JSON schema is a very sharp tool, which tons of features.
 This project is in fact using a json schema to describe it's format, and provide validation and auto completion.
 
 JSON schema syntax can be very noisy and hard to understand,
-it provides dangerous defaults (everything is optional and additional properties are always accepted).
+it provides dangerous defaults (everything is optional, including types, and additional properties are always accepted).
 
 This project tries to simplify syntax for better readability, and provide more secure defaults among others.
 

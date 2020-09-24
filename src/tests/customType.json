@@ -1,5 +1,126 @@
 [
   {
+    "name": "Can defined types, to keep the schema DRY",
+    "schema": {
+      "$types": { "$range": { "$number": { "min": 1, "max": 99 } } },
+      "a": "number",
+      "b": "$range"
+    },
+    "validData": [{ "a": 2, "b": 43 }],
+    "invalidData": [
+      { "a": 2, "b": 101 },
+      { "a": 2, "b": 0 }
+    ]
+  },
+  {
+    "name": "Type definitions can reference each other",
+    "schema": {
+      "$types": {
+        "$myObject": { "itsRange": "$range", "name": "string" },
+        "$range": { "$number": { "min": 1, "max": 99 } }
+      },
+      "a": "$myObject",
+      "b": "$range"
+    },
+    "validData": [{ "a": { "name": "abc", "itsRange": 22 }, "b": 43 }],
+    "invalidData": [
+      { "a": { "name": "abc", "itsRange": 101 }, "b": 43 },
+      { "a": { "name": "abc", "itsRange": 22 }, "b": 0 },
+      { "a": 2, "b": 0 }
+    ]
+  },
+  {
+    "name": "Root can be a custom type via a meta type",
+    "schema": {
+      "$types": {
+        "$customType": {
+          "value": "string",
+          "nodes": { "$array": "$customType" }
+        }
+      },
+      "$type": "$customType"
+    },
+    "validData": [
+      { "value": "abc", "nodes": [] },
+      { "value": "abc", "nodes": [{ "value": "xyz", "nodes": [] }] },
+      {
+        "value": "abc",
+        "nodes": [
+          { "value": "xyz", "nodes": [{ "value": "xyz", "nodes": [] }] }
+        ]
+      }
+    ],
+    "invalidData": [
+      {},
+      { "value": "abc" },
+      { "value": "abc", "nodes": [{ "nodes": [] }] },
+      { "value": "abc", "nodes": [{ "value": "xyz" }] }
+    ]
+  },
+  {
+    "name": "Can create a recursive data type",
+    "schema": {
+      "$types": {
+        "$tree": {
+          "value": "string",
+          "left": ["?", "$tree"],
+          "right": ["?", "$tree"]
+        }
+      },
+      "root": "$tree"
+    },
+    "validData": [
+      {
+        "root": {
+          "value": "Dcn819x2PCmJV",
+          "left": {
+            "value": "mEiX0hq435IXt",
+            "left": { "value": "coGEB1xXQmsRS" },
+            "right": { "value": "6lBoBa" }
+          },
+          "right": {
+            "value": "mV9j2",
+            "left": { "value": "iL42zyiOv" },
+            "right": { "value": "Bx6FbX" }
+          }
+        }
+      },
+      { "root": { "value": "abc" } },
+      {
+        "root": {
+          "value": "Dcn819x2PCmJV",
+          "right": { "value": "mV9j2" }
+        }
+      },
+      {
+        "root": {
+          "value": "Dcn819x2PCmJV",
+          "left": { "value": "mEiX0hq435IXt" },
+          "right": { "value": "mV9j2" }
+        }
+      }
+    ],
+    "invalidData": [
+      {},
+      [],
+      { "root": {} },
+      { "root": { "value": "abc", "left": {} } },
+      {
+        "value": "Dcn819x2PCmJV",
+        "left": {
+          "value": "mEiX0hq435IXt",
+          "left": { "value": "coGEB1xXQmsRS" },
+          "right": { "value": "6lBoBa" }
+        },
+        "right": {
+          "value": "mV9j2",
+          "left": { "value": "iL42zyiOv" },
+          "right": { "value": "Bx6FbX" }
+        }
+      }
+    ]
+  },
+  {
     "name": "Throws on unknown custom type",
     "invalidSchema": "$bigFloat",
     "throws": "Unknown validator:\"$bigFloat\"",
@@ -7,7 +128,7 @@
   },
   {
     "name": "Throws on unknown object key starting with $",
-    "invalidSchema": {"$whatever" : "bigFloat"},
+    "invalidSchema": { "$whatever": "bigFloat" },
     "throws": "Unknown validator:{\"$whatever\":\"bigFloat\"}",
     "invalidData": [{}, null, "", 2]
   }

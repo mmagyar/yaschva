@@ -44,9 +44,7 @@
           "minLength": "$optionalPositiveInteger",
           "maxLength": "$optionalPositiveInteger"
         },
-        {
-          "regex": ["?", "string"]
-        }
+        { "regex": ["?", "string"] }
       ]
     },
     "$numberType": {
@@ -81,9 +79,7 @@
         { "$array": "string", "minLength": 2 }
       ]
     },
-    "$literalType": {
-      "\\$literal": ["string", "number", "null"]
-    },
+    "$literalType": { "\\$literal": ["string", "number", "null"] },
     "$andType": {
       "\\$and": {
         "$array": ["$objectOnlyMetaType", "$objectType", "$customObjectType"]

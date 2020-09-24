@@ -5,8 +5,19 @@
     "invalidData": [[2], "hello"]
   },
   {
+    "schema": { "$array": "number" },
+    "validData": [[], [1], [1,2], [1,2,1]],
+    "invalidData": [["2"], "hello"]
+  },
+  {
     "schema": ["number", { "$array": "string" }],
     "validData": [[], 2, ["hello"], ["hello", "there"]],
     "invalidData": [[2], "hello"]
+  },
+  {
+    "name":"Constrain length of arrays",
+  "schema": { "$array": "number", "minLength": 2, "maxLength": 4 },
+  "validData":[[1,2], [1,5,3],[6,6]],
+  "invalidData":[[1,2,3,4,5],[],[1]]
   }
 ]

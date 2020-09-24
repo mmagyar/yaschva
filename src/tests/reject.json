@@ -1,0 +1,17 @@
+[
+  {
+    "name":"Protects against prototype injection from json",
+  "schema": { "a": "number", "b": "number" } ,
+  "validData":[{"a":0,"b":0}],
+  "invalidData":[
+    { "a": 5, "__proto__": {"b" : "some other"} },
+    { "a": 5, "__proto__": {"b" : 32} }
+  ]
+  },
+  {
+    "name":"Property name can not start with $ (dollar sign)",
+  "invalidSchema": {"$whatever":"string"},
+  "throws":"Unknown validator:{\"$whatever\":\"string\"}",
+  "invalidData":[{"$whatever":"string"}, {"$whatever":8008145}]
+  }
+]

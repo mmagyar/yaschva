@@ -1,0 +1,26 @@
+[
+  {
+    "name":"Simple form for a number",
+    "schema": "number",
+    "validData": [1,2,10000, 132.2],
+    "invalidData":[{}, [], null , "", "twelve", "12"]
+  },
+  {
+    "name":"Simple form for an integer",
+    "schema": "integer",
+    "validData": [1,2,10000],
+    "invalidData":[123.2, {}, [], null , "", "twelve", "12"]
+  },
+  {
+    "name":"Enforce minimum / maximum for numbers",
+  "schema": { "$number": { "min": 1, "max": 66 } },
+  "validData":[44,2,50,44.5],
+  "invalidData":[0,67,132420]
+  },
+  {
+    "name":"Enforce minimum / maximum for integers",
+  "schema": { "$number": { "min": 1, "max": 66, "integer": true } },
+  "validData":[44,2,50],
+  "invalidData":[0,67,132420,33.4,44.5]
+  }
+]

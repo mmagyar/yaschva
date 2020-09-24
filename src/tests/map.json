@@ -1,5 +1,26 @@
 [
   {
+    "name": "map accepts arbitrary keys with set value types",
+    "schema": { "$map": ["number"] },
+    "validData": [{ "x": 3, "y": 4, "z": 99 }],
+    "invalidData": [
+      { "x": 3, "y": 4, "z": "99" },
+      { "x": 3, "y": "a string", "z": 34 }
+    ]
+  },
+  {
+    "name": "Key can be regex validated",
+    "schema": {
+      "$map": ["number"],
+      "key": { "$string": { "regex": "^ab[a-z]" } }
+    },
+    "validData": [{ "abx": 3, "aby": 4, "abz": 99 }],
+    "invalidData": [
+      { "x": 3, "y": 4, "z": 99 },
+      { "abx": 3, "aby": "a string", "abz": 34 }
+    ]
+  },
+  {
     "name": "Can have size constraint.",
     "schema": { "$map": "string", "minLength": 2, "maxLength": 3 },
     "validData": [{ "a": "some", "x": "value" }],
@@ -26,10 +47,7 @@
   },
   {
     "name": "Specified keys most be either an object or a defined type, simple string will throw.",
-    "invalidSchema": {
-      "$map": "string",
-      "keySpecificType": "some"
-    },
+    "invalidSchema": { "$map": "string", "keySpecificType": "some" },
     "throws": "Invalid keySpecificType: some",
     "invalidData": [{ "x": "value" }]
   },
