@@ -45,6 +45,7 @@ const invalid = (schema: Validation, data: any, t: ExecutionContext): void => {
   t.is(dataValid.result, 'fail', JSON.stringify(dataValid, null, 2) +
       '\n\nData validation passed, but it should have failed\n')
 }
+
 const loadAndAddTestsBasedOnJsonDefinitions = (): void => {
   const testJsonFolder = './src/tests'
   const dirs = fs.readdirSync(testJsonFolder)

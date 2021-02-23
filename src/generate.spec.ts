@@ -4,6 +4,7 @@ import { loadJson, validate } from './validate.js'
 import fs from 'fs'
 import { inspect } from 'util'
 import test, { ExecutionContext } from 'ava'
+import path from 'path'
 inspect.defaultOptions.depth = null
 
 const file = fs.promises.readFile
@@ -359,6 +360,36 @@ test('Can specify types for some keys in map', (t) => {
   const generated = generate(schema)
   t.is(validate(schema, generated).result, 'pass')
 })
+
+const loadAndAddTestsBasedOnJsonDefinitions = (): void => {
+  const testJsonFolder = './src/tests'
+  const dirs = fs.readdirSync(testJsonFolder)
+
+  dirs.forEach(x => {
+    if (x.endsWith('json')) {
+      const file = fs.readFileSync(path.join(testJsonFolder, x), 'utf-8')
+      const json = JSON.parse(file)
+      json.forEach((element: any, i: number) => {
+        const indexName = element.name ? ` ${element.name}` : json.length > 1 ? ` > ${i}` : ''
+
+        if (element.schema) {
+          const validData = element.validData || []
+          const invalidData = element.invalidData || []
+          test.skip(`${x}${indexName} > generated data`, (t) => {
+            const generated = generate(element.schema)
+            t.is(validate(element.schema, generated).result, 'pass')
+            
+          })
+          
+          
+        }
+      })
+    }
+  })
+}
+
+loadAndAddTestsBasedOnJsonDefinitions()
+
 /*
 it.skip('Can generate a valid schema, that can generate data that is valid to the schema', async (t) => {
   const example = loadJson(await file('./selfSchema.json', 'utf8'))
