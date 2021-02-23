@@ -9,6 +9,7 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "strict": true,
+    "strictNullChecks": true,
     "declaration": true,
     "inlineSources": true,
     "sourceMap": true,

@@ -23,8 +23,9 @@
     "build:commonjs": "tsc --module \"CommonJS\" -t \"es6\" --outDir \"./cjs\"",
     "clean:test": "jest --clearCache",
     "watch:test": "jest --watchAll",
-    "standard": "standardx **/*.ts",
-    "standard:fix": "standardx --fix **/*.ts",
+    "eslint": "eslint **/*.ts",
+    "eslint:fix": "eslint --fix  **/*.ts",
+    "standard": "eslint **/*.ts",
     "test": "npm run build && npm run test:coverage",
     "test:coverage": "c8 --all --exclude \"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**}\"  --reporter=text --reporter=html --reporter=json --reporter=clover ava --verbose",
     "test:fast": "ava",
@@ -33,42 +34,29 @@
   },
   "author": "mmagyar.com",
   "license": "MIT",
-  "standardx": {
-    "env": [
-      "es6"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint/eslint-plugin"
-    ]
-  },
   "eslintConfig": {
+    "extends": "standard-with-typescript",
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
     "rules": {
-      "no-unused-vars": "off",
-      "no-use-before-define": "off",
-      "@typescript-eslint/no-unused-vars": "error",
-      "@typescript-eslint/semi": [
-        "error",
-        "never"
-      ]
+      "@typescript-eslint/strict-boolean-expressions": 0,
+      "@typescript-eslint/restrict-template-expressions": 0
     }
   },
-  "jest": {
-    "roots": [
-      "<rootDir>/cjs"
-    ]
-  },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.10.4",
-    "@types/jest": "^26.0.13",
-    "@typescript-eslint/eslint-plugin": "^4.1.1",
-    "@typescript-eslint/parser": "^4.1.1",
-    "ava": "^3.12.1",
-    "c8": "^7.3.0",
-    "jest": "^26.4.2",
-    "standardx": "^5.0.0",
+    "@types/node": "^14.14.31",
+    "@typescript-eslint/eslint-plugin": "^4.15.2",
+    "@typescript-eslint/parser": "^4.15.2",
+    "ava": "^3.15.0",
+    "c8": "^7.6.0",
+    "eslint": "^7.13.0",
+    "eslint-config-standard-with-typescript": "^19.0.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
     "tsc-watch": "^4.2.9",
-    "typescript": "^4.0.2"
+    "typescript": "^4.1.5"
   },
   "dependencies": {
     "randexp": "^0.5.3"

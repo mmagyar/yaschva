@@ -4,14 +4,14 @@ import {
   isString, isMap, isNumber, isTypeDefValidation, ValueTypes, isMeta, isAnd
 } from './validationTypes.js'
 
-const containsOptional = (input: Validation) =>
+const containsOptional = (input: Validation): boolean =>
   (Array.isArray(input) && input.some(y => y === '?')) ||
    input === '?'
 
-const allOptional = (input: Validation) =>
+const allOptional = (input: Validation): boolean =>
   Object.values(input).every(containsOptional)
 
-const simpleTypes = (input: string) => {
+const simpleTypes = (input: string): 'string' | 'boolean' | 'number' | 'null' | 'any' | 'undefined' => {
   switch (input) {
     case 'string':
       return 'string'
@@ -30,17 +30,17 @@ const simpleTypes = (input: string) => {
     default: throw new Error(`Unhandled ${input}`)
   }
 }
-export const validationToType = (input:ValueTypes): string => validationToTypeInternal(input, {})
-const validationToTypeInternal = (input: ValueTypes, typesIn: {[key:string]:Validation}): string => {
+export const validationToType = (input: ValueTypes): string => validationToTypeInternal(input, {})
+const validationToTypeInternal = (input: ValueTypes, typesIn: {[key: string]: Validation}): string => {
   let customTypes = typesIn
-  let type:ValueTypes = input
+  let type: ValueTypes = input
   if (isTypeDefValidation(input)) {
     customTypes = input.$types
     type = { ...input }
     delete type.$types
   }
 
-  const toType = (input:ValueTypes) => validationToTypeInternal(input, customTypes)
+  const toType = (input: ValueTypes): string => validationToTypeInternal(input, customTypes)
 
   if (Array.isArray(type)) { return type.map(toType).join(' | ') }
 
@@ -54,7 +54,7 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: {[key:string]:Vali
 
   if (isArray(type)) {
     const typeRet = toType(type.$array)
-    return (Array.isArray(type.$array) && type.$array.length > 1) || typeRet.indexOf('|') > -1
+    return (Array.isArray(type.$array) && type.$array.length > 1) || typeRet.includes('|')
       ? `(${typeRet})[]` : `${typeRet}[]`
   }
 
@@ -62,7 +62,7 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: {[key:string]:Vali
   if (isEnum(type)) { return '' /** TODO **/ }
 
   if (isObj(type)) {
-    const optionalPostfix = (value: Validation) => containsOptional(value) ? '?' : ''
+    const optionalPostfix = (value: Validation): ('?'|'') => containsOptional(value) ? '?' : ''
 
     const obj = Object.entries(type)
       .map(([key, value]) => `${key.startsWith('\\$') ? key.slice(1) : key}${optionalPostfix(value)}: ${toType(value)}`)

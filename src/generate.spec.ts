@@ -7,7 +7,7 @@ import test, { ExecutionContext } from 'ava'
 inspect.defaultOptions.depth = null
 
 const file = fs.promises.readFile
-const checkNumber = (result: number, t: ExecutionContext) => {
+const checkNumber = (result: number, t: ExecutionContext): void => {
   t.not(result, Infinity)
   t.not(isNaN(result), true)
   t.is(typeof result, 'number')
@@ -159,14 +159,14 @@ test('Generates extended string', (t) => {
 })
 
 test('Throws on unknown type', (t) => {
-  const test = () => {
+  const test = (): void => {
     const schema: any = { $stringss: { minLength: 77 } }
     generate(schema)
   }
 
   t.throws(test)
 
-  const test2 = () => {
+  const test2 = (): void => {
     const schema: any = { something: 'magicRune' }
     generate(schema)
   }
@@ -194,7 +194,7 @@ test('Generates string based on regex', (t) => {
 
 test('Generates uuid based on regex', (t) => {
   const regex = '[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}'
-  for (var i = 0; i < 240; i++) {
+  for (let i = 0; i < 240; i++) {
     const result = generate({ id: { $string: { regex } } })
     t.is(typeof result.id, 'string')
   }
@@ -202,9 +202,9 @@ test('Generates uuid based on regex', (t) => {
 
 test('Does not add property to object if it\'s optionally undefined', (t) => {
   const undefinedGenerated = []
-  for (var i = 0; i < 240; i++) {
+  for (let i = 0; i < 240; i++) {
     const result = generate({ value: ['string', '?'] })
-    if (Object.keys(result).indexOf('value') !== -1) {
+    if (Object.keys(result).includes('value')) {
       t.is(typeof result.value, 'string')
     } else {
       t.is(Object.keys(result).length, 0)
@@ -229,7 +229,7 @@ test('Generates empty array for array of undefined', (t) => {
 })
 
 test('Can prefer undefined type if present', (t) => {
-  const schema : Validation = {
+  const schema: Validation = {
     root: 'string',
     aNumber: ['number'],
     mayBeUndefined: ['string', '?']
@@ -244,7 +244,7 @@ test('Can prefer undefined type if present', (t) => {
 })
 
 test('can prefer defined type if present', (t) => {
-  const schema :Validation = {
+  const schema: Validation = {
     root: 'string',
     aNumber: ['number'],
     mayBeUndefined: ['string', '?']
@@ -288,7 +288,7 @@ test('Depth for nested arrays can be limited', (t) => {
   const generated = generate(schema, { arrayMin: 1, maxDepthSoft: 3 })
   t.true(generated.nodes.length > 0)
   // Check that the final layer is an empty array
-  t.is(generated.nodes.find((x:any) => x.nodes.find((y:any) => y.nodes.length !== 0)), undefined)
+  t.is(generated.nodes.find((x: any) => x.nodes.find((y: any) => y.nodes.length !== 0)), undefined)
   const validated = validate(schema, generated)
   t.is(validated.result, 'pass')
 })
@@ -302,7 +302,7 @@ test('Depth for nested maps can be limited', (t) => {
   const layers3 = generate(schema, { mapMin: 1, maxDepthSoft: 3 })
   t.true(Object.keys(layers3.nodes).length > 0)
   // Check that the final layer is an empty map
-  t.is(Object.values(layers3.nodes).find((x:any) => Object.keys(x.nodes).length !== 0), undefined)
+  t.is(Object.values(layers3.nodes).find((x: any) => Object.keys(x.nodes).length !== 0), undefined)
   const validated = validate(schema, layers3)
   t.is(validated.result, 'pass')
 })
@@ -316,7 +316,7 @@ test('Schema with unescapable circular type will throw an error', (t) => {
 })
 
 test('Can validate to multiple custom types with $and', (t) => {
-  const schema:Validation = {
+  const schema: Validation = {
     $types: {
       $myObject: { value: 'string' },
       $otherObject: { num: 'number' },
@@ -334,12 +334,12 @@ test('Can validate to multiple custom types with $and', (t) => {
 })
 
 test('invalid $and throws', (t) => {
-  const schema:Validation = { $and: [{ valueA: 'string' }, 'myObject'] }
+  const schema: Validation = { $and: [{ valueA: 'string' }, 'myObject'] }
   t.throws(() => generate(schema))
 })
 
 test('Will limit array size to be between bounds', (t) => {
-  const schema :Validation = { $array: 'string', minLength: 2, maxLength: 6 }
+  const schema: Validation = { $array: 'string', minLength: 2, maxLength: 6 }
   for (let i = 0; i < 32; i++) {
     const generated = generate(schema)
     t.is(validate(schema, generated).result, 'pass')
@@ -347,7 +347,7 @@ test('Will limit array size to be between bounds', (t) => {
 })
 
 test('Will limit map size to be between bounds', (t) => {
-  const schema :Validation = { $map: 'string', minLength: 2, maxLength: 6 }
+  const schema: Validation = { $map: 'string', minLength: 2, maxLength: 6 }
   for (let i = 0; i < 32; i++) {
     const generated = generate(schema)
     t.is(validate(schema, generated).result, 'pass')

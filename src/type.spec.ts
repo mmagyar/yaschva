@@ -88,14 +88,14 @@ test('Generates types based on custom type', (t) => {
 })
 
 test('Throws on unknown type', (t) => {
-  const test = () => {
+  const test = (): void => {
     const schema: any = { $stringss: { minLength: 77 } }
     validationToType(schema)
   }
 
   t.throws(test)
 
-  const test2 = () => {
+  const test2 = (): void => {
     const schema: any = { something: 'magicRune' }
     validationToType(schema)
   }
@@ -125,7 +125,7 @@ test('Can generate type for recursive data structure', (t) => {
 })
 
 test('Can validate to multiple custom types with $and', (t) => {
-  const schema:Validation = {
+  const schema: Validation = {
     $types: {
       $myObject: { value: 'string' },
       $otherObject: { num: 'number' },
@@ -138,7 +138,7 @@ test('Can validate to multiple custom types with $and', (t) => {
 })
 
 test('invalid $and throws', (t) => {
-  const schema:Validation = { $and: [{ valueA: 'string' }, 'myObject'] }
+  const schema: Validation = { $and: [{ valueA: 'string' }, 'myObject'] }
   t.throws(() => validationToType(schema))
 })
 

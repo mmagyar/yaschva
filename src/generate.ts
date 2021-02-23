@@ -5,7 +5,7 @@ import {
 } from './validationTypes.js'
 import { combineValidationObjects } from './validate.js'
 import randexp from 'randexp'
-type Options = {
+interface Options {
   arrayMin: number
   arrayMax: number
   mapMin: number
@@ -21,7 +21,7 @@ type Options = {
 }
 
 const saneMaximumSize = 12
-export const randomNumber = (isInteger:boolean, c1: number, c2: number): number => {
+export const randomNumber = (isInteger: boolean, c1: number, c2: number): number => {
   const min = Math.min(c1, c2)
   const max = Math.max(c1, c2)
   const num = Math.random() * (max - min) + min
@@ -30,8 +30,8 @@ export const randomNumber = (isInteger:boolean, c1: number, c2: number): number 
 }
 
 const simpleTypes: SimpleTypes[] = ['number', 'integer', '?', 'string', 'boolean']
-const randomString = (options: Options, lengthIn?: number) => {
-  const length = lengthIn ||
+const randomString = (options: Options, lengthIn?: number): string => {
+  const length = lengthIn ??
    randomNumber(true, options.minStringLength, options.maxStringLength)
 
   let result = ''
@@ -42,7 +42,7 @@ const randomString = (options: Options, lengthIn?: number) => {
 
   return result
 }
-const simpleGeneration = (type: SimpleTypes, options:Options): any => {
+const simpleGeneration = (type: SimpleTypes, options: Options): any => {
   switch (type) {
     case 'any': return simpleGeneration(simpleTypes[randomNumber(true, 0, simpleTypes.length - 1)], options)
     case '?': return undefined
@@ -55,7 +55,7 @@ const simpleGeneration = (type: SimpleTypes, options:Options): any => {
   }
 }
 
-const applyPreference = (input: Validation[], options:Options) => {
+const applyPreference = (input: Validation[], options: Options): Validation[] => {
   if (options.prefer === 'defined') {
     return input.length > 1 ? input.filter(x => x !== '?') : input
   }
@@ -65,8 +65,8 @@ const applyPreference = (input: Validation[], options:Options) => {
   return input
 }
 
-export const generate = (type: Validation, options: Partial<Options> = {}) :any => {
-  const defaultOptions : Options = {
+export const generate = (type: Validation, options: Partial<Options> = {}): any => {
+  const defaultOptions: Options = {
     arrayMin: 1,
     arrayMax: 16,
     mapMin: 1,
@@ -86,8 +86,8 @@ export const generate = (type: Validation, options: Partial<Options> = {}) :any 
 const generateInternal = (
   typeIn: Validation,
   options: Options,
-  typesIn: {[key:string] : Validation },
-  depth :number,
+  typesIn: {[key: string]: Validation },
+  depth: number,
   rootType: Validation
 ): any => {
   if (depth >= options.maxDepthHard) {
@@ -97,14 +97,14 @@ const generateInternal = (
   }
 
   let customTypes = typesIn
-  let type:ValueTypes = typeIn
+  let type: ValueTypes = typeIn
   if (isTypeDefValidation(typeIn)) {
     customTypes = typeIn.$types
     type = { ...typeIn }
     delete type.$types
   }
 
-  const gen = (type:Validation, increaseDepth:boolean = false) =>
+  const gen = (type: Validation, increaseDepth: boolean = false): any =>
     generateInternal(type, options, customTypes, increaseDepth ? depth + 1 : depth, rootType)
 
   if (isSimpleType(type)) {
@@ -140,7 +140,7 @@ const generateInternal = (
 
   if (isObj(type)) {
     return Object.entries(type).reduce((prev: any, [key, value]) => {
-      let val:any | Validation = value
+      let val: any | Validation = value
       // This is strictly needed to generate a schema that makes sense
       const num = { $number: { min: 0, max: 16, integer: true } }
       if ((key === 'minLength' || key === 'maxLength') && (value === 'number')) {
@@ -150,8 +150,8 @@ const generateInternal = (
         val = { $number: { ...(value as any).$number, ...num.$number } }
       }
       if ((key === 'minLength' || key === 'maxLength') &&
-        Array.isArray(value) && value.some((x:any) => x.$number)) {
-        val = value.map((x:any) => x.$number ? { $number: { ...x.$number, ...num.$number } } : x)
+        Array.isArray(value) && value.some((x: any) => x.$number)) {
+        val = value.map((x: any) => x.$number ? { $number: { ...x.$number, ...num.$number } } : x)
       }
 
       const generated = gen(val, true)
@@ -172,7 +172,7 @@ const generateInternal = (
     if (min <= 0 || max > 64) {
       throw new Error(`Too big, too small, size does matter after all, ${count}, min: ${min}, max: ${max}`)
     }
-    let specKey:any = mapType.keySpecificType
+    let specKey: any = mapType.keySpecificType
     while (typeof specKey === 'string') {
       if (!specKey.startsWith('$')) throw new Error('Invalid keySpecificType: ' + specKey)
       specKey = customTypes[specKey]
@@ -195,7 +195,7 @@ const generateInternal = (
 
   if (isNumber(type)) {
     return randomNumber(
-      type.$number.integer || false,
+      type.$number.integer ?? false,
       type.$number.min == null ? options.minNumber : type.$number.min,
       type.$number.max == null ? options.maxNumber : type.$number.max)
   }
@@ -214,7 +214,7 @@ const generateInternal = (
       }
     }
 
-    return randomString(options, type.$string.minLength || type.$string.maxLength)
+    return randomString(options, type.$string.minLength === 0 || typeof type.$string.minLength === 'undefined' ? type.$string.maxLength : type.$string.minLength)
   }
 
   if (isAnd(type)) {

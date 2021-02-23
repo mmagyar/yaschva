@@ -9,16 +9,17 @@ import { inspect } from 'util'
 inspect.defaultOptions.depth = null
 
 const file = fs.promises.readFile
-let loaded:Validation
-const schemaSchema = () => {
+let loaded: Validation
+const schemaSchema = (): Validation => {
   if (!loaded) { loaded = loadJson(fs.readFileSync('./selfSchema.json', 'utf8')) }
   return loaded
 }
+
 test.afterEach(() => {
   // eslint-disable-next-line no-proto
   delete ({} as any).__proto__.b
 })
-const validSchema = (schema:Validation, t:ExecutionContext):Validation => {
+const validSchema = (schema: Validation, t: ExecutionContext): Validation => {
   const validated = validate(schemaSchema(), schema)
   t.is(validated.result, 'pass', JSON.stringify(validated, null, 2) +
         '\n\nInvalid Schema\n\n')
@@ -26,25 +27,25 @@ const validSchema = (schema:Validation, t:ExecutionContext):Validation => {
   return schema
 }
 
-const invalidSchema = (schema:any, t:ExecutionContext):Validation => {
+const invalidSchema = (schema: any, t: ExecutionContext): Validation => {
   const validated = validate(schemaSchema(), schema)
   t.is(validated.result, 'fail', JSON.stringify(validated, null, 2) +
         '\n\nValid Schema, expected invalid\n\n')
   return schema
 }
 
-const valid = (schema:Validation, data:any, t:ExecutionContext) => {
+const valid = (schema: Validation, data: any, t: ExecutionContext): void => {
   const dataValid = validate(validSchema(schema, t), data)
   t.is(dataValid.result, 'pass', JSON.stringify(dataValid, null, 2) +
       '\n\nData validation failed, but it should have passed\n')
 }
 
-const invalid = (schema:Validation, data:any, t:ExecutionContext) => {
+const invalid = (schema: Validation, data: any, t: ExecutionContext): void => {
   const dataValid = validate(validSchema(schema, t), data)
   t.is(dataValid.result, 'fail', JSON.stringify(dataValid, null, 2) +
       '\n\nData validation passed, but it should have failed\n')
 }
-const loadAndAddTestsBasedOnJsonDefinitions = () => {
+const loadAndAddTestsBasedOnJsonDefinitions = (): void => {
   const testJsonFolder = './src/tests'
   const dirs = fs.readdirSync(testJsonFolder)
 
@@ -52,7 +53,7 @@ const loadAndAddTestsBasedOnJsonDefinitions = () => {
     if (x.endsWith('json')) {
       const file = fs.readFileSync(path.join(testJsonFolder, x), 'utf-8')
       const json = JSON.parse(file)
-      json.forEach((element:any, i:number) => {
+      json.forEach((element: any, i: number) => {
         const indexName = element.name ? ` ${element.name}` : json.length > 1 ? ` > ${i}` : ''
 
         if (element.invalidSchema) {
@@ -62,7 +63,7 @@ const loadAndAddTestsBasedOnJsonDefinitions = () => {
               invalidSchema(element.invalidSchema, t)
             })
           } else {
-            invalidData.forEach((z:any, j:number) => {
+            invalidData.forEach((z: any, j: number) => {
               test(`${x}${indexName} > invalid data > ${j}`, t => {
                 const schema = invalidSchema(element.invalidSchema, t)
                 if (element.throws) {
@@ -81,11 +82,11 @@ const loadAndAddTestsBasedOnJsonDefinitions = () => {
         if (element.schema) {
           const validData = element.validData || []
           const invalidData = element.invalidData || []
-          validData.forEach((z:any, j:number) => {
+          validData.forEach((z: any, j: number) => {
             test(`${x}${indexName} > valid data > ${j}`, (t) => valid(element.schema, z, t))
           })
 
-          invalidData.forEach((z:any, j:number) => {
+          invalidData.forEach((z: any, j: number) => {
             test(`${x}${indexName} > invalid data > ${j}`, (t) => invalid(element.schema, z, t))
           })
         }
@@ -122,8 +123,8 @@ test('Shows example schema working', async (t) => {
       country: 'USA'
     }
   }
-  t.is(validate(example, data)['result'], 'pass')
-  t.is(validate(example, { })['result'], 'fail')
+  t.is(validate(example, data).result, 'pass')
+  t.is(validate(example, { }).result, 'fail')
 
   t.deepEqual(validate(example, { }), {
     result: 'fail',
@@ -154,7 +155,7 @@ test('Can validate itself with itself', async (t) => {
   const example = loadJson(await file('./selfSchema.json', 'utf8'))
   const validated = validate(example, example)
   fs.writeFileSync('../test_out.json', JSON.stringify(validated, null, 2))
-  t.is(validated['result'], 'pass')
+  t.is(validated.result, 'pass')
 })
 
 test('Provides useful error description', (t) => {
@@ -167,7 +168,7 @@ test('Provides useful error description', (t) => {
   }, t)
   const result = validate(type, { num: 'abc' })
 
-  t.is(result['result'], 'fail')
+  t.is(result.result, 'fail')
 
   t.deepEqual(result.output, {
     num: { error: 'Value is not a number', value: 'abc' },
@@ -179,7 +180,7 @@ test('Provides useful error description', (t) => {
 
   const result2 = validate(type, { int: 123.3, str: [], bool: 'true', obj: {} })
 
-  t.is(result2['result'], 'fail')
+  t.is(result2.result, 'fail')
   t.deepEqual(result2.output, {
     num: { error: 'Value is not a number', value: undefined },
     int: { error: 'Value is not an integer ', value: 123.3 },
@@ -198,7 +199,7 @@ test('Uses null to signal that there is no error for a given property', (t) => {
   }, t)
   const result = validate(type, { obj: { member: false, nested: { inside: 'hello' } } })
 
-  t.is(result['result'], 'pass')
+  t.is(result.result, 'pass')
   t.deepEqual(result.output, {
     obj: {
       member: null,
@@ -230,7 +231,7 @@ test('Protects against prototype injection on class', (t) => {
   const input: any = new Test1(4)
   // eslint-disable-next-line no-proto
   input.__proto__.b = 3
-  const result:any = validate(schema, input)
-  t.is(result['output']?.a, null)
+  const result: any = validate(schema, input)
+  t.is(result.output?.a, null)
   t.is(result.output.b.error, 'Did not match any from the listed types')
 })
