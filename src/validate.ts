@@ -267,7 +267,7 @@ const simpleValidation = (type: SimpleTypes, value: any): SimpleValidation => {
 }
 
 const toResult = (res: SimpleValidation, value: InputTypes): ValidationResult =>
-  ({ result: res === null ? 'pass' : 'fail', output: res === null ? res : { error: res, value } })
+  ({ result: res ? 'fail' : 'pass', output: res ? { error: res, value } : null })
 
 const validateRecursive = (
   typeIn: Validation,
