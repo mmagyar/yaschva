@@ -216,9 +216,9 @@ ValidationResult => {
   return { result: fail ? 'fail' : 'pass', output }
 }
 
-const validateKeyOf = (value: InputTypes, type: KeyOfType, customTypes: Custom):
+const validateKeyOf = (value: InputTypes, type: KeyOfType, allTypes: Custom):
 ValidationResult => {
-  const current = type.$keyOf.reduce((p, c) => p?.[c], customTypes.root)
+  const current = type.$keyOf.reduce((p, c) => p?.[c], allTypes.root)
   const values = Object.keys(current || {})
 
   if (values.length === 0) {
@@ -236,7 +236,7 @@ ValidationResult => {
   if (validated) return toResult(validated, value)
 
   if (type.valueType && current) {
-    const result = validateRecursive(type.valueType, current[value], customTypes)
+    const result = validateRecursive(type.valueType, current[value], allTypes)
     if (result.result === 'fail') { return toResult(`Key ${String(value)} did not have the required type`, value) }
   }
 
@@ -272,40 +272,40 @@ const toResult = (res: SimpleValidation, value: InputTypes): ValidationResult =>
 const validateRecursive = (
   typeIn: Validation,
   value: InputTypes,
-  customTypesIn: Custom): ValidationResult => {
+  fullValidationStructure: Custom): ValidationResult => {
   if (typeof typeIn === 'undefined') throw new Error('Type for validation cannot be undefined')
 
   let type: ValueTypes = typeIn
-  const customTypes: Custom = customTypesIn
+  const allTypes: Custom = fullValidationStructure
   if (isTypeDefValidation(typeIn)) {
-    customTypes.custom = typeIn.$types
+    allTypes.custom = typeIn.$types
     type = { ...typeIn }
     delete type.$types
   }
 
-  while (isSimpleType(type) && Boolean(customTypes.custom[type])) {
-    type = customTypes.custom[type]
+  while (isSimpleType(type) && Boolean(allTypes.custom[type])) {
+    type = allTypes.custom[type]
   }
 
   if (isSimpleType(type)) { return toResult(simpleValidation(type, value), value) }
 
-  if (Array.isArray(type)) { return validateOneOf(value, type, customTypes) }
+  if (Array.isArray(type)) { return validateOneOf(value, type, allTypes) }
 
-  if (isArray(type)) { return validateArray(value, type, customTypes) }
+  if (isArray(type)) { return validateArray(value, type, allTypes) }
 
   if (isEnum(type)) { return toResult(validateString(value, type.$enum), value) }
 
-  if (isKeyOf(type)) { return validateKeyOf(value, type, customTypes) }
+  if (isKeyOf(type)) { return validateKeyOf(value, type, allTypes) }
 
-  if (isMap(type)) { return validateMap(value, type, customTypes) }
+  if (isMap(type)) { return validateMap(value, type, allTypes) }
 
   if (isNumber(type)) { return toResult(validateNumberComplex(value, type), value) }
 
-  if (isMeta(type)) { return validateRecursive(type.$type, value, customTypes) }
+  if (isMeta(type)) { return validateRecursive(type.$type, value, allTypes) }
 
   if (isString(type)) { return toResult(validateStringObject(value, type), value) }
 
-  if (isAnd(type)) { return validateAnd(value, type, customTypes) }
+  if (isAnd(type)) { return validateAnd(value, type, allTypes) }
 
   if (isLiteral(type)) {
     return toResult(value === type.$literal ? '' : `Value did not match literal: ${String(type.$literal)}`, value)
@@ -319,7 +319,7 @@ const validateRecursive = (
     if (value.length > type.$tuple.length) {
       return toResult('Array larger then tuple', value)
     }
-    const results = type.$tuple.map((validation, index) => validateRecursive(validation, value[index], customTypes))
+    const results = type.$tuple.map((validation, index) => validateRecursive(validation, value[index], allTypes))
     const failed = results.some(x => x.result === 'fail')
     const output: ValidationOutputs = results.reduce((p: {[key: number]: ValidationOutputs}, c, i) => {
       p[i] = c.output
@@ -336,7 +336,7 @@ const validateRecursive = (
     }
   }
 
-  if (isObj(type)) { return validateObject(value, type, customTypes) }
+  if (isObj(type)) { return validateObject(value, type, allTypes) }
 
   throw new Error(`Unknown validator:${JSON.stringify(type)}`)
 }

@@ -36,6 +36,27 @@
     ]
   },
   {
+    "name": "keys are checked on the input data, not the validation 2",
+    "schema": {
+      "id": ["?", "string"],
+      "valueA": ["?", "number"],
+      "valueB": ["?" ,{ "$keyOf": [] }]
+    },
+    "validData": [
+      { "id": "a", "valueA": 4, "valueB": "id" },
+      { "id": "a", "valueB": "id" },
+      { "id": "a", "valueA": 4, "valueB": "valueA" },
+      { "id": "a", "valueA": 4, "valueB": "valueB" },
+      { },
+      {"valueB": "valueB"},
+      {"valueA": 5, "valueB": "valueB"}
+    ],
+    "invalidData": [
+      { "id": "a",  "valueB": "valueA" },
+      { "valueB": "id" }
+    ]
+  },
+  {
     "name": "can restrict a string to be one of the keys of the root object on the input",
     "schema": {
       "keyA": "number",

@@ -1,7 +1,7 @@
 import {
   Validation, isSimpleType, isArray, isEnum,
   isObj, isMap, isNumber, isMeta, isAnd,
-  isString, SimpleTypes, isTypeDefValidation, ValueTypes
+  isString, SimpleTypes, isTypeDefValidation, ValueTypes, isLiteral, isTuple, isKeyOf
 } from './validationTypes.js'
 import { combineValidationObjects } from './validate.js'
 import randexp from 'randexp'
@@ -136,7 +136,15 @@ const generateInternal = (
       .map(() => gen(arrayType.$array, true)).filter(x => typeof x !== 'undefined')
   }
 
+
   if (isEnum(type)) { return type.$enum[randomNumber(true, 0, type.$enum.length - 1)] }
+
+  if(isKeyOf(type)) {
+    const current = type.$keyOf.reduce((p:any, c) => p?.[c], rootType)
+    const keys = Object.keys(current)
+    //This does not work correctly, because the available keys depend on the input
+    return keys[randomNumber(true, 0, keys.length-1)]
+  }
 
   if (isObj(type)) {
     return Object.entries(type).reduce((prev: any, [key, value]) => {
@@ -224,6 +232,14 @@ const generateInternal = (
     }
 
     return gen(combined.pass)
+  }
+
+  if(isLiteral(type)) {
+    return type.$literal
+  }
+
+  if(isTuple(type)) {
+    return type.$tuple.map(x=> gen(x))
   }
 
   throw new Error('Unknown type: ' + JSON.stringify(typeIn, null, 2))

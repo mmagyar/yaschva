@@ -375,9 +375,10 @@ const loadAndAddTestsBasedOnJsonDefinitions = (): void => {
         if (element.schema) {
           const validData = element.validData || []
           const invalidData = element.invalidData || []
-          test.skip(`${x}${indexName} > generated data`, (t) => {
+          test(`${x}${indexName} > generated data`, (t) => {
             const generated = generate(element.schema)
-            t.is(validate(element.schema, generated).result, 'pass')
+            const validated = validate(element.schema, generated)
+            t.is(validated.result, 'pass',JSON.stringify([generated, validated.output],null,2))
             
           })
           
