@@ -1,5 +1,5 @@
 import { Validation } from './validationTypes.js'
-import { generate, randomNumber } from './generate.js'
+import { generate, keyOfPaths, randomNumber } from './generate.js'
 import { loadJson, validate } from './validate.js'
 import fs from 'fs'
 import { inspect } from 'util'
@@ -59,7 +59,7 @@ test('Generates on of multiple types', (t) => {
   }
   const result = generate(schema)
   t.true(typeof result.stringOrNumber === 'string' ||
-      typeof result.stringOrNumber === 'number')
+    typeof result.stringOrNumber === 'number')
   t.true(result.optionalString === undefined || typeof result.optionalString === 'string')
   t.is(validate(schema, result).result, 'pass')
 })
@@ -156,7 +156,7 @@ test('Generates extended string', (t) => {
   t.true(typeof result2 === 'string')
   t.true(result2.length <= 33)
 
-  t.is(typeof generate({ $string: { } }), 'string')
+  t.is(typeof generate({ $string: {} }), 'string')
 })
 
 test('Throws on unknown type', (t) => {
@@ -375,15 +375,18 @@ const loadAndAddTestsBasedOnJsonDefinitions = (): void => {
         if (element.schema) {
           const validData = element.validData || []
           const invalidData = element.invalidData || []
-          test(`${x}${indexName} > generated data`, (t) => {
+         if(element.name === "Keys specified deeper than the 2 levels are only checked at runtime (for now)") {
+           return; //This is a temporary mesaure. It shows and invalid schema that cannot be checked without running a validation through it.
+         }
+         for(let i =0; i < 1; i++)   test(`${x}${indexName} > generated data > ${i}`, (t) => {
             const generated = generate(element.schema)
             const validated = validate(element.schema, generated)
-            t.is(validated.result, 'pass',JSON.stringify([generated, validated.output],null,2))
-            
+            t.is(validated.result, 'pass', JSON.stringify({ generated, validation: validated.output }, null, 2))
+
           })
-          
-          
-        }
+
+
+         }
       })
     }
   })

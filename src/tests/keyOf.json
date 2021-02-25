@@ -57,7 +57,7 @@
     ]
   },
   {
-    "name": "can restrict a string to be one of the keys of the root object on the input",
+    "name": "can restrict the keys of a map to be one of the keys of the root object on the input",
     "schema": {
       "keyA": "number",
       "keyB": "number",
@@ -74,7 +74,7 @@
     ]
   },
   {
-    "name": "can restrict a string to be one of the keys on an object under root on the input",
+    "name": "can restrict the keys of a map be one of the keys on an object under root on the input",
     "schema": {
       "keyA": { "x": "number", "y": ["?", "number"] },
       "keyB": "number",
@@ -99,7 +99,56 @@
     ]
   },
   {
-    "name": "Keys specified deeper than the 2 levels are only checked at runtime (for now",
+    "name" : "Can specify a keyof a map",
+    "schema": {
+      "refMap": {"$map":"string"},
+      "primaryElement": {"$keyOf": ["refMap"]}
+    },
+    "validData": [
+      {
+        "refMap": {"myKey":"it is","yourKey":"it isnt"},
+        "primaryElement": "yourKey"
+      }
+    ],
+    "invalidData": [
+      {
+        "refMap": {"myKey":"it is","yourKey":"it isnt"},
+        "primaryElement": "ourKey"
+      }
+    ]
+  },
+  {
+    "name": "Keys specified deeper than the 2 levels",
+    "schema": { 
+      "ourValue":{
+        "yourValue": {
+          "abc":"string",
+          "CBA":"number"
+        }
+      },
+      "myValue": { "$keyOf": ["ourValue", "yourValue"] } 
+    },
+    "validData": [
+      {
+        "ourValue": {
+          "yourValue":{"abc":"hello", "CBA":4 }
+        },
+        "myValue":"abc"
+      }
+    ],
+    "invalidData": [
+      "abc",
+      {
+        "ourValue": {
+          "yourValue":{"abc":"hello", "CBA":4 }
+        },
+        "myValue":"hello"
+      }
+    ]
+  },
+  {
+    "name": "Keys specified deeper than the 2 levels are only checked at runtime (for now)",
+    "description": "This schema should be invalid, but due to current limitations it's not possible to validate this on a schema level yet",
     "schema": { "myValue": { "$keyOf": ["myValue", "yourValue"] } },
     "validData": [],
     "invalidData": ["abc"]
