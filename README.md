@@ -145,6 +145,13 @@ JSON schema is very verbose,
 yaschva's schema is defined with both itself and in JSON schema.
 The JSON schema is about twice as long.
 
+### Why not generate schema from typescript types
+
+Typescript types are much more limited on what they can describe, then yaschva, 
+and sharing a schema directly is much more harder, than just sending a json document over.
+
+Although in the future a type to yaschva module may be developed, it may prove useful for migrating.
+
 ### How to use JSON schema definition when writing yaschva schema
 
 In your yaschva schema file you need to add a property in the root object called:
@@ -159,17 +166,11 @@ Note: the `$schema` property is not part of yaschva schema, and will be removed 
 What can be improved
 ====================
 
-Schema can not validate if the custom types are correct without actually running the validation
------------------------------------------------------------------------------------------------
-
-Right now, there is no way to define
-that a string must exist as a key of another object.
-
 Generating recursive Typescript type
 ------------------------------------
 
 This is not currently possible,
-because the type generator is designed to generate a single type,
+because the type generator is designed to generate a single,
 unnamed type, but to do it for recursive types,
 it must be named to enable recursion.
 The type generation needs to be reworked a bit for it to work.
@@ -184,13 +185,6 @@ that are currently not supports but would be helpful
 to implement, like:
 - Array to be unique set
 - Map to be a unique set
-- Tuple type
-- Require that a string is used as a key somewhere (maybe)
-
-Literal Types
--------------
-
-yeah, that
 
 Faster happy path validation
 ----------------------------

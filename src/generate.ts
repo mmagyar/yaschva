@@ -362,6 +362,7 @@ const generateInternal = (
   if (isString(type)) {
     if (type.$string.regex) {
       const types = Object.keys((rootType as any)?.$types || {})
+      //This regex denotes generating a custom type name, Special case for generating own schema
       if (type.$string.regex === '^\\$([a-zA-Z0-9_]{1,128})$' && types.length) {
         const i = randomNumber(true, 0, types.length)
         return types[i]

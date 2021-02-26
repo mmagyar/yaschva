@@ -121,6 +121,25 @@
     ]
   },
   {
+    "name": "Schema is invalid on unknown custom type that is nested",
+    "invalidSchema": { "outerObject" : {"innerObject": "$bigint"}},
+    "invalidData": [{}, null, "", 2]
+  },
+  {
+    "name": "Schema is invalid on unknown custom type that is nested deeper",
+    "invalidSchema": { "outerObject" : {"innerObject": {"core": "$bigint"}}},
+    "invalidData": [{}, null, "", 2]
+  },
+  {
+    "name": "Works with deeply nested custom type",
+    "schema": {
+      "$types":{"$bigint": "number"},
+      "outerObject" : {"innerObject": {"core": "$bigint"}}
+    },
+    "validData": [{"outerObject":{"innerObject": {"core": 4}}}],
+    "invalidData": [{}, null, "", 2]
+  },
+  {
     "name": "Throws on unknown custom type",
     "invalidSchema": "$bigFloat",
     "throws": "Unknown validator:\"$bigFloat\"",

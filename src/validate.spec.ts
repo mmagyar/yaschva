@@ -22,7 +22,7 @@ test.afterEach(() => {
 const validSchema = (schema: Validation, t: ExecutionContext): Validation => {
   const validated = validate(schemaSchema(), schema)
   t.is(validated.result, 'pass', JSON.stringify(validated, null, 2) +
-        '\n\nInvalid Schema\n\n')
+    '\n\nInvalid Schema\n\n')
 
   return schema
 }
@@ -30,20 +30,20 @@ const validSchema = (schema: Validation, t: ExecutionContext): Validation => {
 const invalidSchema = (schema: any, t: ExecutionContext): Validation => {
   const validated = validate(schemaSchema(), schema)
   t.is(validated.result, 'fail', JSON.stringify(validated, null, 2) +
-        '\n\nValid Schema, expected invalid\n\n')
+    '\n\nValid Schema, expected invalid\n\n')
   return schema
 }
 
 const valid = (schema: Validation, data: any, t: ExecutionContext): void => {
   const dataValid = validate(validSchema(schema, t), data)
   t.is(dataValid.result, 'pass', JSON.stringify(dataValid, null, 2) +
-      '\n\nData validation failed, but it should have passed\n')
+    '\n\nData validation failed, but it should have passed\n')
 }
 
 const invalid = (schema: Validation, data: any, t: ExecutionContext): void => {
   const dataValid = validate(validSchema(schema, t), data)
   t.is(dataValid.result, 'fail', JSON.stringify(dataValid, null, 2) +
-      '\n\nData validation passed, but it should have failed\n')
+    '\n\nData validation passed, but it should have failed\n')
 }
 
 const loadAndAddTestsBasedOnJsonDefinitions = (): void => {
@@ -90,6 +90,16 @@ const loadAndAddTestsBasedOnJsonDefinitions = (): void => {
           invalidData.forEach((z: any, j: number) => {
             test(`${x}${indexName} > invalid data > ${j}`, (t) => invalid(element.schema, z, t))
           })
+
+          if (!validData.length && !invalidData.length) {
+            test(`${x}${indexName} > invalid test`, (t) =>
+              t.fail("This test did not define a valid or invalid test data for a valid schema. Cannot run test."))
+          }
+        }
+
+        if (!element.schema && !element.invalidSchema) {
+          test(`${x}${indexName} > invalid test`, (t) => 
+            t.fail("This test did not define a schema or an invalidSchema. Cannot run test."))
         }
       })
     }
@@ -125,9 +135,9 @@ test('Shows example schema working', async (t) => {
     }
   }
   t.is(validate(example, data).result, 'pass')
-  t.is(validate(example, { }).result, 'fail')
+  t.is(validate(example, {}).result, 'fail')
 
-  t.deepEqual(validate(example, { }), {
+  t.deepEqual(validate(example, {}), {
     result: 'fail',
     output: {
       myString: { error: 'Value is not a string', value: undefined },
@@ -228,7 +238,7 @@ test('Throws on undefined', (t) => {
 test('Protects against prototype injection on class', (t) => {
   const schema = validSchema({ a: 'number', b: ['string', '?'] }, t)
   // eslint-disable-next-line no-useless-constructor
-  class Test1 { constructor (public readonly a: number) {} }
+  class Test1 { constructor(public readonly a: number) { } }
   const input: any = new Test1(4)
   // eslint-disable-next-line no-proto
   input.__proto__.b = 3

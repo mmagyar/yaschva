@@ -378,7 +378,9 @@ const loadAndAddTestsBasedOnJsonDefinitions = (): void => {
          if(element.name === "Keys specified deeper than the 2 levels are only checked at runtime (for now)") {
            return; //This is a temporary mesaure. It shows and invalid schema that cannot be checked without running a validation through it.
          }
-         for(let i =0; i < 1; i++)   test(`${x}${indexName} > generated data > ${i}`, (t) => {
+        
+         //Run each test 4 times due to the random nature of tests, all 4 should pass
+         for(let i =0; i < 4; i++)   test(`${x}${indexName} > generated data > ${i}`, (t) => {
             const generated = generate(element.schema)
             const validated = validate(element.schema, generated)
             t.is(validated.result, 'pass', JSON.stringify({ generated, validation: validated.output }, null, 2))

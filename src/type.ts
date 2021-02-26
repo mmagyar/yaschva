@@ -1,12 +1,12 @@
 import { combineValidationObjects } from './validate.js'
 import {
   Validation, isArray, isEnum, isObj,
-  isString, isMap, isNumber, isTypeDefValidation, ValueTypes, isMeta, isAnd
+  isString, isMap, isNumber, isTypeDefValidation, ValueTypes, isMeta, isAnd, isLiteral, isTuple, isKeyOf
 } from './validationTypes.js'
 
 const containsOptional = (input: Validation): boolean =>
   (Array.isArray(input) && input.some(y => y === '?')) ||
-   input === '?'
+  input === '?'
 
 const allOptional = (input: Validation): boolean =>
   Object.values(input).every(containsOptional)
@@ -31,7 +31,10 @@ const simpleTypes = (input: string): 'string' | 'boolean' | 'number' | 'null' | 
   }
 }
 export const validationToType = (input: ValueTypes): string => validationToTypeInternal(input, {})
-const validationToTypeInternal = (input: ValueTypes, typesIn: {[key: string]: Validation}): string => {
+
+const maxDepth = 32
+
+const validationToTypeInternal = (input: ValueTypes, typesIn: { [key: string]: Validation }, depth: number = 0): string => {
   let customTypes = typesIn
   let type: ValueTypes = input
   if (isTypeDefValidation(input)) {
@@ -40,12 +43,13 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: {[key: string]: Va
     delete type.$types
   }
 
-  const toType = (input: ValueTypes): string => validationToTypeInternal(input, customTypes)
-
+  const toType = (input: ValueTypes): string => validationToTypeInternal(input, customTypes, depth + 1)
+  if(depth > maxDepth) return "any" //Bail out with any for recursive types
   if (Array.isArray(type)) { return type.map(toType).join(' | ') }
 
   if (typeof type === 'string') {
     if (customTypes[type]) {
+
       return toType(customTypes[type])
     }
 
@@ -59,10 +63,10 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: {[key: string]: Va
   }
 
   if (isEnum(type) && Array.isArray(type.$enum)) { return type.$enum.map(x => `"${x}"`).join(' | ') }
-  if (isEnum(type)) { return '' /** TODO **/ }
+  if (isEnum(type)) { return '' /** invalid case i guess, why did a put it here?**/ }
 
   if (isObj(type)) {
-    const optionalPostfix = (value: Validation): ('?'|'') => containsOptional(value) ? '?' : ''
+    const optionalPostfix = (value: Validation): ('?' | '') => containsOptional(value) ? '?' : ''
 
     const obj = Object.entries(type)
       .map(([key, value]) => `${key.startsWith('\\$') ? key.slice(1) : key}${optionalPostfix(value)}: ${toType(value)}`)
@@ -93,6 +97,18 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: {[key: string]: Va
     }
 
     return toType(combined.pass)
+  }
+
+  if (isLiteral(type)) {
+    return `"${type.$literal}"`
+  }
+
+  if (isTuple(type)) {
+    return `[${type.$tuple.map(x => toType(x)).join(', ')}]`
+  }
+
+  if (isKeyOf(type)) {
+    return "string"
   }
 
   throw new Error(`UNSUPPORTED ${JSON.stringify(type, undefined, 2)}`)
