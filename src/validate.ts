@@ -218,7 +218,7 @@ ValidationResult => {
 
 const validateKeyOf = (value: InputTypes, type: KeyOfType, allTypes: Custom):
 ValidationResult => {
-  const current = type.$keyOf.reduce((p, c) => p?.[c], allTypes.root)
+  const current = type.$keyOf.reduce((p, c) => p[c], allTypes.root)
   const values = Object.keys(current || {})
 
   if (values.length === 0) {
