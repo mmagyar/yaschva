@@ -1,5 +1,5 @@
 import { Validation } from './validationTypes.js'
-import { generate, keyOfPaths, randomNumber } from './generate.js'
+import { generate, randomNumber } from './generate.js'
 import { loadJson, validate } from './validate.js'
 import fs from 'fs'
 import { inspect } from 'util'
@@ -373,22 +373,22 @@ const loadAndAddTestsBasedOnJsonDefinitions = (): void => {
         const indexName = element.name ? ` ${element.name}` : json.length > 1 ? ` > ${i}` : ''
 
         if (element.schema) {
-          const validData = element.validData || []
-          const invalidData = element.invalidData || []
-         if(element.name === "Keys specified deeper than the 2 levels are only checked at runtime (for now)") {
-           return; //This is a temporary mesaure. It shows and invalid schema that cannot be checked without running a validation through it.
-         }
-        
-         //Run each test 4 times due to the random nature of tests, all 4 should pass
-         for(let i =0; i < 4; i++)   test(`${x}${indexName} > generated data > ${i}`, (t) => {
-            const generated = generate(element.schema)
-            const validated = validate(element.schema, generated)
-            t.is(validated.result, 'pass', JSON.stringify({ generated, validation: validated.output }, null, 2))
+          // const validData = element.validData || []
+          // const invalidData = element.invalidData || []
+          if (element.name === 'Keys specified deeper than the 2 levels are only checked at runtime (for now)') {
+            // TODO
+            return // This is a temporary mesaure. It shows and invalid schema that cannot be checked without running a validation through it.
+          }
 
-          })
-
-
-         }
+          // Run each test 4 times due to the random nature of tests, all 4 should pass
+          for (let i = 0; i < 4; i++) {
+            test(`${x}${indexName} > generated data > ${i}`, (t) => {
+              const generated = generate(element.schema)
+              const validated = validate(element.schema, generated)
+              t.is(validated.result, 'pass', JSON.stringify({ generated, validation: validated.output }, null, 2))
+            })
+          }
+        }
       })
     }
   })

@@ -27,7 +27,7 @@ const failValidation = (error: string, value: any, output?: ValidationOutputs): 
   }
 }
 
-export const combineValidationObjects = <T>(type: AndType, customTypes: Custom, onError: (input: any) => T): {result: 'error', error: T} | {pass: ObjectType, result? : undefined} => {
+export const combineValidationObjects = <T>(type: AndType, customTypes: Custom, onError: (input: any) => T): {result: 'error', error: T} | {pass: ObjectType, result?: undefined} => {
   const resolveMeta = (tpe: Validation): Validation => {
     if (typeof tpe === 'string') { return resolveMeta(customTypes.custom[tpe]) }
     if (isMeta(tpe)) return resolveMeta(tpe.$type)

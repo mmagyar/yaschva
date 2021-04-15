@@ -5,7 +5,6 @@ import {
 } from './validationTypes.js'
 import { combineValidationObjects } from './validate.js'
 import randexp from 'randexp'
-import { deepCopy, map } from 'microtil'
 interface Options {
   arrayMin: number
   arrayMax: number
@@ -85,7 +84,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
   const generated1stPass = generateInternal(type, { ...defaultOptions, ...options }, {}, 0, type)
   const keyOf = keyOfPaths(type, {}, type)
   keyOf?.forEach(x => {
-    if (!x.keyOff || !x.path) return;
+    if (!x.keyOff || !x.path) return
 
     const options = Object.keys(x.keyOff.reduce((p, c) => {
       return p[c]
@@ -95,26 +94,23 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     for (const el of x.path) {
       if (typeof previous[el] === 'string') {
         if (!options.find(x => x === previous[el])) {
-          previous[el] = options[randomNumber(true,0, options.length -1)]
+          previous[el] = options[randomNumber(true, 0, options.length - 1)]
         }
       } else {
         previous = previous[el]
       }
-
     }
 
     if (x.where === 'map') {
       for (const key of Object.keys(previous)) {
         if (!options.find(x => x === key)) {
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete previous[key]
         }
       }
     }
-
-
   })
   return generated1stPass
-
 }
 
 export const keyOfPaths = (
@@ -122,9 +118,8 @@ export const keyOfPaths = (
   typesIn: { [key: string]: Validation },
   rootType: Validation,
   depth: number = 0,
-  path: string[] = [],
-): Array<{ keyOff: string[], path: string[], depth: number, valueType: any, where?: "map" }> | undefined => {
-
+  path: string[] = []
+): Array<{ keyOff: string[], path: string[], depth: number, valueType: any, where?: 'map' }> | undefined => {
   if (depth >= 32) {
     return [{ keyOff: [], path: [], depth: 999999, valueType: undefined }]
   }
@@ -163,11 +158,10 @@ export const keyOfPaths = (
 
   if (isEnum(type)) { return undefined }
 
-
   if (isKeyOf(type)) {
     const current = type.$keyOf.reduce((p: any, c) => p?.[c], rootType)
-    if(!current) return undefined
-    const keys = Object.keys(current)
+    if (!current) return undefined
+    // const keys = Object.keys(current)
     return [{ keyOff: type.$keyOf, path: path, depth, valueType: type.valueType }]
   }
 
@@ -191,14 +185,14 @@ export const keyOfPaths = (
       return !!input?.$keyOf
     }
 
-    let add = []
+    const add = []
     const keyType = type.key
     if (isKeyType(keyType)) {
-      add.push({ keyOff: keyType.$keyOf, path: path, depth, valueType: keyType.valueType, where: "map" })
+      add.push({ keyOff: keyType.$keyOf, path: path, depth, valueType: keyType.valueType, where: 'map' })
     }
 
     const specific = Object.entries(mapType.keySpecificType ?? {}).map(([key, value]) => gen(value, key))
-    const other = gen(mapType.$map, "*")
+    const other = gen(mapType.$map, '*')
     const mapResult = specific.concat(other).concat(add).filter(x => x !== undefined)
     if (mapResult.length) return mapResult
     return undefined
@@ -228,8 +222,6 @@ export const keyOfPaths = (
 
   throw new Error('Unknown type: ' + JSON.stringify(typeIn, null, 2))
 }
-
-
 
 const generateInternal = (
   typeIn: Validation,
@@ -284,14 +276,13 @@ const generateInternal = (
       .map(() => gen(arrayType.$array, true)).filter(x => typeof x !== 'undefined')
   }
 
-
   if (isEnum(type)) { return type.$enum[randomNumber(true, 0, type.$enum.length - 1)] }
 
   if (isKeyOf(type)) {
     const current = type.$keyOf.reduce((p: any, c) => p?.[c], rootType)
-    if(!current) return ""
+    if (!current) return ''
     const keys = Object.keys(current)
-    //This does not work correctly, because the available keys depend on the input
+    // This does not work correctly, because the available keys depend on the input
     return keys[randomNumber(true, 0, keys.length - 1)]
   }
 
@@ -362,7 +353,7 @@ const generateInternal = (
   if (isString(type)) {
     if (type.$string.regex) {
       const types = Object.keys((rootType as any)?.$types || {})
-      //This regex denotes generating a custom type name, Special case for generating own schema
+      // This regex denotes generating a custom type name, Special case for generating own schema
       if (type.$string.regex === '^\\$([a-zA-Z0-9_]{1,128})$' && types.length) {
         const i = randomNumber(true, 0, types.length)
         return types[i]

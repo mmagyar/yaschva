@@ -93,13 +93,13 @@ const loadAndAddTestsBasedOnJsonDefinitions = (): void => {
 
           if (!validData.length && !invalidData.length) {
             test(`${x}${indexName} > invalid test`, (t) =>
-              t.fail("This test did not define a valid or invalid test data for a valid schema. Cannot run test."))
+              t.fail('This test did not define a valid or invalid test data for a valid schema. Cannot run test.'))
           }
         }
 
         if (!element.schema && !element.invalidSchema) {
-          test(`${x}${indexName} > invalid test`, (t) => 
-            t.fail("This test did not define a schema or an invalidSchema. Cannot run test."))
+          test(`${x}${indexName} > invalid test`, (t) =>
+            t.fail('This test did not define a schema or an invalidSchema. Cannot run test.'))
         }
       })
     }
@@ -238,7 +238,7 @@ test('Throws on undefined', (t) => {
 test('Protects against prototype injection on class', (t) => {
   const schema = validSchema({ a: 'number', b: ['string', '?'] }, t)
   // eslint-disable-next-line no-useless-constructor
-  class Test1 { constructor(public readonly a: number) { } }
+  class Test1 { constructor (public readonly a: number) { } }
   const input: any = new Test1(4)
   // eslint-disable-next-line no-proto
   input.__proto__.b = 3

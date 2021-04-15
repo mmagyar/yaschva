@@ -44,12 +44,11 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: { [key: string]: V
   }
 
   const toType = (input: ValueTypes): string => validationToTypeInternal(input, customTypes, depth + 1)
-  if(depth > maxDepth) return "any" //Bail out with any for recursive types
+  if (depth > maxDepth) return 'any' // Bail out with any for recursive types
   if (Array.isArray(type)) { return type.map(toType).join(' | ') }
 
   if (typeof type === 'string') {
     if (customTypes[type]) {
-
       return toType(customTypes[type])
     }
 
@@ -59,7 +58,8 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: { [key: string]: V
   if (isArray(type)) {
     const typeRet = toType(type.$array)
     return (Array.isArray(type.$array) && type.$array.length > 1) || typeRet.includes('|')
-      ? `(${typeRet})[]` : `${typeRet}[]`
+      ? `(${typeRet})[]`
+      : `${typeRet}[]`
   }
 
   if (isEnum(type) && Array.isArray(type.$enum)) { return type.$enum.map(x => `"${x}"`).join(' | ') }
@@ -108,7 +108,7 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: { [key: string]: V
   }
 
   if (isKeyOf(type)) {
-    return "string"
+    return 'string'
   }
 
   throw new Error(`UNSUPPORTED ${JSON.stringify(type, undefined, 2)}`)

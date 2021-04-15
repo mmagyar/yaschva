@@ -114,32 +114,32 @@ test('Root can be a meta type', (t) => {
   t.is(validated, 'string[]')
 })
 
-test('Generate literal type', (t)=> {
-  const schema = {literalProp: {$literal: "doge"}}
+test('Generate literal type', (t) => {
+  const schema = { literalProp: { $literal: 'doge' } }
   const type = validationToType(schema)
-  t.is( type, "{ literalProp: \"doge\" }")
+  t.is(type, '{ literalProp: "doge" }')
 })
 
-test('Generate tuple type', (t)=> {
-  const schema: Validation = {tupleProp: {$tuple: ["string", "number", {"innerObject": "number"}]}}
+test('Generate tuple type', (t) => {
+  const schema: Validation = { tupleProp: { $tuple: ['string', 'number', { innerObject: 'number' }] } }
   const type = validationToType(schema)
-  t.is( type, "{ tupleProp: [string, number, { innerObject: number }] }")
+  t.is(type, '{ tupleProp: [string, number, { innerObject: number }] }')
 })
 
-//This should change to using actual keyOf, if possible
-test('Generate keyof type as string', (t)=> {
-  const schema: Validation = {keyOfProp: {$keyOf: "string"}}
+// This should change to using actual keyOf, if possible
+test('Generate keyof type as string', (t) => {
+  const schema: Validation = { keyOfProp: { $keyOf: 'string' } }
   const type = validationToType(schema)
-  t.is( type, "{ keyOfProp: string }")
+  t.is(type, '{ keyOfProp: string }')
 })
 
 test('recursive data structre will devolve into any after a pre set depth', (t) => {
- const schema:Validation = {
+  const schema: Validation = {
     $types: { $tree: { value: 'string', left: ['?', '$tree'], right: ['?', '$tree'] } },
     root: '$tree'
   }
   const type = validationToType(schema)
-  t.is(typeof type, "string")
+  t.is(typeof type, 'string')
 })
 
 test('Can validate to multiple custom types with $and', (t) => {
@@ -177,19 +177,19 @@ const loadAndAddTestsBasedOnJsonDefinitions = (): void => {
         const indexName = element.name ? ` ${element.name}` : json.length > 1 ? ` > ${i}` : ''
 
         if (element.schema) {
-          const validData = element.validData || []
-          const invalidData = element.invalidData || []
-         if(element.name === "Keys specified deeper than the 2 levels are only checked at runtime (for now)") {
-           return; //This is a temporary mesaure. It shows and invalid schema that cannot be checked without running a validation through it.
-         }
-         for(let i =0; i < 1; i++)   test(`${x}${indexName} > type generation > ${i}`, (t) => {
-            const validated = validationToType(element.schema)
-            t.is(typeof validated, 'string', JSON.stringify(validated, null, 2))
-
-          })
-
-
-         }
+          // TODO
+          // const validData = element.validData || []
+          // const invalidData = element.invalidData || []
+          if (element.name === 'Keys specified deeper than the 2 levels are only checked at runtime (for now)') {
+            return // This is a temporary mesaure. It shows and invalid schema that cannot be checked without running a validation through it.
+          }
+          for (let i = 0; i < 1; i++) {
+            test(`${x}${indexName} > type generation > ${i}`, (t) => {
+              const validated = validationToType(element.schema)
+              t.is(typeof validated, 'string', JSON.stringify(validated, null, 2))
+            })
+          }
+        }
       })
     }
   })
