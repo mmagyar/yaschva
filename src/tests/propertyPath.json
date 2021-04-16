@@ -1,0 +1,151 @@
+[
+  {
+    "schema": {
+      "topObject": {
+        "aProperty": "string",
+        "bProperty": "number"
+      },
+      "path": {
+        "$propertyPath": {}
+      }
+    },
+    "validData": [
+      {
+        "topObject": {
+          "aProperty": "hello",
+          "bProperty": 4
+        },
+        "path": []
+      },
+      {
+        "topObject": {
+          "aProperty": "hello",
+          "bProperty": 4
+        },
+        "path": [
+          "topObject"
+        ]
+      },
+      {
+        "topObject": {
+          "aProperty": "hello",
+          "bProperty": 4
+        },
+        "path": [
+          "topObject",
+          "aProperty"
+        ]
+      },
+      {
+        "topObject": {
+          "aProperty": "hello",
+          "bProperty": 4
+        },
+        "path": [
+          "topObject",
+          "bProperty"
+        ]
+      }
+    ],
+    "invalidData": [
+      {
+        "path": [
+          "aProperty"
+        ]
+      },
+      {
+        "topObject": {
+          "aProperty": "hello",
+          "bProperty": 4
+        },
+        "path": [
+          "aProperty"
+        ]
+      },
+      {
+        "topObject": {
+          "aProperty": "hello",
+          "bProperty": 4
+        },
+        "path": [
+          "topObject",
+          "aProperty",
+          "hello"
+        ]
+      }
+    ]
+  },
+  {
+    "schema": {
+      "topObject": {
+        "aProperty": "string",
+        "bProperty": [
+          "?",
+          "number"
+        ],
+        "xProp": [
+          "?",
+          {
+            "zProp": "string",
+            "yProp": {
+              "qProp": "number"
+            }
+          }
+        ]
+      },
+      "path": {
+        "$propertyPath": {}
+      }
+    },
+    "validData": [
+      {
+        "topObject": {
+          "aProperty": "hello",
+          "bProperty": 4
+        },
+        "path": [
+          "topObject",
+          "bProperty"
+        ]
+      },
+      {
+        "topObject": {
+          "aProperty": "hello",
+          "bProperty": 4,
+          "xProp": {
+            "zProp": "string",
+            "yProp": {
+              "qProp": 3
+            }
+          }
+        },
+        "path": [
+          "topObject",
+          "xProp",
+          "yProp",
+          "qProp"
+        ]
+      }
+    ],
+    "invalidData": [
+      {
+        "topObject": {
+          "aProperty": "hello"
+        },
+        "path": [
+          "topObject",
+          "bProperty"
+        ]
+      },
+      {
+        "topObject": {
+          "aProperty": "you"
+        },
+        "path": [
+          "topObject",
+          "xProp"
+        ]
+      }
+    ]
+  }
+]

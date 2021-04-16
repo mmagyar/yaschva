@@ -30,6 +30,12 @@ export declare type NumberType = TypeMeta & {
   postfix?: string
   $number: { min?: number, max?: number, integer?: boolean }
 }
+export type PropertyPathType = {
+  $propertyPath : {
+    maxDepth?:number
+  }
+}
+
 export declare type MetaType = TypeMeta & { $type: ValueTypes }
 
 export type ValueType =
@@ -45,6 +51,7 @@ export type ValueType =
   | KeyOfType
   | LiteralType
   | TupleType
+  | PropertyPathType
 
 export const isSimpleType = (tbd: any): tbd is SimpleTypes => typeof tbd === 'string'
 export const isArray = (tbd: any): tbd is ArrayType => tbd.$array
@@ -60,3 +67,4 @@ export const isAnd = (tbd: any): tbd is AndType => tbd.$and
 export const isKeyOf = (tbd: any): tbd is KeyOfType => tbd.$keyOf
 export const isLiteral = (tbd: any): tbd is LiteralType => tbd.$literal
 export const isTuple = (tbd: any): tbd is TupleType => tbd.$tuple
+export const isPropertyPath = (tbd: any): tbd is PropertyPathType => tbd.$propertyPath

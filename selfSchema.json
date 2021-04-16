@@ -79,6 +79,9 @@
         { "$array": "string", "minLength": 2 }
       ]
     },
+    "$propertyPath": {
+      "\\$propertyPath": {}
+    },
     "$literalType": { "\\$literal": ["string", "number", "null"] },
     "$andType": {
       "\\$and": {
@@ -99,7 +102,8 @@
       "$literalType",
       "$andType",
       "$customType",
-      "$tupleType"
+      "$tupleType",
+      "$propertyPath"
     ],
     "$valueTypes": [{ "$array": "$valueType", "minLength": 1 }, "$valueType"],
     "$validation": [

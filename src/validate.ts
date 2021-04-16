@@ -1,7 +1,7 @@
 import {
   Validation, StringType, ArrayType, ObjectType, SimpleTypes,
   isSimpleType, isArray, isEnum, isObj,
-  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType, isKeyOf, isLiteral, KeyOfType, isTuple
+  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType, isKeyOf, isLiteral, KeyOfType, isTuple, isPropertyPath, PropertyPathType
 } from './validationTypes.js'
 
 interface Custom {custom: {[key: string]: ValueTypes}, root: any, type?: Validation}
@@ -243,6 +243,23 @@ ValidationResult => {
   return toResult(validated, value)
 }
 
+const validatePropertyPath = (value: InputTypes, type: PropertyPathType, allTypes: Custom): ValidationResult => {
+  const dataValidation = validate({ $array: "string" }, value)
+  if (dataValidation.result === "fail") return dataValidation;
+  let current = allTypes.root;
+  let valuesSoFar = []
+  for (const key of value) {
+    if (!Object.prototype.hasOwnProperty.call(current, key)) {  
+      return toResult(`There is no key called ${key} on ${valuesSoFar.join(':')}`, value)
+    }
+    current = current[key];
+    valuesSoFar.push(key)
+  }
+
+
+  return { result: "pass", output: [] }
+}
+
 const validateAnd = (value: InputTypes, validator: AndType, customTypes: Custom):
 ValidationResult => {
   const onError = (resolvedType: any): ValidationResult =>
@@ -290,6 +307,8 @@ const validateRecursive = (
   if (isSimpleType(type)) { return toResult(simpleValidation(type, value), value) }
 
   if (Array.isArray(type)) { return validateOneOf(value, type, allTypes) }
+
+  if (isPropertyPath(type)) { return validatePropertyPath(value, type, allTypes) }
 
   if (isArray(type)) { return validateArray(value, type, allTypes) }
 
