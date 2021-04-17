@@ -27,13 +27,10 @@ export type StringType = TypeMeta & {
   }
 }
 export declare type NumberType = TypeMeta & {
-  postfix?: string
   $number: { min?: number, max?: number, integer?: boolean }
 }
-export type PropertyPathType = {
-  $propertyPath : {
-    maxDepth?:number
-  }
+export interface PropertyPathType {
+  $propertyPath: { }
 }
 
 export declare type MetaType = TypeMeta & { $type: ValueTypes }

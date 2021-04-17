@@ -1,7 +1,7 @@
 import {
   Validation, isSimpleType, isArray, isEnum,
   isObj, isMap, isNumber, isMeta, isAnd,
-  isString, SimpleTypes, isTypeDefValidation, ValueTypes, isLiteral, isTuple, isKeyOf, KeyOfType
+  isString, SimpleTypes, isTypeDefValidation, ValueTypes, isLiteral, isTuple, isKeyOf, KeyOfType, isPropertyPath
 } from './validationTypes.js'
 import { combineValidationObjects } from './validate.js'
 import randexp from 'randexp'
@@ -83,8 +83,51 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
 
   const generated1stPass = generateInternal(type, { ...defaultOptions, ...options }, {}, 0, type)
   const keyOf = keyOfPaths(type, {}, type)
+
+  /**
+   * Makes sure that the generated property path is valid to not only
+   * the property path, but the actual data as well.
+   * This is needed, because generating the property path from the schema
+   * may include optional values, that are not in the final generated data.
+   *
+   **/
+  const res = keyOf?.filter(x => x.isPropertyPath && x.path.length).map(x => x.path)
+  if (res?.length) {
+    res?.forEach(x => {
+      const propertyPath = x.reduce((p, c) => {
+        return p[c]
+      }, generated1stPass)
+      console.log(x, propertyPath)
+
+      let previous = generated1stPass
+      const newPath = []
+      for (const el of propertyPath) {
+        let current
+        if (previous && typeof previous === 'object') {
+          current = previous[el]
+        }
+
+        if (current) {
+          newPath.push(el)
+          previous = current
+        } else {
+          break
+        }
+      }
+      while (propertyPath.length > 0) {
+        propertyPath.pop()
+      }
+      newPath.forEach(x => propertyPath.push(x))
+    })
+  }
+
+  /**
+   * Makes sure that keyOf property only allows values that actually exist,
+   * This is needed since the keyOf properties may be generated before
+   * the whole data structure is done in the first pass.
+   */
   keyOf?.forEach(x => {
-    if (!x.keyOff || !x.path) return
+    if (!x.keyOff || !x.path || x.isPropertyPath) return
 
     const options = Object.keys(x.keyOff.reduce((p, c) => {
       return p[c]
@@ -100,7 +143,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
         previous = previous[el]
       }
     }
-
+    // This is used for scenarios when the keys of a map depend on another object
     if (x.where === 'map') {
       for (const key of Object.keys(previous)) {
         if (!options.find(x => x === key)) {
@@ -113,13 +156,74 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
   return generated1stPass
 }
 
+/**
+ * Generate a random, but valid property path from schema
+ */
+export const generatePropertyPath = (
+  typeIn: Validation,
+  typesIn: { [key: string]: Validation } = {},
+  depth: number = 0,
+  path: string[] = []
+): string[] => {
+  if (depth >= 32) {
+    return path
+  }
+
+  let customTypes = typesIn
+  let type: ValueTypes = typeIn
+  if (isTypeDefValidation(typeIn)) {
+    customTypes = typeIn.$types
+    type = { ...typeIn }
+    delete type.$types
+  }
+
+  const gen = (type: Validation, pathAdd?: string): string[] =>
+    generatePropertyPath(type, customTypes, depth + 1, pathAdd ? path.concat([pathAdd]) : path)
+
+  if (isSimpleType(type)) {
+    if (customTypes[type]) {
+      return gen(customTypes[type])
+    }
+
+    return path
+  }
+
+  if (Array.isArray(type)) {
+    const objectType = type.find(x => isObj(x))
+    if (!objectType) return path
+    return gen(objectType)
+  }
+
+  if (isObj(type)) {
+    const keys = Object.keys(type)
+    const randomIndex = randomNumber(true, 0, keys.length)
+    if (randomIndex === keys.length) {
+      return path
+    }
+    return gen(type[keys[randomIndex]], keys[randomIndex])
+  }
+
+  return path
+}
+
+interface KeyOffSearch {
+  keyOff?: string[]
+  path: string[]
+  depth: number
+  valueType: any
+  where?: 'map'
+  isPropertyPath?: boolean
+}
+/**
+ * This method is used to generate a valid keyOf property in the second phase of the generation
+ */
 export const keyOfPaths = (
   typeIn: Validation,
   typesIn: { [key: string]: Validation },
   rootType: Validation,
   depth: number = 0,
   path: string[] = []
-): Array<{ keyOff: string[], path: string[], depth: number, valueType: any, where?: 'map' }> | undefined => {
+): KeyOffSearch[] | undefined => {
   if (depth >= 32) {
     return [{ keyOff: [], path: [], depth: 999999, valueType: undefined }]
   }
@@ -161,8 +265,11 @@ export const keyOfPaths = (
   if (isKeyOf(type)) {
     const current = type.$keyOf.reduce((p: any, c) => p?.[c], rootType)
     if (!current) return undefined
-    // const keys = Object.keys(current)
     return [{ keyOff: type.$keyOf, path: path, depth, valueType: type.valueType }]
+  }
+
+  if (isPropertyPath(type)) {
+    return [{ path: path, depth, valueType: 'any', isPropertyPath: true }]
   }
 
   if (isObj(type)) {
@@ -282,8 +389,13 @@ const generateInternal = (
     const current = type.$keyOf.reduce((p: any, c) => p?.[c], rootType)
     if (!current) return ''
     const keys = Object.keys(current)
-    // This does not work correctly, because the available keys depend on the input
+    // This does not work correctly, because the available keys depend on the input (and they might be optional)
+    // It is overriden in the second pass done in the main generate method
     return keys[randomNumber(true, 0, keys.length - 1)]
+  }
+
+  if (isPropertyPath(type)) {
+    return generatePropertyPath(rootType)
   }
 
   if (isObj(type)) {

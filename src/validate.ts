@@ -244,20 +244,19 @@ ValidationResult => {
 }
 
 const validatePropertyPath = (value: InputTypes, type: PropertyPathType, allTypes: Custom): ValidationResult => {
-  const dataValidation = validate({ $array: "string" }, value)
-  if (dataValidation.result === "fail") return dataValidation;
-  let current = allTypes.root;
-  let valuesSoFar = []
+  const dataValidation = validate({ $array: 'string' }, value)
+  if (dataValidation.result === 'fail') return dataValidation
+  let current = allTypes.root
+  const valuesSoFar = []
   for (const key of value) {
-    if (!Object.prototype.hasOwnProperty.call(current, key)) {  
+    if (!Object.prototype.hasOwnProperty.call(current, key)) {
       return toResult(`There is no key called ${key} on ${valuesSoFar.join(':')}`, value)
     }
-    current = current[key];
+    current = current[key]
     valuesSoFar.push(key)
   }
 
-
-  return { result: "pass", output: [] }
+  return { result: 'pass', output: [] }
 }
 
 const validateAnd = (value: InputTypes, validator: AndType, customTypes: Custom):

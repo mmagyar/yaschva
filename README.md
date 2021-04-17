@@ -221,12 +221,14 @@ One solution should be to return an error report,
 based on the input data, thus changing the error's
 direction from top to bottom first.
 
-Validate more then the root and first child properties at schema level in keyOf
--------------------------------------------------------------------------------
+Ordering the error messages from "most likely error"
+to "least likely error" would improve the 
+readibiltiy as well. This could be done by adding
+a depth paramter, where the validation that goes the 
+deepest is the most likely error.
 
-Right now, the implementation only has limited capability at self checking.
-To solve this, keyOf may need to evolve into a `propertyPath`
-or something similar
 
 Decisions, Decisions, Decisions for the future
 ==============================================
+
+

@@ -1,7 +1,7 @@
 import { combineValidationObjects } from './validate.js'
 import {
   Validation, isArray, isEnum, isObj,
-  isString, isMap, isNumber, isTypeDefValidation, ValueTypes, isMeta, isAnd, isLiteral, isTuple, isKeyOf
+  isString, isMap, isNumber, isTypeDefValidation, ValueTypes, isMeta, isAnd, isLiteral, isTuple, isKeyOf, isPropertyPath
 } from './validationTypes.js'
 
 const containsOptional = (input: Validation): boolean =>
@@ -107,6 +107,10 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: { [key: string]: V
   }
 
   if (isKeyOf(type)) {
+    return 'string'
+  }
+
+  if (isPropertyPath(type)) {
     return 'string'
   }
 

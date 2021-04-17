@@ -1,5 +1,6 @@
 [
   {
+    "name": "can describe a path through nested objects",
     "schema": {
       "topObject": {
         "aProperty": "string",
@@ -76,6 +77,7 @@
     ]
   },
   {
+    "name": "Optional properties only count as valid path if the are present in the data structure",
     "schema": {
       "topObject": {
         "aProperty": "string",
@@ -147,5 +149,38 @@
         ]
       }
     ]
-  }
+  },
+  {
+    "name": "can be used on map",
+    "schema": {
+      "oneProp": {
+        "mePath": {
+          "$propertyPath": {}
+        }
+      },
+      "someOther": "string",
+      "andAnother": ["?",{
+        "withNested": ["?",{
+          "objects": ["?", "number"]
+        }]
+      }]
+    },
+    "validData": [
+      {
+        "oneProp": {
+          "mePath": [
+            "andAnother",
+            "withNested",
+            "objects"
+          ]
+        },
+        "someOther": "asdf",
+        "andAnother": {
+          "withNested": {
+            "objects": 4
+          }
+        }
+      }
+    ]
+}
 ]

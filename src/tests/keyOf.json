@@ -147,11 +147,16 @@
     ]
   },
   {
-    "name": "Keys specified deeper than the 2 levels are only checked at runtime (for now)",
-    "description": "This schema should be invalid, but due to current limitations it's not possible to validate this on a schema level yet",
-    "schema": { "myValue": { "$keyOf": ["myValue", "yourValue"] } },
+    "name": "Speicifying non existent keys will result in an invalid schema 1",
+    "invalidSchema": { "myValue": { "$keyOf": ["myValue", "yourValue"] } },
     "validData": [],
     "invalidData": ["abc"]
+  },
+  {
+    "name": "Speicifying non existent keys will result in an invalid schema at any depth",
+    "invalidSchema": { "myValue": { "$keyOf": ["nest", "ted", "obbi"] }, "nest": {"ted": {"object": {}}} },
+    "validData": [],
+    "invalidData": [{"myValue": "any", "nest": {"ted": {"object": {}}}}]
   },
   {
     "name": "Schema referencing a non existing key is invalid",
