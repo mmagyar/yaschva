@@ -1,10 +1,11 @@
-import { Validation } from './validationTypes.js'
-import { generate, randomNumber } from './generate.js'
-import { loadJson, validate } from './validate.js'
+import { Validation } from '../validationTypes.js'
+import { generate } from './generate.js'
+import { loadJson, validate } from '../validate.js'
 import fs from 'fs'
 import { inspect } from 'util'
 import test, { ExecutionContext } from 'ava'
 import path from 'path'
+import { randomNumber } from './random.js'
 inspect.defaultOptions.depth = null
 
 const file = fs.promises.readFile
