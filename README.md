@@ -231,4 +231,19 @@ deepest is the most likely error.
 Decisions, Decisions, Decisions for the future
 ==============================================
 
+Generating from the schema often dies due to excessive recursion.
+This is because it randomly selects elements in sucsession, that
+do not have the capability to bail out.
 
+On offender is the tuple type, since it must have one elements.
+This restriction may not be the best, either way, since a single
+element tuple does not make much sense, at least not any more than a
+zero element tuple.
+
+
+Testing 
+=======
+
+Add tests to check if keyOf and property path works properly, and only passes if the result data actually have to needed keys
+
+Property path can be an array index?

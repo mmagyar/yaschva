@@ -1,9 +1,9 @@
 import randexp from 'randexp'
 import { combineValidationObjects } from '../validate.js'
 import { Validation, ValueTypes, isTypeDefValidation, isSimpleType, isEnum, isKeyOf, isPropertyPath, isObj, isMap, isMeta, isAnd, isLiteral, isTuple, SimpleTypes, isArray, isNumber, isString, ValueType } from '../validationTypes.js'
-import { Options } from './config.js'
+import { keyOfSymbol, Options, propertyPathSymbol } from './config.js'
 import { getMinimumDepth } from './info.js'
-import { generatePropertyPath, randomNumber, randomString } from './random.js'
+import { randomNumber, randomString } from './random.js'
 
 const saneMaximumSize = 12
 
@@ -52,8 +52,13 @@ export const generateInternal = (
     delete type.$types
   }
 
-  const gen = (type: Validation, increaseDepth: boolean = false): any =>
-    generateInternal(type, options, customTypes, increaseDepth ? depth + 1 : depth, rootType)
+  const gen = (type: Validation, increaseDepth: boolean = false): any => {
+    const res = generateInternal(type, options, customTypes, increaseDepth ? depth + 1 : depth, rootType)
+    if (res === '$literalType') {
+      console.log('SAY WHAT')
+    }
+    return res
+  }
 
   if (isSimpleType(type)) {
     if (customTypes[type]) {
@@ -102,16 +107,13 @@ export const generateInternal = (
   if (isEnum(type)) { return type.$enum[randomNumber(true, 0, type.$enum.length - 1)] }
 
   if (isKeyOf(type)) {
-    const current = type.$keyOf.reduce((p: any, c) => p?.[c], rootType)
-    if (!current) return ''
-    const keys = Object.keys(current)
-    // This does not work correctly, because the available keys depend on the input (and they might be optional)
-    // It is overriden in the second pass done in the main generate method
-    return keys[randomNumber(true, 0, keys.length - 1)]
+    // Just Return a symbol, will resolve it in the second pass
+    return { symbol: keyOfSymbol, type }
   }
 
   if (isPropertyPath(type)) {
-    return generatePropertyPath(rootType)
+    // Just Return a symbol, will resolve it in the second pass
+    return { symbol: propertyPathSymbol, type }
   }
 
   if (isObj(type)) {
@@ -163,6 +165,8 @@ export const generateInternal = (
           const key = specKeys[0].startsWith('\\$') ? specKeys[0].slice(1) : specKeys[0]
           prev[key] = gen(specKey[specKeys[0]], true)
         }
+        // Okay, so if the key type contains keyOf, the map generation need to be deffered
+        // It also needs to know it's own path, since it does not make sense to point to itself
         const str = mapType.key ? gen(mapType.key) : simpleGeneration('string', options)
         prev[str] = gen(mapType.$map, true)
         return prev

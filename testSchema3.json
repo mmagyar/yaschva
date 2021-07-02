@@ -1,0 +1,22 @@
+{
+    "keyA": {
+        "x": "number",
+        "y": [
+            "?",
+            "number"
+        ]
+    },
+    "keyB": "number",
+    "keyC": [
+        "number",
+        "?"
+    ],
+    "myRes": {
+        "$map": "string",
+        "key": {
+            "$keyOf": [
+                "keyA"
+            ]
+        }
+    }
+}

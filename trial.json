@@ -1,0 +1,29 @@
+{
+  "generated": {
+    "keyA": {
+      "x": 1626130472916211
+    },
+    "keyB": 1744326268340647,
+    "keyC": -4333283276367340,
+    "myRes": {
+      "[object Object]": "Sfh2BQ"
+    }
+  },
+  "validated": {
+    "result": "fail",
+    "output": {
+      "keyA": {
+        "x": null,
+        "y": null
+      },
+      "keyB": null,
+      "keyC": null,
+      "myRes": {
+        "[object Object]": {
+          "error": "Value needs to be one of the following: [x] ",
+          "value": "[object Object]"
+        }
+      }
+    }
+  }
+}

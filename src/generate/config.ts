@@ -13,3 +13,6 @@ export interface Options {
   prefer: 'defined' | 'undefined' | 'none'
   absoluteMaxStringSize: number
 }
+
+export const keyOfSymbol = Symbol('KeyOf')
+export const propertyPathSymbol = Symbol('PropertyPath')

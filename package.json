@@ -30,7 +30,8 @@
     "test:coverage": "c8 --all --exclude \"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**}\"  --reporter=text --reporter=html --reporter=json --reporter=clover ava --verbose",
     "test:fast": "ava",
     "test:watch": "tsc-watch --onSuccess \"c8 --all --exclude \\\"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**,index.js,index.ts}\\\" --reporter=text-summary --reporter=clover --reporter=json ava\"",
-    "test:watchOne": "tsc-watch --onSuccess \"c8 --all --exclude \\\"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**,index.js,index.ts}\\\" --reporter=text ava --match \\\"\\\" \""
+    "test:watchOne": "tsc-watch --onSuccess \"c8 --all --exclude \\\"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**,index.js,index.ts}\\\" --reporter=text ava --match \\\"\\\" \"",
+    "debug":  "node es6/trial.js"
   },
   "author": "mmagyar.com",
   "license": "MIT",
