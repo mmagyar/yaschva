@@ -4,7 +4,7 @@ import { generate } from './generate/generate.js'
 const file = fs.promises.readFile
 
 const run = async (): Promise<any> => {
-  const example = loadJson(await file('./testSchema3.json', 'utf8'))
+  const example = loadJson(await file('./selfSchema.json', 'utf8'))
   let generated = null
 
   let validated = null

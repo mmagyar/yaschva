@@ -32,6 +32,23 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     return propertyPath(entries[randomIndex][1], path.concat([entries[randomIndex][0]]))
   }
 
+  const symbolFinder = (data: any, rootData?: any): any => {
+    const rootDataCurrent = rootData || data
+    if (!data || typeof data !== 'object') return false
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const [_, value] of Object.entries(data)) {
+      if ((value as any)?.symbol === keyOfSymbol) {
+        return true
+      } else if ((value as any)?.symbol === propertyPathSymbol) {
+        return true
+      } else {
+        if (symbolFinder(value, rootDataCurrent)) return true
+      }
+    }
+    return false
+  }
+
   const replaceKeyOfAndPropertyPath = (data: any, rootData?: any): any => {
     const rootDataCurrent = rootData || data
     if (!data || typeof data !== 'object') return data
@@ -39,13 +56,29 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     for (const [key, value] of Object.entries(data)) {
       if ((value as any)?.symbol === keyOfSymbol) {
         const current = (value as any).type.$keyOf.reduce((p: any, c: any) => p?.[c], rootDataCurrent)
+
         if (!current) {
+          result[key] = value
+          // console.error('CURRENT NOT FOUND', JSON.stringify(rootData, null, 2), 'CURRENT', JSON.stringify(value, null, 2))
+          continue
           // fs.writeFileSync('./faultRoot.json', JSON.stringify(rootData, null, 2))
           // fs.writeFileSync('./faultCurrent.json', JSON.stringify(value, null, 2))
-          console.error('CURRENT NOT FOUND', JSON.stringify(rootData, null, 2), 'CURRENT', JSON.stringify(value, null, 2))
         }
-        const possibleKeys = Object.keys(current)
 
+        // Skip generation when referencing an unresovled key
+        if (current?.symbol === keyOfSymbol) {
+          result[key] = value
+          continue
+        }
+
+        let possibleKeys = []
+        try {
+          // So, the problem occures when we encounter an unresolved keyof as base value
+          possibleKeys = Object.keys(current)
+        } catch (e) {
+          // console.log('\nNOW THIS', data, '\n____VALUE', value, '\nCURRENT____', current)
+          throw e
+        }
         if (!(value as any).valueType) {
           result[key] = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
         } else {
@@ -74,5 +107,19 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     return result
   }
 
-  return replaceKeyOfAndPropertyPath(generated1stPass)
+  let replaced = replaceKeyOfAndPropertyPath(generated1stPass)
+  let safeWord = 0
+
+  while (symbolFinder(replaced)) {
+    replaced = replaceKeyOfAndPropertyPath(replaced)
+    safeWord++
+    if (safeWord > 10000) {
+      // Failure to resolve, it adds property to keyOf that does not even exits on the final data (value was optional)
+      fs.writeFileSync('./faultRawGen2.json', JSON.stringify(replaced || {}, null, 2))
+      throw new Error('could not resolve all symbols in 10000 passes')
+    }
+  }
+  fs.writeFileSync('./faultRawGen3.json', JSON.stringify(replaced || {}, null, 2))
+
+  return replaced
 }

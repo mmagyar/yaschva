@@ -419,17 +419,15 @@ test('Can generate a valid schema, that can generate data that is valid to the s
       console.error(validated.output)
     }
   }
-})*/
+}) */
 
 test('Can generate a valid schema based on the schema definition', async (t) => {
   const example = loadJson(await file('./selfSchema.json', 'utf8'))
-  let count = 1
+  const count = 1
   for (let i = 0; i < count; i++) {
     const generated = generate(example)
-    // console.log(generated)
-    // const validated = validate(example, generated)
-    // t.is(validated.result, 'pass')
-    t.pass();
+    const validated = validate(example, generated)
+    t.is(validated.result, 'pass')
+    t.pass()
   }
 })
-
