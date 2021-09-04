@@ -157,6 +157,9 @@ export const generateInternal = (
     }
 
     if (!specKey) specKey = {}
+    if (isKeyOf(mapType.key ?? {})) {
+      return { symbol: keyOfSymbol, type: mapType.key, valueType: mapType.$map, size: count }
+    }
 
     return Array.from(Array(count))
       .reduce((prev: any) => {
@@ -167,7 +170,9 @@ export const generateInternal = (
         }
         // Okay, so if the key type contains keyOf, the map generation need to be deffered
         // It also needs to know it's own path, since it does not make sense to point to itself
+
         const str = mapType.key ? gen(mapType.key) : simpleGeneration('string', options)
+
         prev[str] = gen(mapType.$map, true)
         return prev
       }, {})

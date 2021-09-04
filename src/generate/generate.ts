@@ -20,7 +20,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
   }
 
   const generated1stPass = generateInternal(type, { ...defaultOptions, ...options }, {}, 0, type)
-  fs.writeFileSync('./faultRawGen.json', JSON.stringify(generated1stPass, null, 2))
+  fs.writeFileSync('./faultRawGen.json', JSON.stringify(generated1stPass || {}, null, 2))
   const propertyPath = (data: any, path: string[] = []): any => {
     if (!data || typeof data !== 'object' || Array.isArray(data) || typeof data?.symbol === 'symbol') return path
     const entries = Object.entries(data)
@@ -46,14 +46,31 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
         }
         const possibleKeys = Object.keys(current)
 
-        result[key] = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
+        if (!(value as any).valueType) {
+          result[key] = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
+        } else {
+          result[key] = {}
+          for (let i = 0; i < (value as any)?.size; i++) {
+            let randomKey = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
+            let safeWord = 0
+            // Try getting a random prop, if we don't find any new in 10 tries, get the next unused,
+            // with fallback to the first element if all are generated already.
+            while (result[key][randomKey] && Object.keys(result[key]).length < possibleKeys.length) {
+              randomKey = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
+              safeWord++
+              if (safeWord > 10) {
+                randomKey = possibleKeys.find(x => typeof result[key][x] === 'undefined') ?? possibleKeys[0]
+              }
+            }
+            result[key][randomKey] = generate((value as any).valueType)
+          }
+        }
       } else if ((value as any)?.symbol === propertyPathSymbol) {
         result[key] = propertyPath(rootDataCurrent)
       } else {
         result[key] = replaceKeyOfAndPropertyPath(value, rootDataCurrent)
       }
     }
-
     return result
   }
 

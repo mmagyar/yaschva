@@ -6,7 +6,7 @@ import { inspect } from 'util'
 import test, { ExecutionContext } from 'ava'
 import path from 'path'
 import { randomNumber } from './random.js'
-inspect.defaultOptions.depth = null
+inspect.defaultOptions.depth = 64
 
 const file = fs.promises.readFile
 const checkNumber = (result: number, t: ExecutionContext): void => {
@@ -426,7 +426,7 @@ test('Can generate a valid schema based on the schema definition', async (t) => 
   let count = 1
   for (let i = 0; i < count; i++) {
     const generated = generate(example)
-    console.log(generated)
+    // console.log(generated)
     // const validated = validate(example, generated)
     // t.is(validated.result, 'pass')
     t.pass();

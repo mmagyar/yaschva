@@ -13,7 +13,7 @@ const run = async (): Promise<any> => {
     console.log(i)
     generated = generate(example)
     validated = validate(example, generated)
-    if (validated.result !== 'pass') break;
+    if (validated.result !== 'pass') break
   }
   return { generated, validated }
 }
