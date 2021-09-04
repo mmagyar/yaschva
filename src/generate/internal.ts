@@ -107,6 +107,7 @@ export const generateInternal = (
   if (isEnum(type)) { return type.$enum[randomNumber(true, 0, type.$enum.length - 1)] }
 
   if (isKeyOf(type)) {
+    console.log(type)
     // Just Return a symbol, will resolve it in the second pass
     return { symbol: keyOfSymbol, type }
   }

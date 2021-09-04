@@ -116,6 +116,39 @@
         "primaryElement": "ourKey"
       }
     ]
+  },  {
+    "name" : "Can specify a keyof a map indirectly",
+    "schema":       {
+        "keyA": {
+            "$map": "string",
+            "key": {"$keyOf": ["keyB"]}
+        },
+        "keyB" : {
+            "minLength": 4,
+            "$map":"number"
+        }, 
+        "myRes": {
+            "$map": "string",
+            "key": {
+                "$keyOf": [
+                    "keyA"
+                ]
+            }
+        }
+    },
+    "validData": [
+      {
+        "keyB": { "a": 1, "b":2, "c":5, "d": 7 },
+        "keyA": { "a": "x", "b":"y", "c":"z" },
+        "myRes": { "a": "x", "b":"y" }
+      }
+    ],
+    "invalidData": [
+      {
+        "refMap": {"myKey":"it is","yourKey":"it isnt"},
+        "primaryElement": "ourKey"
+      }
+    ]
   },
   {
     "name": "Keys specified deeper than the 2 levels",
@@ -145,6 +178,12 @@
         "myValue":"hello"
       }
     ]
+  },
+  {
+    "name": "Speicifying a non object keys will result in an invalid schema",
+    "invalidSchema": {"yourValue":"number", "myValue": { "$keyOf": ["yourValue"] } },
+    "validData": [],
+    "invalidData": ["abc"]
   },
   {
     "name": "Speicifying non existent keys will result in an invalid schema 1",

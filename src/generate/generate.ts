@@ -21,6 +21,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
 
   const generated1stPass = generateInternal(type, { ...defaultOptions, ...options }, {}, 0, type)
   fs.writeFileSync('./faultRawGen.json', JSON.stringify(generated1stPass || {}, null, 2))
+
   const propertyPath = (data: any, path: string[] = []): any => {
     if (!data || typeof data !== 'object' || Array.isArray(data) || typeof data?.symbol === 'symbol') return path
     const entries = Object.entries(data)
@@ -72,13 +73,9 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
         }
 
         let possibleKeys = []
-        try {
-          // So, the problem occures when we encounter an unresolved keyof as base value
-          possibleKeys = Object.keys(current)
-        } catch (e) {
-          // console.log('\nNOW THIS', data, '\n____VALUE', value, '\nCURRENT____', current)
-          throw e
-        }
+
+        possibleKeys = Object.keys(current)
+
         if (!(value as any).valueType) {
           result[key] = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
         } else {
@@ -115,11 +112,11 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     safeWord++
     if (safeWord > 10000) {
       // Failure to resolve, it adds property to keyOf that does not even exits on the final data (value was optional)
-      fs.writeFileSync('./faultRawGen2.json', JSON.stringify(replaced || {}, null, 2))
+      fs.writeFileSync('./faultRawGen2.json', JSON.stringify(replaced || {}, (input) => typeof input === 'symbol' ? `_____SYMBOL_______${input}` : input, 2))
       throw new Error('could not resolve all symbols in 10000 passes')
     }
   }
-  fs.writeFileSync('./faultRawGen3.json', JSON.stringify(replaced || {}, null, 2))
+  fs.writeFileSync('./faultRawGen3.json', JSON.stringify(replaced || {}, (input) => typeof input === 'symbol' ? `_____SYMBOL_______${input}` : input, 2))
 
   return replaced
 }
