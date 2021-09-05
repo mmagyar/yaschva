@@ -5,6 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch trial Program",
+      "program": "${workspaceFolder}/es6/trial.js",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "pwa-node"
+    },
+
+    {
       "name": "Launch via NPM",
       "request": "launch",
       "runtimeArgs": [

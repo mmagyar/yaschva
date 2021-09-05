@@ -180,10 +180,49 @@
     ]
   },
   {
-    "name": "Speicifying a non object keys will result in an invalid schema",
+    "name": "Can specify keyOf of custom type",
+    "schema": {
+      "$types": {
+        "$myObj":{
+          "myNumber":"number",
+          "myObject": {}
+        }
+      },
+      "myValue": { "$keyOf": ["ourValue"] } ,
+      "ourValue": "$myObj"
+    },
+    "validData": [{
+      "myValue": "myNumber",
+      "ourValue": {
+        "myNumber": 4,
+        "myObject": {}
+      }
+    }],
+    "invalidData": ["abc"]
+  },
+  {
+    "name": "Speicifying a non object (primitive) key will result in an invalid schema",
     "invalidSchema": {"yourValue":"number", "myValue": { "$keyOf": ["yourValue"] } },
     "validData": [],
     "invalidData": ["abc"]
+  },
+  {
+    "name": "Speicifying a non object (array) key will result in an invalid schema",
+    "invalidSchema": {
+      "keyC": [
+          "number",
+          "?"
+      ],
+      "myRes": {
+          "$map": "string",
+          "key": {
+              "$keyOf": [
+                  "keyC"
+              ]
+          }
+      }
+  },
+    "invalidData": [{ "keyC": 2 }, { "keyC": 4, "myRes": { "keyC":"habzsi" }}]
   },
   {
     "name": "Speicifying non existent keys will result in an invalid schema 1",

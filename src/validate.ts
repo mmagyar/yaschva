@@ -4,16 +4,16 @@ import {
   isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType, isKeyOf, isLiteral, KeyOfType, isTuple, isPropertyPath, PropertyPathType
 } from './validationTypes.js'
 
-interface Custom {custom: {[key: string]: ValueTypes}, root: any}
+interface Custom { custom: { [key: string]: ValueTypes }, root: any }
 type InputTypes = any | string | number | object | undefined | boolean | null
-export type ValidationOutputs= ValidationOutput|ValidationOutput[]
+export type ValidationOutputs = ValidationOutput | ValidationOutput[]
 export type ValidationOutput =
-  | {[key: string]: ValidationOutputs}
+  | { [key: string]: ValidationOutputs }
   | null
-  | {'error': string, output?: ValidationOutputs, value: any}
+  | { 'error': string, output?: ValidationOutputs, value: any }
 
 export interface ValidationResult {
-  'result': 'pass'|'fail'
+  'result': 'pass' | 'fail'
   output: ValidationOutputs
 }
 export interface ValidationFailed { message: string }
@@ -27,7 +27,7 @@ const failValidation = (error: string, value: any, output?: ValidationOutputs): 
   }
 }
 
-export const combineValidationObjects = <T>(type: AndType, customTypes: Custom, onError: (input: any) => T): {result: 'error', error: T} | {pass: ObjectType, result?: undefined} => {
+export const combineValidationObjects = <T>(type: AndType, customTypes: Custom, onError: (input: any) => T): { result: 'error', error: T } | { pass: ObjectType, result?: undefined } => {
   const resolveMeta = (tpe: Validation): Validation => {
     if (typeof tpe === 'string') { return resolveMeta(customTypes.custom[tpe]) }
     if (isMeta(tpe)) return resolveMeta(tpe.$type)
@@ -48,7 +48,7 @@ export const combineValidationObjects = <T>(type: AndType, customTypes: Custom, 
 
 export interface CustomProcessedValidation {
   validation: ValueTypes
-  customTypes: {[key: string]: ValueTypes}
+  customTypes: { [key: string]: ValueTypes }
 }
 
 export const processCustomTypes = (typeIn: Validation): CustomProcessedValidation => {
@@ -153,7 +153,7 @@ ValidationResult => {
   }
 
   let fail = false
-  const output: {[key: string]: ValidationOutputs} = {}
+  const output: { [key: string]: ValidationOutputs } = {}
 
   for (const key of Object.keys(value)) {
     const validatorKey = key.startsWith('$') ? `\\${key}` : key
@@ -185,15 +185,15 @@ ValidationResult => {
     return failValidation('Value is not a Map (freeform Object)', value)
   }
   let fail = false
-  const output: {[key: string]: ValidationOutputs} = {}
+  const output: { [key: string]: ValidationOutputs } = {}
   const keys = Object.keys(value)
   const keyCount = keys.length
   const maxLength = validator.maxLength ?? Number.MAX_SAFE_INTEGER
   const minLength = validator.minLength ?? 0
   if (keyCount < minLength || keyCount > maxLength) {
     return failValidation(
-        `Map needs to have member count to be between ${minLength} - ${maxLength}`,
-        keyCount)
+      `Map needs to have member count to be between ${minLength} - ${maxLength}`,
+      keyCount)
   }
   let types: any = validator.keySpecificType
 
@@ -240,7 +240,7 @@ ValidationResult => {
 
   if (values.length === 0) {
     if (type.$keyOf.length) {
-      const route = type.$keyOf.reduce((p: {current: any, root?: any}, c) => {
+      const route = type.$keyOf.reduce((p: { current: any, root?: any }, c) => {
         p.current[c] = {}
         return { current: p.current[c], root: p.root || p.current }
       }, { current: {}, root: undefined })
@@ -270,11 +270,27 @@ const validatePropertyPath = (value: InputTypes, type: PropertyPathType, allType
       return toResult(`There is no key called ${key} on ${valuesSoFar.join(':')}`, value)
     }
 
-    if (type.$propertyPath.objectsOnly && typeof current[key] !== 'object') {
-      return toResult(`The value under the requried key ${key} must be an object`, value)
-    }
     current = current[key]
     valuesSoFar.push(key)
+  }
+
+  if (type.$propertyPath.onlyObjects) {
+    // Resolve custom type
+    while (isSimpleType(current) && allTypes.root?.$types?.[current]) {
+      current = allTypes.root?.$types?.[current]
+    }
+
+    if (isMeta(current)) {
+      current = current.$type
+    }
+
+    const withoutKeys = isSimpleType(current) || isArray(current) || isString(current) || isNumber(current) ||
+      isEnum(current) || isAnd(current) || isKeyOf(current) ||
+      isLiteral(current) || isTuple(current) || isPropertyPath(current) || false
+    if (Array.isArray(current) || withoutKeys) return toResult('The value under final key did not have the desired type', value)
+    // const validation = validateRecursive(type.$propertyPath.valueType, current, allTypes)
+    // if (validation.result === 'fail') return toResult('The value under final key did not have the desired type', value)
+    // return toResult(`The value under the requried key ${key} must be an object`, value)
   }
 
   return { result: 'pass', output: [] }
@@ -352,7 +368,7 @@ const validateRecursive = (
     }
     const results = type.$tuple.map((validation, index) => validateRecursive(validation, value[index], validationRef))
     const failed = results.some(x => x.result === 'fail')
-    const output: ValidationOutputs = results.reduce((p: {[key: number]: ValidationOutputs}, c, i) => {
+    const output: ValidationOutputs = results.reduce((p: { [key: number]: ValidationOutputs }, c, i) => {
       p[i] = c.output
       return p
     }, {})

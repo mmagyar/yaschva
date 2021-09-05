@@ -4,25 +4,27 @@ import { generate } from './generate/generate.js'
 const file = fs.promises.readFile
 
 const run = async (): Promise<any> => {
-  const example = loadJson(await file('./testSchema5.json', 'utf8'))
-  const sch = loadJson(await file('./selfSchema.json', 'utf8'))
-  const result = validate(sch, example)
+  const example = loadJson(await file('./selfSchema.json', 'utf8'))
+  const selfSchema = loadJson(await file('./selfSchema.json', 'utf8'))
+  const result = validate(selfSchema, example)
   if (result.result !== 'pass') {
     // UUU OOO Property path is not validated for type !!!???
     console.log(result, 'WARNING \n\n INPUT IS INVALID \n\n')
+    fs.writeFileSync('./failSchemaValidation.json', JSON.stringify(result.output, null, 2))
   }
-  console.log(JSON.stringify(result,null, 2))
+
   let generated = null
 
   let validated = null
 
-  for (let i = 0; i < 5000; i++) {
+  const count = 10
+  for (let i = 0; i < count; i++) {
     console.log(i)
     generated = generate(example)
     validated = validate(example, generated)
     if (validated.result !== 'pass') {
       console.error('VALIDATION FAILED')
-      fs.writeFileSync('./failValidateion.json', JSON.stringify(validated, null, 2))
+      fs.writeFileSync('./failValidation.json', JSON.stringify(validated, null, 2))
       break
     }
   }
@@ -31,7 +33,7 @@ const run = async (): Promise<any> => {
 
 run().then(x => {
   const result = JSON.stringify(x, null, 2)
-  console.log('SUCCESS')
+  console.log('END')
   fs.writeFileSync('./trial.json', result)
 }).catch(x => {
   console.log('FAILLLEDDD___________')

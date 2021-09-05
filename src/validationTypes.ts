@@ -31,7 +31,7 @@ export declare type NumberType = TypeMeta & {
 }
 export interface PropertyPathType {
   $propertyPath: {
-    objectsOnly?: boolean
+    onlyObjects?: boolean
   }
 }
 

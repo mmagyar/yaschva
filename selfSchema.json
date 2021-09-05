@@ -73,10 +73,10 @@
     },
     "$keyOfType": {
       "valueType": ["?", "$valueTypes"],
-      "\\$keyOf": {"$propertyPath":{ "objectsOnly": true }}
+      "\\$keyOf": {"$propertyPath":{ "onlyObjects": true }}
     },
-    "$propertyPath": {
-      "\\$propertyPath": { "objectsOnly": ["?", "boolean"] }
+    "$propertyPathType": {
+      "\\$propertyPath": { "onlyObjects": ["?", "boolean"] }
     },
     "$literalType": { "\\$literal": ["string", "number", "null"] },
     "$andType": {
@@ -99,7 +99,7 @@
       "$andType",
       "$customType",
       "$tupleType",
-      "$propertyPath"
+      "$propertyPathType"
     ],
     "$valueTypes": [{ "$array": "$valueType", "minLength": 1 }, "$valueType"],
     "$validation": [
