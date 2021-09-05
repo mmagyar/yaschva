@@ -30,7 +30,9 @@ export declare type NumberType = TypeMeta & {
   $number: { min?: number, max?: number, integer?: boolean }
 }
 export interface PropertyPathType {
-  $propertyPath: { }
+  $propertyPath: {
+    objectsOnly?: boolean
+  }
 }
 
 export declare type MetaType = TypeMeta & { $type: ValueTypes }

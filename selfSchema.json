@@ -73,10 +73,10 @@
     },
     "$keyOfType": {
       "valueType": ["?", "$valueTypes"],
-      "\\$keyOf": {"$propertyPath":{}}
+      "\\$keyOf": {"$propertyPath":{ "objectsOnly": true }}
     },
     "$propertyPath": {
-      "\\$propertyPath": {}
+      "\\$propertyPath": { "objectsOnly": ["?", "boolean"] }
     },
     "$literalType": { "\\$literal": ["string", "number", "null"] },
     "$andType": {

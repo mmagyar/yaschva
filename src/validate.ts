@@ -269,6 +269,10 @@ const validatePropertyPath = (value: InputTypes, type: PropertyPathType, allType
     if (!Object.prototype.hasOwnProperty.call(current, key)) {
       return toResult(`There is no key called ${key} on ${valuesSoFar.join(':')}`, value)
     }
+
+    if (type.$propertyPath.objectsOnly && typeof current[key] !== 'object') {
+      return toResult(`The value under the requried key ${key} must be an object`, value)
+    }
     current = current[key]
     valuesSoFar.push(key)
   }
