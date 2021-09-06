@@ -65,6 +65,11 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
       return path
     }
 
+    // TODO Schema generation is failing because we are generating propertyPaths as keyof to non objects
+    // TODO Also there are keyOf being generated for toplevel type (such as $map)
+
+    // TODO Another slightly unrelated error: when base type is array, there cannot be $type keyOf property
+
     return propertyPath(entries[randomIndex][1], path.concat([entries[randomIndex][0]]))
   }
 

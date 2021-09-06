@@ -53,7 +53,7 @@ export type ValueType =
   | PropertyPathType
 
 export const isSimpleType = (tbd: any): tbd is SimpleTypes => typeof tbd === 'string'
-export const isArray = (tbd: any): tbd is ArrayType => tbd.$array
+export const isArray = (tbd: any): tbd is ArrayType => tbd?.$array
 export const isMap = (tbd: any): tbd is MapType => tbd.$map
 export const isString = (tbd: any): tbd is StringType => tbd.$string
 export const isNumber = (tbd: any): tbd is NumberType => tbd.$number
