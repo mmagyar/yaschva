@@ -284,10 +284,19 @@ const validatePropertyPath = (value: InputTypes, type: PropertyPathType, allType
       current = current.$type
     }
 
-    const withoutKeys = isSimpleType(current) || isArray(current) || isString(current) || isNumber(current) ||
-      isEnum(current) || isAnd(current) || isKeyOf(current) ||
-      isLiteral(current) || isTuple(current) || isPropertyPath(current) || false
-    if (Array.isArray(current) || withoutKeys) return toResult('The value under final key did not have the desired type', value)
+    // This may not be a good idea after all, since it does not guarantuee soundness
+    // Just because it points to a map, it still can be invalid, if the map has no members
+    // Just beucase it points to something that is optionally not defined, it may still be valid, since this validation may be optional as well
+    // Oh well, it may still be used for validation though
+    const withoutKeys = (x: any): boolean => isSimpleType(x) || isArray(x) || isString(x) || isNumber(x) ||
+      isEnum(x) || isAnd(x) || isKeyOf(x) || isLiteral(x) || isTuple(x) || isPropertyPath(x) || false
+    let withoutKeysResult = false
+
+    if (Array.isArray(current)) {
+      withoutKeysResult = !current.some(x => !withoutKeys(x))
+    } else withoutKeysResult = withoutKeys(current)
+
+    if (withoutKeysResult) return toResult('The value under final key did not have the desired type', value)
     // const validation = validateRecursive(type.$propertyPath.valueType, current, allTypes)
     // if (validation.result === 'fail') return toResult('The value under final key did not have the desired type', value)
     // return toResult(`The value under the requried key ${key} must be an object`, value)

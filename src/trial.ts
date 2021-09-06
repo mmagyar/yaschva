@@ -20,7 +20,8 @@ const run = async (): Promise<any> => {
   const count = 10
   for (let i = 0; i < count; i++) {
     console.log(i)
-    generated = generate(example)
+    generated = generate(example, { maxDepthSoft: 2, arrayMax: 3 })
+    // console.log(generated)
     validated = validate(example, generated)
     if (validated.result !== 'pass') {
       console.error('VALIDATION FAILED')

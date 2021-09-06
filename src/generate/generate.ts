@@ -19,7 +19,42 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     absoluteMaxStringSize: 8192
   }
 
-  const generated1stPass = generateInternal(type, { ...defaultOptions, ...options }, {}, 0, type)
+  // Walk every proeprty on the type, AS IS, withouth resolving anything
+  // While resolving may give more accurate results, it is not required here
+  // Because we just need to get the keyOf parameters, and resolving everything,
+  // May result in an infine loop, because schemas can be recursive
+
+  const iterate = (obj: {[key: string]: any}, path: Array<string|number> = []): any => {
+    const itrFunction = (key: string|number): any => {
+      if (key === '$keyOf') {
+        return { path: path, value: obj[key] }
+      }
+
+      if (typeof obj[key] === 'object') {
+        const result = iterate(obj[key], path.concat([key]))
+        if (!result || result?.length === 0) {
+          return undefined
+        }
+        return result
+      }
+      return undefined
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.flatMap((val, i) => itrFunction(i))
+    }
+    return Object.keys(obj).flatMap(itrFunction).filter(x => x)
+  }
+
+  const neededKeysFor = iterate(type as any)?.map((x: any) => x.value).reduce((p: string[][], c: string[]) => {
+    if (!p.some(x => x.length === c.length && x.every((y, i) => y === c[i]))) {
+      p.push(c)
+    }
+
+    return p
+  }, [])
+
+  const generated1stPass = generateInternal(type, { ...defaultOptions, ...options }, {}, 0, type, neededKeysFor)
   fs.writeFileSync('./faultRawGen.json', JSON.stringify(generated1stPass || {}, null, 2))
 
   const propertyPath = (data: any, path: string[] = []): any => {
@@ -112,11 +147,11 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     safeWord++
     if (safeWord > 10000) {
       // Failure to resolve, it adds property to keyOf that does not even exits on the final data (value was optional)
-      fs.writeFileSync('./faultRawGen2.json', JSON.stringify(replaced || {}, (input) => typeof input === 'symbol' ? `_____SYMBOL_______${input}` : input, 2))
+      fs.writeFileSync('./faultRawGen2.json', JSON.stringify(replaced || {}, null, 2))
       throw new Error('could not resolve all symbols in 10000 passes')
     }
   }
-  fs.writeFileSync('./faultRawGen3.json', JSON.stringify(replaced || {}, (input) => typeof input === 'symbol' ? `_____SYMBOL_______${input}` : input, 2))
+  fs.writeFileSync('./faultRawGen3.json', JSON.stringify(replaced || {}, null, 2))
 
   return replaced
 }

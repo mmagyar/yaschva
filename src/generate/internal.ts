@@ -1,3 +1,4 @@
+
 import randexp from 'randexp'
 import { combineValidationObjects } from '../validate.js'
 import { Validation, ValueTypes, isTypeDefValidation, isSimpleType, isEnum, isKeyOf, isPropertyPath, isObj, isMap, isMeta, isAnd, isLiteral, isTuple, SimpleTypes, isArray, isNumber, isString, ValueType } from '../validationTypes.js'
@@ -7,6 +8,8 @@ import { randomNumber, randomString } from './random.js'
 
 const saneMaximumSize = 12
 
+const arrayEq = (x: string[], c: string[]): boolean => x.length === c.length && x.every((y, i) => y === c[i])
+const needed = (x: string[][], y: string[]): boolean => x.some(z => arrayEq(y, z))
 const simpleTypes: SimpleTypes[] = ['number', 'integer', '?', 'string', 'boolean']
 const simpleGeneration = (type: SimpleTypes, options: Options): any => {
   switch (type) {
@@ -36,7 +39,9 @@ export const generateInternal = (
   options: Options,
   typesIn: { [key: string]: Validation },
   depth: number,
-  rootType: Validation
+  rootType: Validation,
+  neededPaths: string[][],
+  currentPath: string[] = []
 ): any => {
   if (depth >= options.maxDepthHard) {
     throw new Error(`Maximum depth reached: ${depth} --
@@ -52,8 +57,8 @@ export const generateInternal = (
     delete type.$types
   }
 
-  const gen = (type: Validation, increaseDepth: boolean = false): any => {
-    const res = generateInternal(type, options, customTypes, increaseDepth ? depth + 1 : depth, rootType)
+  const gen = (type: Validation, increaseDepth: boolean = false, currentPathMod?: string[]): any => {
+    const res = generateInternal(type, options, customTypes, increaseDepth ? depth + 1 : depth, rootType, neededPaths, currentPathMod ?? currentPath)
     if (res === '$literalType') {
       console.log('SAY WHAT')
     }
@@ -69,7 +74,9 @@ export const generateInternal = (
   }
 
   if (Array.isArray(type)) {
-    if (depth > options.maxDepthSoft) {
+    const need = needed(neededPaths, currentPath)
+
+    if (!need && depth > options.maxDepthSoft) {
       if (type.find(x => x === '?')) { return simpleGeneration('?', options) }
       let leastDepth: {depth: number, type: ValueType} | undefined
       for (const currentType of type) {
@@ -82,8 +89,15 @@ export const generateInternal = (
       }
       return gen(leastDepth ? leastDepth.type : type[0])
     } else {
-      const typeArray = applyPreference(type, options)
+      // Use a defined value if this path is referenced as keyOf
+      const typeArray = applyPreference(type, need ? { ...options, prefer: 'defined' } : options)
       const randomIndex = randomNumber(true, 0, typeArray.length - 1)
+
+      // DELETE THIS, IT"S JUST A TEST TO DEBUG
+      // while (typeArray[randomIndex] === '$customType') {
+      //   randomIndex = randomNumber(true, 0, typeArray.length - 1)
+      // }
+
       return gen(typeArray[randomIndex])
     }
   }
@@ -132,8 +146,9 @@ export const generateInternal = (
         val = value.map((x: any) => x.$number ? { $number: { ...x.$number, ...num.$number } } : x)
       }
 
-      const generated = gen(val, true)
       const keyC = key.startsWith('\\$') ? key.slice(1) : key
+      const generated = gen(val, true, currentPath.concat([keyC]))
+
       if (typeof generated !== 'undefined') prev[keyC] = generated
       return prev
     }, {})
@@ -141,13 +156,21 @@ export const generateInternal = (
 
   if (isMap(type)) {
     const mapType = type
-    const min = typeof mapType.minLength === 'number' ? mapType.minLength : options.mapMin
+    let min = typeof mapType.minLength === 'number' ? mapType.minLength : options.mapMin
+
+    // This map is referenced as keyOf, override minLength if it's less then one,
+    // to make sure we have at least on element to refer
+    if (min < 1 && needed(neededPaths, currentPath)) {
+      min = 1
+    }
+
     const max = Math.min(
       typeof mapType.maxLength === 'number' ? mapType.maxLength : options.mapMax,
       saneMaximumSize)
+
     if (depth >= options.maxDepthSoft && !mapType.minLength) return {}
     const count = depth >= options.maxDepthSoft ? min : randomNumber(true, min, max)
-    if (min <= 0 || max > 64) {
+    if (min < 0 || max > 64) { // Why did i put this her??
       throw new Error(`Too big, too small, size does matter after all, ${count}, min: ${min}, max: ${max}`)
     }
     let specKey: any = mapType.keySpecificType
@@ -166,14 +189,15 @@ export const generateInternal = (
         const specKeys = Object.keys(specKey)
         if (specKeys.length) {
           const key = specKeys[0].startsWith('\\$') ? specKeys[0].slice(1) : specKeys[0]
-          prev[key] = gen(specKey[specKeys[0]], true)
+          prev[key] = gen(specKey[specKeys[0]], true, currentPath.concat([key]))
         }
         // Okay, so if the key type contains keyOf, the map generation need to be deffered
         // It also needs to know it's own path, since it does not make sense to point to itself
+        // This above might be out of date, key generation is not a problem actually in and of itself
 
         const str = mapType.key ? gen(mapType.key) : simpleGeneration('string', options)
 
-        prev[str] = gen(mapType.$map, true)
+        prev[str] = gen(mapType.$map, true, currentPath.concat([str]))
         return prev
       }, {})
   }
@@ -189,15 +213,8 @@ export const generateInternal = (
 
   if (isString(type)) {
     if (type.$string.regex) {
-      const types = Object.keys((rootType as any)?.$types || {})
-      // This regex denotes generating a custom type name, Special case for generating own schema
-      if (type.$string.regex === '^\\$([a-zA-Z0-9_]{1,128})$' && types.length) {
-        const i = randomNumber(true, 0, types.length)
-        return types[i]
-      } else {
-        const regexString = randexp.randexp(type.$string.regex)
-        return regexString
-      }
+      const regexString = randexp.randexp(type.$string.regex)
+      return regexString
     }
 
     return randomString(options, type.$string.minLength === 0 || typeof type.$string.minLength === 'undefined' ? type.$string.maxLength : type.$string.minLength)
