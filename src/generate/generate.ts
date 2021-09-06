@@ -41,7 +41,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     }
 
     if (Array.isArray(obj)) {
-      return obj.flatMap((val, i) => itrFunction(i))
+      return obj.flatMap((val, i) => itrFunction(i)).filter(x => x)
     }
     return Object.keys(obj).flatMap(itrFunction).filter(x => x)
   }
