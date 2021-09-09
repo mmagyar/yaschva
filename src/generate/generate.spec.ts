@@ -356,6 +356,46 @@ test('Will limit map size to be between bounds', (t) => {
   }
 })
 
+test('Setting a random seed will make sure that it generates the same thing', (t) => {
+  const schema: Validation = { $map: ['string', { $map: ['number', 'string', { $literal: 'ABA' }], minLength: 3 }], minLength: 5, keySpecificType: { a: 'number' } }
+
+  const opts = { randomSeed: 999 }
+  const expected = {
+    a: -7719441583512761,
+    iHR4HZi: '3xuU',
+    SHnMqrdaZguJu: 'lxedW4wL',
+    oTYNIhQ6wOHihGQ: {
+      xJMkCOXZ: 'ABA',
+      oimMq3do034: 'ABA',
+      '0Zw40GemOAIj2z': 'FkXVF0BdUh',
+      PSkBs: -7457735494055309,
+      OzNTrH: 'ABA',
+      WBZW: 'gniP'
+    },
+    '9bcI8u': 'dVVEOC5NReqeJ',
+    Uwed: '72XO'
+  }
+  const result: any = generate(schema, opts)
+  t.deepEqual(result, expected)
+  for (let i = 0; i < 128; i++) {
+    t.deepEqual(result, generate(schema, opts))
+    t.is(validate(schema, result).result, 'pass')
+  }
+})
+
+test('Setting a random seed will make sure that it generates the same regex', (t) => {
+  const schema: Validation = { $string: { regex: '\\w+' } }
+
+  const opts = { randomSeed: 999 }
+  const expected = 'WqHgq'
+  const result: any = generate(schema, opts)
+
+  t.deepEqual(result, expected)
+  for (let i = 0; i < 128; i++) {
+    t.deepEqual(result, generate(schema, opts))
+    t.is(validate(schema, result).result, 'pass')
+  }
+})
 test('Can specify types for some keys in map', (t) => {
   const schema = { $map: 'string', keySpecificType: { a: 'number' } }
   const generated = generate(schema)

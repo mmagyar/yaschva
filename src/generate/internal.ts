@@ -1,10 +1,10 @@
 
-import randexp from 'randexp'
+import randexp from '../randexp/index.js'
 import { combineValidationObjects } from '../validate.js'
 import { Validation, ValueTypes, isTypeDefValidation, isSimpleType, isEnum, isKeyOf, isPropertyPath, isObj, isMap, isMeta, isAnd, isLiteral, isTuple, SimpleTypes, isArray, isNumber, isString, ValueType } from '../validationTypes.js'
 import { keyOfSymbol, Options, propertyPathSymbol } from './config.js'
 import { getMinimumDepth } from './info.js'
-import { randomNumber, randomString } from './random.js'
+import { randomBoolean, randomNumber, randomString } from './random.js'
 
 const saneMaximumSize = 12
 
@@ -19,7 +19,7 @@ const simpleGeneration = (type: SimpleTypes, options: Options): any => {
     case 'number': return randomNumber(false, options.minNumber, options.maxNumber)
     case 'integer': return randomNumber(true, options.minNumber, options.maxNumber)
     case 'string': return randomString(options)
-    case 'boolean': return Math.random() > 0.5
+    case 'boolean': return randomBoolean()
     default: throw new Error(`Unknown validator:${JSON.stringify(type)}`)
   }
 }

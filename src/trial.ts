@@ -8,7 +8,6 @@ const run = async (): Promise<any> => {
   const selfSchema = loadJson(await file('./selfSchema.json', 'utf8'))
   const result = validate(selfSchema, example)
   if (result.result !== 'pass') {
-    // UUU OOO Property path is not validated for type !!!???
     console.log(result, 'WARNING \n\n INPUT IS INVALID \n\n')
     fs.writeFileSync('./failSchemaValidation.json', JSON.stringify(result.output, null, 2))
   }
@@ -17,11 +16,11 @@ const run = async (): Promise<any> => {
 
   let validated = null
 
-  const count = 100
-  for (let i = 0; i < count; i++) {
+  const count = 2
+  for (let i = 1; i < count; i++) {
     console.log(i)
     const randomSeed = i
-    generated = generate(example, { maxDepthSoft: 2, arrayMax: 3, randomSeed })
+    generated = generate(example, { maxDepthSoft: 2, arrayMax: 3, randomSeed: 9 })
     // console.log(generated)
     validated = validate(example, generated)
     if (validated.result !== 'pass') {

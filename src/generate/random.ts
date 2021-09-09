@@ -15,6 +15,9 @@ export const randomNumber = (isInteger: boolean, c1: number, c2: number): number
   return num
 }
 
+export const randomBoolean = (): boolean => {
+  return seededRandom() > 0.5
+}
 export const randomString = (options: Options, lengthIn?: number): string => {
   const length = lengthIn ??
     randomNumber(true, options.minStringLength, options.maxStringLength)
