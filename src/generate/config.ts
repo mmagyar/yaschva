@@ -12,6 +12,7 @@ export interface Options {
   maxDepthHard: number
   prefer: 'defined' | 'undefined' | 'none'
   absoluteMaxStringSize: number
+  randomSeed: number
 }
 
 export const keyOfSymbol = Symbol('KeyOf')

@@ -1,5 +1,5 @@
-import { Validation } from '../validationTypes.js'
-import { randomNumber } from './random.js'
+import { isObj, Validation } from '../validationTypes.js'
+import { randomNumber, setSeed } from './random.js'
 import { generateInternal } from './internal.js'
 import { keyOfSymbol, Options, propertyPathSymbol } from './config.js'
 import fs from 'fs'
@@ -16,7 +16,8 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     maxDepthSoft: 4,
     maxDepthHard: 32,
     prefer: 'none',
-    absoluteMaxStringSize: 8192
+    absoluteMaxStringSize: 8192,
+    randomSeed: Math.random()
   }
 
   // Walk every proeprty on the type, AS IS, withouth resolving anything
@@ -54,10 +55,19 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     return p
   }, [])
 
-  const generated1stPass = generateInternal(type, { ...defaultOptions, ...options }, {}, 0, type, neededKeysFor)
+  const usedOptions = { ...defaultOptions, ...options }
+  setSeed(usedOptions.randomSeed)
+  const generated1stPass = generateInternal(type, usedOptions, {}, 0, type, neededKeysFor)
   fs.writeFileSync('./faultRawGen.json', JSON.stringify(generated1stPass || {}, null, 2))
 
-  const propertyPath = (data: any, path: string[] = []): any => {
+  // TODO Schema generation is failing because we are generating propertyPaths as keyof to non objects
+  // TODO Also there are keyOf being generated for toplevel type (such as $map)
+
+  // TODO Another slightly unrelated error: when base type is array, there cannot be $type keyOf property
+  // TODO before starting to generate, check the schema if keyofs make any sense. But that may not be possible, so it may need to be on the fly. This is actually just a problem when the base type is not an object. Does it make any sense to do keyOf if the base type is not an object / map (or meta of those)? i don't think so. Need to check if i can disable this on schame level, but i think that would be too complicated, and not worth it (since such nonsense schema will fail on validation) so it's probably a problem with the generator, and i need to solve it there.
+
+  const propertyPath = (data: any, onlyObjects: boolean, path: string[] = []): any => {
+    // Maybe there should be no path generated to properties starting with a $? nah, thats not the solution / problem
     if (!data || typeof data !== 'object' || Array.isArray(data) || typeof data?.symbol === 'symbol') return path
     const entries = Object.entries(data)
     const randomIndex = randomNumber(true, 0, entries.length)
@@ -65,12 +75,9 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
       return path
     }
 
-    // TODO Schema generation is failing because we are generating propertyPaths as keyof to non objects
-    // TODO Also there are keyOf being generated for toplevel type (such as $map)
+    console.log('PP', onlyObjects, isObj(data), path)
 
-    // TODO Another slightly unrelated error: when base type is array, there cannot be $type keyOf property
-
-    return propertyPath(entries[randomIndex][1], path.concat([entries[randomIndex][0]]))
+    return propertyPath(entries[randomIndex][1], onlyObjects, path.concat([entries[randomIndex][0]]))
   }
 
   const symbolFinder = (data: any, rootData?: any): any => {
@@ -132,11 +139,13 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
                 randomKey = possibleKeys.find(x => typeof result[key][x] === 'undefined') ?? possibleKeys[0]
               }
             }
+            console.log('VT', (value as any).valueType)
             result[key][randomKey] = generate((value as any).valueType)
           }
         }
       } else if ((value as any)?.symbol === propertyPathSymbol) {
-        result[key] = propertyPath(rootDataCurrent)
+        console.log(value)
+        result[key] = propertyPath(rootDataCurrent, (value as any).type?.$propertyPath?.onlyObjects)
       } else {
         result[key] = replaceKeyOfAndPropertyPath(value, rootDataCurrent)
       }

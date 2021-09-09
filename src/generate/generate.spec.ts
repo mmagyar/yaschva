@@ -202,10 +202,10 @@ test('Generates uuid based on regex', (t) => {
   }
 })
 
-test('Does not add property to object if it\'s optionally undefined', (t) => {
+test('Does not add property to object if it\'s optionally undefined and undefined is prefered', (t) => {
   const undefinedGenerated = []
   for (let i = 0; i < 240; i++) {
-    const result = generate({ value: ['string', '?'] })
+    const result = generate({ value: ['string', '?'] }, { prefer: 'undefined' })
     if (Object.keys(result).includes('value')) {
       t.is(typeof result.value, 'string')
     } else {

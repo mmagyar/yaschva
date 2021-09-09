@@ -17,10 +17,11 @@ const run = async (): Promise<any> => {
 
   let validated = null
 
-  const count = 10
+  const count = 100
   for (let i = 0; i < count; i++) {
     console.log(i)
-    generated = generate(example, { maxDepthSoft: 2, arrayMax: 3 })
+    const randomSeed = i
+    generated = generate(example, { maxDepthSoft: 2, arrayMax: 3, randomSeed })
     // console.log(generated)
     validated = validate(example, generated)
     if (validated.result !== 'pass') {

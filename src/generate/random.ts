@@ -1,11 +1,17 @@
 import { isObj, isSimpleType, isTypeDefValidation, Validation, ValueTypes } from '../validationTypes.js'
 import { Options } from './config.js'
 
+let seed = 1
+export const setSeed = (newSeed: number): void => { seed = newSeed }
+export const seededRandom = (): number => {
+  seed = (seed * 9301 + 49297) % 233280
+  return seed / 233280.0
+}
 export const randomNumber = (isInteger: boolean, c1: number, c2: number): number => {
   const min = Math.min(c1, c2)
   const max = Math.max(c1, c2)
-  const num = Math.random() * (max - min) + min
-  if (isInteger) return Math.round(num)
+  let num = seededRandom() * (max - min) + min
+  if (isInteger) num = Math.round(num)
   return num
 }
 
@@ -17,7 +23,7 @@ export const randomString = (options: Options, lengthIn?: number): string => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   const charactersLength = characters.length
   const max = Math.min(length, options.absoluteMaxStringSize)
-  for (let i = 0; i < max; i += 1) { result += characters.charAt(Math.floor(Math.random() * charactersLength)) }
+  for (let i = 0; i < max; i += 1) { result += characters.charAt(Math.floor(seededRandom() * charactersLength)) }
 
   return result
 }
