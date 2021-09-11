@@ -6,6 +6,7 @@ import { Validation } from './validationTypes.js'
 import fs from 'fs'
 import path from 'path'
 import { inspect } from 'util'
+
 inspect.defaultOptions.depth = null
 
 const file = fs.promises.readFile
@@ -140,25 +141,43 @@ test('Shows example schema working', async (t) => {
   t.deepEqual(validate(example, {}), {
     result: 'fail',
     output: {
-      myString: { error: 'Value is not a string', value: undefined },
-      myOptionalString: null,
-      myObject: { error: 'Value is not an Object', value: undefined },
-      myArrayOfNumbers: { error: 'Value is not an Array', value: undefined },
-      myEnum: { error: 'Value is not a string', value: undefined },
-      myKeyValuePairs: { error: 'Value is not a Map (freeform Object)', value: undefined },
-      myMultiType: {
-        error: 'Did not match any from the listed types',
-        value: undefined,
-        output: [
-          { error: 'Value is not a string', value: undefined },
-          { error: 'Value is not a number', value: undefined }
-        ]
-      },
-      myNull: { error: 'Value is not null', value: undefined },
-      myNumberRange: { error: 'Value is not a number', value: undefined },
-      myRegex: { error: 'Value is not a string', value: undefined },
-      myAddress: { error: 'Value is not an Object', value: undefined }
-    }
+      error: 'objectResult',
+      depth: 2,
+      errorCount: 10,
+      objectResults: {
+        myAddress: { error: 'Value is not an Object', value: undefined, depth: 1 },
+        myString: { error: 'Value is not a string', value: undefined, depth: 1 },
+        myOptionalString: null,
+        myObject: { error: 'Value is not an Object', value: undefined, depth: 1 },
+        myArrayOfNumbers: { error: 'Value is not an Array', value: undefined, depth: 1 },
+        myEnum: { error: 'Value is not a string', value: undefined, depth: 1 },
+        myKeyValuePairs: {
+          error: 'Value is not a Map (freeform Object)',
+          value: undefined,
+          depth: 1
+        },
+        myMultiType: {
+          error: 'Did not match any from the listed types',
+          value: undefined,
+          depth: 2,
+          output: [
+            {
+              error: 'Value is not a string',
+              value: undefined,
+              depth: 2
+            },
+            {
+              error: 'Value is not a number',
+              value: undefined,
+              depth: 2
+            }
+          ]
+        },
+        myNumberRange: { error: 'Value is not a number', value: undefined, depth: 1 },
+        myNull: { error: 'Value is not null', value: undefined, depth: 1 },
+        myRegex: { error: 'Value is not a string', value: undefined, depth: 1 }
+      }
+    } as any
   })
 })
 
@@ -179,28 +198,47 @@ test('Provides useful error description', (t) => {
   const result = validate(type, { num: 'abc' })
 
   t.is(result.result, 'fail')
-
+  console.log(result.output)
   t.deepEqual(result.output, {
-    num: { error: 'Value is not a number', value: 'abc' },
-    int: { error: 'Value is not an integer ', value: undefined },
-    str: { error: 'Value is not a string', value: undefined },
-    bool: { error: 'Value is not a boolean', value: undefined },
-    obj: { error: 'Value is not an Object', value: undefined }
-  })
+    error: 'objectResult',
+    errorCount: 5,
+    objectResults: {
+      num: { error: 'Value is not a number', value: 'abc', depth: 1 },
+      int: { error: 'Value is not an integer ', value: undefined, depth: 1 },
+      str: { error: 'Value is not a string', value: undefined, depth: 1 },
+      bool: { error: 'Value is not a boolean', value: undefined, depth: 1 },
+      obj: { error: 'Value is not an Object', value: undefined, depth: 1 }
+    },
+    depth: 1
+  } as any)
 
   const result2 = validate(type, { int: 123.3, str: [], bool: 'true', obj: {} })
 
   t.is(result2.result, 'fail')
   t.deepEqual(result2.output, {
-    num: { error: 'Value is not a number', value: undefined },
-    int: { error: 'Value is not an integer ', value: 123.3 },
-    str: { error: 'Value is not a string', value: [] },
-    bool: { error: 'Value is not a boolean', value: 'true' },
-    obj: {
-      member: { error: 'Value is not a boolean', value: undefined },
-      memberId: null
-    }
-  })
+    error: 'objectResult',
+    errorCount: 5,
+    objectResults: {
+      int: { error: 'Value is not an integer ', value: 123.3, depth: 1 },
+      str: {
+        error: 'Value is not a string',
+        value: '[object ommited]',
+        depth: 1
+      },
+      bool: { error: 'Value is not a boolean', value: 'true', depth: 1 },
+      obj: {
+        error: 'objectResult',
+        errorCount: 1,
+        objectResults: {
+          member: { error: 'Value is not a boolean', value: undefined, depth: 2 },
+          memberId: null
+        },
+        depth: 2
+      },
+      num: { error: 'Value is not a number', value: undefined, depth: 1 }
+    },
+    depth: 2
+  } as any)
 })
 
 test('Uses null to signal that there is no error for a given property', (t) => {
@@ -211,12 +249,144 @@ test('Uses null to signal that there is no error for a given property', (t) => {
 
   t.is(result.result, 'pass')
   t.deepEqual(result.output, {
-    obj: {
-      member: null,
-      nested: { inside: null },
-      memberId: null
-    }
+    error: 'objectResult',
+    errorCount: 0,
+    objectResults: {
+      obj: {
+        error: 'objectResult',
+        errorCount: 0,
+        objectResults: {
+          member: null,
+          nested: {
+            error: 'objectResult',
+            errorCount: 0,
+            objectResults: { inside: null },
+            depth: 2
+          },
+          memberId: null
+        },
+        depth: 2
+      }
+    },
+    depth: 2
+  } as any)
+})
+
+test('Most likely error is first on the error output', (t) => {
+  const type = validSchema([
+    { member: 'boolean', memberId: ['string', '?'] },
+    { aValue: 'string', nested: { inside: 'string' } },
+    'number'
+  ], t)
+
+  const result = validate(type, { aValue: 'asdf' })
+  console.log(result.output)
+
+  // with such simple input, we just use the order of declaration
+  t.deepEqual(validate(type, 'a string').output, {
+    error: 'Did not match any from the listed types',
+    depth: 1,
+    value: 'a string',
+    output: [
+      { error: 'Value is not an Object', depth: 1, value: 'a string' },
+      { error: 'Value is not an Object', depth: 1, value: 'a string' },
+      { error: 'Value is not a number', depth: 1, value: 'a string' }
+    ]
   })
+
+  // The input data has one field correct from the object option,
+  // so we show the error message ragrding the object first
+  // The option with the least number of errors will be first
+  t.deepEqual(validate(type, { member: true, memberId: 3 }).output,
+    {
+      error: 'Did not match any from the listed types',
+      depth: 3,
+      value: '[object ommited]',
+      output: [
+        {
+          error: 'objectResult',
+          depth: 3,
+          errorCount: 1,
+          objectResults: {
+            member: null,
+            memberId: {
+              error: 'Did not match any from the listed types',
+              depth: 3,
+              value: 3,
+              output: [
+                { error: 'Value is not a string', depth: 3, value: 3 },
+                { error: 'Value is not undefined', depth: 3, value: 3 }
+              ]
+            }
+          }
+        },
+        {
+          error: 'objectResult',
+          depth: 2,
+          errorCount: 4,
+          objectResults: {
+            member: {
+              error: 'Key does not exist on validator',
+              depth: 1,
+              value: true
+            },
+            memberId: {
+              error: 'Key does not exist on validator',
+              depth: 1,
+              value: 3
+            },
+            aValue: { error: 'Value is not a string', depth: 2, value: undefined },
+            nested: { error: 'Value is not an Object', depth: 2, value: undefined }
+          }
+        },
+        {
+          error: 'Value is not a number',
+          depth: 1,
+          value: '[object ommited]'
+        }
+      ]
+    } as any
+  )
+
+  t.deepEqual(validate(type, { aValue: 'asdf' }).output,
+    {
+      error: 'Did not match any from the listed types',
+      depth: 2,
+      value: '[object ommited]',
+      output: [
+        {
+          error: 'objectResult',
+          depth: 2,
+          errorCount: 1,
+          objectResults: {
+            aValue: null,
+            nested: { error: 'Value is not an Object', depth: 2, value: undefined }
+          }
+        },
+        {
+          error: 'objectResult',
+          depth: 2,
+          errorCount: 2,
+          objectResults: {
+            aValue: {
+              error: 'Key does not exist on validator',
+              depth: 1,
+              value: 'asdf'
+            },
+            member: { error: 'Value is not a boolean', depth: 2, value: undefined },
+            memberId: null
+          }
+        },
+        {
+          error: 'Value is not a number',
+          depth: 1,
+          value: '[object ommited]'
+        }
+      ]
+    })
+
+  // If a tree matches our data deeper, it will be shown first, even with more errors
+  // todo write test for it.
 })
 
 test('Throws on undefined', (t) => {
@@ -242,6 +412,6 @@ test('Protects against prototype injection on class', (t) => {
   // eslint-disable-next-line no-proto
   input.__proto__.b = 3
   const result: any = validate(schema, input)
-  t.is(result.output?.a, null)
-  t.is(result.output.b.error, 'Did not match any from the listed types')
+  t.is(result.output?.objectResults.a, null)
+  t.is(result.output.objectResults.b.error, 'Did not match any from the listed types')
 })

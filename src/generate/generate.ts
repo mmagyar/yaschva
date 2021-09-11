@@ -67,6 +67,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
   // TODO before starting to generate, check the schema if keyofs make any sense. But that may not be possible, so it may need to be on the fly. This is actually just a problem when the base type is not an object. Does it make any sense to do keyOf if the base type is not an object / map (or meta of those)? i don't think so. Need to check if i can disable this on schame level, but i think that would be too complicated, and not worth it (since such nonsense schema will fail on validation) so it's probably a problem with the generator, and i need to solve it there.
 
   const propertyPath = (data: any, onlyObjects: boolean, path: string[] = []): any => {
+    console.log('DAAAA')
     // Maybe there should be no path generated to properties starting with a $? nah, thats not the solution / problem
     if (!data || typeof data !== 'object' || Array.isArray(data) || typeof data?.symbol === 'symbol') return path
     const entries = Object.entries(data)

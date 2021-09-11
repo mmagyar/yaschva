@@ -20,7 +20,7 @@ const run = async (): Promise<any> => {
   for (let i = 1; i < count; i++) {
     console.log(i)
     const randomSeed = i
-    generated = generate(example, { maxDepthSoft: 2, arrayMax: 3, randomSeed: 9 })
+    generated = generate(example, { maxDepthSoft: 2, arrayMax: 3, randomSeed })
     // console.log(generated)
     validated = validate(example, generated)
     if (validated.result !== 'pass') {

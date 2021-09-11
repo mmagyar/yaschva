@@ -2,16 +2,16 @@
   "$schema": "./schema.json",
   "$types": {
     "$customType": { "$keyOf": ["$types"] },
-    "$customTypeDefObject": {
+    "$customObjectType": {
       "$keyOf": ["$types"],
-      "valueType": ["$objectTypeKeyOf", "$customTypeDefObject", "$objectOnlyMetaTypeKeyOf"]
+      "valueType": ["$objectType", "$customObjectType", "$objectOnlyMetaType"]
     },
     "$customTypeDef": {
       "\\$types": [
         "?",
         {
           "key": { "$string": { "regex": "^\\$([a-zA-Z0-9_]{1,128})$" } },
-          "$map": "$valueTypesKeyOf"
+          "$map": "$valueTypes"
         }
       ]
     },
@@ -31,23 +31,12 @@
       "key": { "$string": { "regex": "^(?!\\$).*" } },
       "$map": "$valueTypes"
     },
-    "$objectTypeKeyOf": {
-      "key": { "$string": { "regex": "^(?!\\$).*" } },
-      "$map": "$valueTypesKeyOf"
-    },
     "$arrayType": {
       "name": ["?", "string"],
       "description": ["?", "string"],
       "minLength": "$optionalPositiveInteger",
       "maxLength": "$optionalPositiveInteger",
       "\\$array": "$valueTypes"
-    },
-    "$arrayTypeKeyOf": {
-      "name": ["?", "string"],
-      "description": ["?", "string"],
-      "minLength": "$optionalPositiveInteger",
-      "maxLength": "$optionalPositiveInteger",
-      "\\$array": "$valueTypesKeyOf"
     },
     "$stringType": {
       "\\$string": [
@@ -70,20 +59,10 @@
       "description": ["?", "string"],
       "\\$type": "$valueTypes"
     },
-    "$metaTypeKeyOf": {
-      "name": ["?", "string"],
-      "description": ["?", "string"],
-      "\\$type": "$valueTypesKeyOf"
-    },
     "$objectOnlyMetaType": {
       "name": ["?", "string"],
       "description": ["?", "string"],
-      "\\$type": ["$objectType", "$objectOnlyMetaType"]
-    },
-    "$objectOnlyMetaTypeKeyOf": {
-      "name": ["?", "string"],
-      "description": ["?", "string"],
-      "\\$type": ["$objectTypeKeyOf", "$objectOnlyMetaTypeKeyOf", "$customTypeDefObject"]
+      "\\$type": ["$objectType", "$objectOnlyMetaType", "$customObjectType"]
     },
     "$mapType": {
       "minLength": "$optionalPositiveInteger",
@@ -92,15 +71,8 @@
       "keySpecificType": ["?", { "$map": "$valueTypes" }, "$customType"],
       "\\$map": "$valueTypes"
     },
-    "$mapTypeKeyOf": {
-      "minLength": "$optionalPositiveInteger",
-      "maxLength": "$optionalPositiveInteger",
-      "key": ["?", "$stringType", "$enumType", "$keyOfType", "$customType"],
-      "keySpecificType": ["?", { "$map": "$valueTypesKeyOf" }, "$customType"],
-      "\\$map": "$valueTypesKeyOf"
-    },
     "$keyOfType": {
-      "valueType": ["?", "$valueTypesKeyOf"],
+      "valueType": ["?", "$valueTypes"],
       "\\$keyOf": {"$propertyPath":{ "onlyObjects": true }}
     },
     "$propertyPathType": {
@@ -109,16 +81,10 @@
     "$literalType": { "\\$literal": ["string", "number", "null"] },
     "$andType": {
       "\\$and": {
-        "$array": ["$objectOnlyMetaType", "$objectType", "$customTypeDefObject"]
-      }
-    },
-    "$andTypeKeyOf": {
-      "\\$and": {
-        "$array": ["$objectOnlyMetaTypeKeyOf", "$objectType", "$customTypeDefObject"]
+        "$array": ["$objectOnlyMetaType", "$objectType", "$customObjectType"]
       }
     },
     "$tupleType": { "\\$tuple": { "$array": "$valueTypes", "minLength": 1 } },
-    "$tupleTypeKeyOf": { "\\$tuple": { "$array": "$valueTypesKeyOf", "minLength": 1 } },
     "$valueType": [
       "$simpleTypes",
       "$enumType",
@@ -128,45 +94,32 @@
       "$numberType",
       "$metaType",
       "$mapType",
+      "$keyOfType",
       "$literalType",
-      "$andType",     
-      "$tupleType"
+      "$andType",
+      "$customType",
+      "$tupleType",
+      "$propertyPathType"
     ],
-    "$valueTypeKeyOf": [
+    "$valueTypes": [{ "$array": "$valueType", "minLength": 1 }, "$valueType"],
+    "$validation": [
       "$simpleTypes",
       "$enumType",
-      "$stringType",
-      "$numberType",
       "$literalType",
-      "$keyOfType",
-      "$customType",
-      "$propertyPathType",
-      "$objectTypeKeyOf",
-      "$arrayTypeKeyOf",
-      "$metaTypeKeyOf",
-      "$mapTypeKeyOf",
-      "$tupleTypeKeyOf",
-      "$andTypeKeyOf"
-      ],
-    "$valueTypes": [{ "$array": "$valueType", "minLength": 1 }, "$valueType"],
-    "$valueTypesKeyOf": [{ "$array": "$valueTypeKeyOf", "minLength": 1 }, "$valueTypeKeyOf"]
+      {
+        "$map": "$valueTypes",
+        "key": { "$string": { "regex": "(^(?!\\$).*)|(\\$types)" } },
+        "keySpecificType": "$customTypeDef"
+      },
+      { "$and": ["$customTypeDef", "$arrayType"] },
+      { "$and": ["$customTypeDef", "$stringType"] },
+      { "$and": ["$customTypeDef", "$numberType"] },
+      { "$and": ["$customTypeDef", "$metaType"] },
+      { "$and": ["$customTypeDef", "$mapType"] },
+      { "$and": ["$customTypeDef", "$andType"] },
+      { "$and": ["$customTypeDef", "$tupleType"] },
+      { "minLength": 1, "$array": "$valueType" }
+    ]
   },
-  "$type": [
-    "$simpleTypes",
-    "$enumType",
-    "$literalType",
-    {
-      "$map": "$valueTypesKeyOf",
-      "key": { "$string": { "regex": "(^(?!\\$).*)|(\\$types)" } },
-      "keySpecificType": "$customTypeDef"
-    },
-    { "$and": ["$customTypeDef", "$arrayTypeKeyOf"] },
-    { "$and": ["$customTypeDef", "$stringType"] },
-    { "$and": ["$customTypeDef", "$numberType"] },
-    { "$and": ["$customTypeDef", "$metaTypeKeyOf"] },
-    { "$and": ["$customTypeDef", "$mapTypeKeyOf"] },
-    { "$and": ["$customTypeDef", "$andTypeKeyOf"] },
-    { "$and": ["$customTypeDef", "$tupleTypeKeyOf"] },
-    { "minLength": 1, "$array": "$valueType" }
-  ]
+  "$type": "$validation"
 }
