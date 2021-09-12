@@ -66,19 +66,28 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
   // TODO Another slightly unrelated error: when base type is array, there cannot be $type keyOf property
   // TODO before starting to generate, check the schema if keyofs make any sense. But that may not be possible, so it may need to be on the fly. This is actually just a problem when the base type is not an object. Does it make any sense to do keyOf if the base type is not an object / map (or meta of those)? i don't think so. Need to check if i can disable this on schame level, but i think that would be too complicated, and not worth it (since such nonsense schema will fail on validation) so it's probably a problem with the generator, and i need to solve it there.
 
-  const propertyPath = (data: any, onlyObjects: boolean, path: string[] = []): any => {
-    console.log('DAAAA')
+  const propertyPath = (data: any, onlyObjects: boolean, path: string[] = [], fallbackPath: string[] = []): any => {
+    // console.log('DAAAA', JSON.stringify(path))
     // Maybe there should be no path generated to properties starting with a $? nah, thats not the solution / problem
-    if (!data || typeof data !== 'object' || Array.isArray(data) || typeof data?.symbol === 'symbol') return path
-    const entries = Object.entries(data)
+    if (!data || typeof data !== 'object' || Array.isArray(data) || typeof data?.symbol === 'symbol') {
+      // console.log('EARLY PATH', onlyObjects ? fallbackPath : path, onlyObjects)
+      return onlyObjects ? fallbackPath : path
+    }
+    const entries = Object.entries(data).filter(([key, value]) => !key.startsWith('$'))
+
+    if (entries.length === 0) {
+      return fallbackPath
+    }
     const randomIndex = randomNumber(true, 0, entries.length)
-    if (randomIndex === entries.length) {
+    if (randomNumber(true, 0, 1) === 1) {
+    // if (randomIndex === entries.length) { // why did i exactly put this if here?
+      // console.log('PATH', path)
       return path
     }
 
-    console.log('PP', onlyObjects, isObj(data), path)
+    // console.log('PP', onlyObjects, isObj(data), path)
 
-    return propertyPath(entries[randomIndex][1], onlyObjects, path.concat([entries[randomIndex][0]]))
+    return propertyPath(entries[randomIndex][1], onlyObjects, path.concat([entries[randomIndex][0]]), path)
   }
 
   const symbolFinder = (data: any, rootData?: any): any => {
@@ -104,6 +113,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     const result: any = Array.isArray(data) ? [] : {}
     for (const [key, value] of Object.entries(data)) {
       if ((value as any)?.symbol === keyOfSymbol) {
+        // console.log('KYOF', (value as any).type.$keyOf)
         const current = (value as any).type.$keyOf.reduce((p: any, c: any) => p?.[c], rootDataCurrent)
 
         if (!current) {
@@ -140,12 +150,11 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
                 randomKey = possibleKeys.find(x => typeof result[key][x] === 'undefined') ?? possibleKeys[0]
               }
             }
-            console.log('VT', (value as any).valueType)
+            // console.log('VT', (value as any).valueType)
             result[key][randomKey] = generate((value as any).valueType)
           }
         }
       } else if ((value as any)?.symbol === propertyPathSymbol) {
-        console.log(value)
         result[key] = propertyPath(rootDataCurrent, (value as any).type?.$propertyPath?.onlyObjects)
       } else {
         result[key] = replaceKeyOfAndPropertyPath(value, rootDataCurrent)

@@ -9,23 +9,27 @@ const run = async (): Promise<any> => {
   const result = validate(selfSchema, example)
   if (result.result !== 'pass') {
     console.log(result, 'WARNING \n\n INPUT IS INVALID \n\n')
-    fs.writeFileSync('./failSchemaValidation.json', JSON.stringify(result.output, null, 2))
+    fs.writeFileSync('./testdata/failSchemaValidation.json', JSON.stringify(result.output, null, 2))
   }
 
   let generated = null
 
   let validated = null
 
-  const count = 2
-  for (let i = 1; i < count; i++) {
+  const count = 20
+  for (let i = 0; i < count; i++) {
     console.log(i)
     const randomSeed = i
     generated = generate(example, { maxDepthSoft: 2, arrayMax: 3, randomSeed })
-    // console.log(generated)
+    fs.writeFileSync(`./testdata/generated-schema-${i}.json`, JSON.stringify(generated, null, 2))
+
     validated = validate(example, generated)
+
+    const generatedData = generate(generated, { randomSeed })
+    fs.writeFileSync(`./testdata/generated-${i}.json`, JSON.stringify(generatedData, null, 2))
     if (validated.result !== 'pass') {
       console.error('VALIDATION FAILED')
-      fs.writeFileSync('./failValidation.json', JSON.stringify(validated, null, 2))
+      fs.writeFileSync(`./testdata/failed_validation-${i}.json`, JSON.stringify(validated, null, 2))
       break
     }
   }
