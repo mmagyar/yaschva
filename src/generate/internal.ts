@@ -121,7 +121,6 @@ export const generateInternal = (
   if (isEnum(type)) { return type.$enum[randomNumber(true, 0, type.$enum.length - 1)] }
 
   if (isKeyOf(type)) {
-    console.log('INTERNAL', type)
     // Just Return a symbol, will resolve it in the second pass
     return { symbol: keyOfSymbol, type }
   }
@@ -136,14 +135,16 @@ export const generateInternal = (
       let val: any | Validation = value
       // This is strictly needed to generate a schema that makes sense
       const num = { $number: { min: 0, max: 16, integer: true } }
-      if ((key === 'minLength' || key === 'maxLength') && (value === 'number')) {
+      if ((key === 'minLength' || key === 'maxLength') && (value === '$optionalPositiveInteger')) {
         val = num
       }
       if ((key === 'minLength' || key === 'maxLength') && (value as any).$number) {
+        console.log('NOW THIS')
         val = { $number: { ...(value as any).$number, ...num.$number } }
       }
       if ((key === 'minLength' || key === 'maxLength') &&
         Array.isArray(value) && value.some((x: any) => x.$number)) {
+        console.log('NOW That')
         val = value.map((x: any) => x.$number ? { $number: { ...x.$number, ...num.$number } } : x)
       }
 
@@ -158,7 +159,6 @@ export const generateInternal = (
   if (isMap(type)) {
     const mapType = type
     let min = typeof mapType.minLength === 'number' ? mapType.minLength : options.mapMin
-
     // This map is referenced as keyOf, override minLength if it's less then one,
     // to make sure we have at least on element to refer
     if (min < 1 && needed(neededPaths, currentPath)) {

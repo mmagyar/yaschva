@@ -1,4 +1,4 @@
-import { isObj, Validation } from '../validationTypes.js'
+import { Validation } from '../validationTypes.js'
 import { randomNumber, setSeed } from './random.js'
 import { generateInternal } from './internal.js'
 import { keyOfSymbol, Options, propertyPathSymbol } from './config.js'
@@ -44,7 +44,8 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     if (Array.isArray(obj)) {
       return obj.flatMap((val, i) => itrFunction(i)).filter(x => x)
     }
-    return Object.keys(obj).flatMap(itrFunction).filter(x => x)
+
+    return Object.keys(obj || {}).flatMap(itrFunction).filter(x => x)
   }
 
   const neededKeysFor = iterate(type as any)?.map((x: any) => x.value).reduce((p: string[][], c: string[]) => {
@@ -78,14 +79,10 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     if (entries.length === 0) {
       return fallbackPath
     }
-    const randomIndex = randomNumber(true, 0, entries.length)
-    if (randomNumber(true, 0, 1) === 1) {
-    // if (randomIndex === entries.length) { // why did i exactly put this if here?
-      // console.log('PATH', path)
+    const randomIndex = randomNumber(true, 0, entries.length - 1)
+    if (randomNumber(true, 0, 1) === 1) { // Roll the dice, if we are deep enought
       return path
     }
-
-    // console.log('PP', onlyObjects, isObj(data), path)
 
     return propertyPath(entries[randomIndex][1], onlyObjects, path.concat([entries[randomIndex][0]]), path)
   }

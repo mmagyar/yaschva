@@ -31,7 +31,7 @@
     "test:fast": "ava --verbose",
     "test:watch": "tsc-watch --onSuccess \"c8 --all --exclude \\\"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**,index.js,index.ts}\\\" --reporter=text-summary --reporter=clover --reporter=json ava\"",
     "test:watchOne": "tsc-watch --onSuccess \"c8 --all --exclude \\\"{**/*.spec.*,**/*.d.ts,cjs/**,coverage/**,index.js,index.ts}\\\" --reporter=text ava --match \\\"\\\" \"",
-    "debug":  "node es6/trial.js"
+    "debug": "node es6/trial.js"
   },
   "author": "mmagyar.com",
   "license": "MIT",
@@ -60,8 +60,9 @@
     "typescript": "^4.1.5"
   },
   "dependencies": {
+    "drange": "^1.0.2",
     "microtil": "^2.0.3",
-    "randexp": "^0.5.3"
+    "ret": "^0.2.0"
   },
   "ava": {
     "files": [

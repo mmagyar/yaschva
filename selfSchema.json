@@ -65,6 +65,22 @@
       "maxLength": "$optionalPositiveInteger",
       "\\$array": "$valueTypesKeyOf"
     },
+    "$arrayTypeRootCanHaveKeyOf": {
+      "name": ["?", "string"],
+      "description": ["?", "string"],
+      "minLength": "$optionalPositiveInteger",
+      "maxLength": "$optionalPositiveInteger",
+      "\\$array":  [
+        "$rootCanHaveKeyOf", { "$array": "$rootCanHaveKeyOf", "minLength": 1 }]
+    }, 
+    "$arrayTypeRootCanNotHaveKeyOf": {
+      "name": ["?", "string"],
+      "description": ["?", "string"],
+      "minLength": "$optionalPositiveInteger",
+      "maxLength": "$optionalPositiveInteger",
+      "\\$array":  [
+        "$rootCanNotHaveKeyOf", { "$array": "$rootCanNotHaveKeyOf", "minLength": 1 }]
+    },
 
     "$stringType": {
       "\\$string": [
@@ -99,7 +115,8 @@
       "description": ["?", "string"],
       "\\$type": [
         "$rootCanHaveKeyOf", { "$array": "$rootCanHaveKeyOf", "minLength": 1 }]
-    },  "$metaTypeRootCanNotHaveKeyOf": {
+    },  
+    "$metaTypeRootCanNotHaveKeyOf": {
       "name": ["?", "string"],
       "description": ["?", "string"],
       "\\$type": [
@@ -130,6 +147,22 @@
       "key": ["?", "$stringType", "$enumType", "$keyOfType", "$customType"],
       "keySpecificType": ["?", { "$map": "$valueTypesKeyOf" }, "$customType"],
       "\\$map": "$valueTypesKeyOf"
+    },   
+    "$mapTypeRootCanKeyOf": {
+      "minLength": "$optionalPositiveInteger",
+      "maxLength": "$optionalPositiveInteger",
+      "key": ["?", "$stringType", "$enumType", "$keyOfType", "$customType"],
+      "keySpecificType": ["?", { "$map": "$valueTypesKeyOf" }, "$customType"],
+      "\\$map": [
+        "$rootCanHaveKeyOf", { "$array": "$rootCanHaveKeyOf", "minLength": 1 }]
+    },
+    "$mapTypeRootCanNotKeyOf": {
+      "minLength": "$optionalPositiveInteger",
+      "maxLength": "$optionalPositiveInteger",
+      "key": ["?", "$stringType", "$enumType", "$customType"],
+      "keySpecificType": ["?", { "$map": "$valueTypes" }, "$customType"],
+      "\\$map": [
+        "$rootCanNotHaveKeyOf", { "$array": "$rootCanNotHaveKeyOf", "minLength": 1 }]
     },
 
     "$keyOfType": {
@@ -195,7 +228,8 @@
       "$mapType",
       "$literalType",
       "$andType",     
-      "$tupleType"
+      "$tupleType",      
+      "$customType"
     ],
     "$valueTypeKeyOf": [
       "$simpleTypes",
@@ -225,13 +259,16 @@
       "key": { "$string": { "regex": "(^(?!\\$).*)|(\\$types)" } },
       "keySpecificType": "$customTypeDefKeyOf"
     },
-    { "$and": ["$customTypeDefKeyOf", "$arrayTypeKeyOf"] },
-    { "$and": ["$customTypeDefKeyOf", "$mapTypeKeyOf"] },
+    { "$and": ["$customTypeDefKeyOf", "$arrayTypeRootCanHaveKeyOf"] },
+    { "$and": ["$customTypeDefKeyOf", "$mapTypeRootCanKeyOf"] },
     { "$and": ["$customTypeDefKeyOf", "$andTypeKeyOf"] },
     { "$and": ["$customTypeDefKeyOf", "$metaTypeRootCanHaveKeyOf"] },
     { "$and": ["$customTypeDefKeyOf", "$tupleTypeRootCanHaveKeyOf"] },
     { "$and": ["$customTypeDef", "$metaTypeRootCanNotHaveKeyOf"] },
     { "$and": ["$customTypeDef", "$tupleTypeRootCanNotHaveKeyOf"] },
+    { "$and": ["$customTypeDef", "$arrayTypeRootCanNotHaveKeyOf"] },
+    { "$and": ["$customTypeDef", "$mapTypeRootCanNotKeyOf"] },
+
     { "$and": ["$customTypeDef", "$stringType"] },
     { "$and": ["$customTypeDef", "$numberType"] },
     { "minLength": 1, "$array": "$valueTypeKeyOf" }

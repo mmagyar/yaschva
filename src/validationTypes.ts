@@ -64,6 +64,6 @@ export const isObj = (tbd: any): tbd is ObjectType =>
 export const isTypeDefValidation = (tbd: any): tbd is TypeDef => tbd.$types
 export const isAnd = (tbd: any): tbd is AndType => tbd.$and
 export const isKeyOf = (tbd: any): tbd is KeyOfType => tbd.$keyOf
-export const isLiteral = (tbd: any): tbd is LiteralType => tbd.$literal
+export const isLiteral = (tbd: any): tbd is LiteralType => typeof tbd.$literal !== 'undefined'
 export const isTuple = (tbd: any): tbd is TupleType => tbd.$tuple
 export const isPropertyPath = (tbd: any): tbd is PropertyPathType => tbd.$propertyPath

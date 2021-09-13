@@ -16,7 +16,7 @@ const run = async (): Promise<any> => {
 
   let validated = null
 
-  const count = 20
+  const count = 200
   for (let i = 0; i < count; i++) {
     console.log(i)
     const randomSeed = i
@@ -24,7 +24,6 @@ const run = async (): Promise<any> => {
     fs.writeFileSync(`./testdata/generated-schema-${i}.json`, JSON.stringify(generated, null, 2))
 
     validated = validate(example, generated)
-
     const generatedData = generate(generated, { randomSeed })
     fs.writeFileSync(`./testdata/generated-${i}.json`, JSON.stringify(generatedData, null, 2))
     if (validated.result !== 'pass') {
