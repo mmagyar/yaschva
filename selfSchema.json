@@ -256,7 +256,7 @@
     "$literalType",
     {
       "$map": "$valueTypesKeyOf",
-      "key": { "$string": { "regex": "(^(?!\\$).*)|(\\$types)" } },
+      "key": { "$string": { "regex": "(^(?!\\$).*)" } },
       "keySpecificType": "$customTypeDefKeyOf"
     },
     { "$and": ["$customTypeDefKeyOf", "$arrayTypeRootCanHaveKeyOf"] },
