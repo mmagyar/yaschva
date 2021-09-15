@@ -9,7 +9,7 @@ import { randomBoolean, randomNumber, randomString } from './random.js'
 const saneMaximumSize = 12
 
 const arrayEq = (x: string[], c: string[]): boolean => x.length === c.length && x.every((y, i) => y === c[i])
-const needed = (x: string[][], y: string[]): boolean => x.some(z => arrayEq(y, z))
+const needed = (x: Array<{path: string[], type: any}>, y: string[]): boolean => x.some(z => arrayEq(y, z.path))
 const simpleTypes: SimpleTypes[] = ['number', 'integer', '?', 'string', 'boolean']
 const simpleGeneration = (type: SimpleTypes, options: Options): any => {
   switch (type) {
@@ -40,7 +40,7 @@ export const generateInternal = (
   typesIn: { [key: string]: Validation },
   depth: number,
   rootType: Validation,
-  neededPaths: string[][],
+  neededPaths: Array<{path: string[], type: any}>,
   currentPath: string[] = []
 ): any => {
   if (depth >= options.maxDepthHard) {

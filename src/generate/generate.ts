@@ -1,8 +1,19 @@
 import { Validation } from '../validationTypes.js'
-import { randomNumber, setSeed } from './random.js'
+import { randomNumber, seededRandom, setSeed } from './random.js'
 import { generateInternal } from './internal.js'
 import { keyOfSymbol, Options, propertyPathSymbol } from './config.js'
 import fs from 'fs'
+import { processCustomTypes, validate, validateRecursive } from '../validate.js'
+
+function shuffleArray<T> (arrayIn: T[]): T[] {
+  const array = arrayIn.concat([])
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(seededRandom() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]
+  }
+  return array
+}
+
 export const generate = (type: Validation, options: Partial<Options> = {}): any => {
   const defaultOptions: Options = {
     arrayMin: 1,
@@ -25,10 +36,10 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
   // Because we just need to get the keyOf parameters, and resolving everything,
   // May result in an infine loop, because schemas can be recursive
 
-  const iterate = (obj: {[key: string]: any}, path: Array<string|number> = []): any => {
+  const iterate = (obj: {[key: string]: any}, path: Array<string|number> = []): Array<{value: string[], type: any}> => {
     const itrFunction = (key: string|number): any => {
       if (key === '$keyOf') {
-        return { path: path, value: obj[key] }
+        return { path: path, value: obj[key], type: obj }
       }
 
       if (typeof obj[key] === 'object') {
@@ -48,16 +59,21 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     return Object.keys(obj || {}).flatMap(itrFunction).filter(x => x)
   }
 
-  const neededKeysFor = iterate(type as any)?.map((x: any) => x.value).reduce((p: string[][], c: string[]) => {
-    if (!p.some(x => x.length === c.length && x.every((y, i) => y === c[i]))) {
-      p.push(c)
-    }
+  // This reduce remove all but one for the same keyOf, but that is not valid, since we may require multiple different types to be in a keyof
+  console.log(iterate(type as any))
+  const neededKeysFor = iterate(type as any)?.map((x) => ({ value: x.value, type: x.type }))
+    .reduce((p: Array<{path: string[], type: any}>, c) => {
+      if (!p.some(x => x.path.length === c.value.length && x.path.every((y, i) => y === c.value[i]))) {
+        p.push({ path: c.value, type: c.type })
+      }
 
-    return p
-  }, [])
+      return p
+    }, [])
 
   const usedOptions = { ...defaultOptions, ...options }
   setSeed(usedOptions.randomSeed)
+  console.log(neededKeysFor)
+  // TODO so the lacking generated type, duh i solved it, i just need to pass the typeinfo as well
   const generated1stPass = generateInternal(type, usedOptions, {}, 0, type, neededKeysFor)
   fs.writeFileSync('./faultRawGen.json', JSON.stringify(generated1stPass || {}, null, 2))
 
@@ -104,13 +120,12 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     return false
   }
 
-  const replaceKeyOfAndPropertyPath = (data: any, rootData?: any): any => {
+  const replaceKeyOfAndPropertyPath = (data: any, schema: Validation, rootData?: any): any => {
     const rootDataCurrent = rootData || data
     if (!data || typeof data !== 'object') return data
     const result: any = Array.isArray(data) ? [] : {}
     for (const [key, value] of Object.entries(data)) {
       if ((value as any)?.symbol === keyOfSymbol) {
-        // console.log('KYOF', (value as any).type.$keyOf)
         const current = (value as any).type.$keyOf.reduce((p: any, c: any) => p?.[c], rootDataCurrent)
 
         if (!current) {
@@ -131,9 +146,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
 
         possibleKeys = Object.keys(current)
 
-        if (!(value as any).valueType) {
-          result[key] = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
-        } else {
+        if ((value as any).valueType) {
           result[key] = {}
           for (let i = 0; i < (value as any)?.size; i++) {
             let randomKey = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
@@ -147,24 +160,43 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
                 randomKey = possibleKeys.find(x => typeof result[key][x] === 'undefined') ?? possibleKeys[0]
               }
             }
-            // console.log('VT', (value as any).valueType)
             result[key][randomKey] = generate((value as any).valueType)
           }
+        } else if ((value as any).type.valueType) {
+          console.log('KYOF', (value as any))
+          // Randomize order
+          const randPossibleKeys = shuffleArray(possibleKeys)
+          // Check every if there are any that fit
+          const customT = processCustomTypes(schema)
+          randPossibleKeys.find(x => {
+            // This may not be needed, since with the help of neededKeys i can resolve this
+            const a = current[x]
+            const b = validateRecursive((value as any).type.valueType, a, 0, { root: a, custom: customT.customTypes })
+            console.log('AAAAA', a, b.result)
+            return false
+          })
+          const b = validateRecursive((value as any).type.valueType, { a: 'string' }, 0, { root: { a: 'string' }, custom: customT.customTypes })
+          // generateInternal()
+          console.log('bbbbbb', b.result)
+
+          // TODO search for one that fits
+        } else {
+          result[key] = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
         }
       } else if ((value as any)?.symbol === propertyPathSymbol) {
         result[key] = propertyPath(rootDataCurrent, (value as any).type?.$propertyPath?.onlyObjects)
       } else {
-        result[key] = replaceKeyOfAndPropertyPath(value, rootDataCurrent)
+        result[key] = replaceKeyOfAndPropertyPath(value, schema, rootDataCurrent)
       }
     }
     return result
   }
 
-  let replaced = replaceKeyOfAndPropertyPath(generated1stPass)
+  let replaced = replaceKeyOfAndPropertyPath(generated1stPass, type)
   let safeWord = 0
 
   while (symbolFinder(replaced)) {
-    replaced = replaceKeyOfAndPropertyPath(replaced)
+    replaced = replaceKeyOfAndPropertyPath(replaced, type)
     safeWord++
     if (safeWord > 10000) {
       // Failure to resolve, it adds property to keyOf that does not even exits on the final data (value was optional)

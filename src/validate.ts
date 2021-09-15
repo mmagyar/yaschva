@@ -352,7 +352,7 @@ const validatePropertyPath = (value: InputTypes, type: PropertyPathType, depth: 
     // Just because it points to a map, it still can be invalid, if the map has no members
     // Just beucase it points to something that is optionally not defined, it may still be valid, since this validation may be optional as well
     // Oh well, it may still be used for validation though
-    const withoutKeys = (x: any): boolean => isSimpleType(x) || isArray(x) || isString(x) || isNumber(x) ||
+    const withoutKeys = (x: any): boolean => isSimpleType(x) || isString(x) || isNumber(x) ||
       isEnum(x) || isAnd(x) || isKeyOf(x) || isLiteral(x) || isTuple(x) || isPropertyPath(x) || false
     let withoutKeysResult = false
 
@@ -395,7 +395,7 @@ const simpleValidation = (type: SimpleTypes, value: any): SimpleValidation => {
 const toResult = (res: SimpleValidation, value: InputTypes, depth: number): ValidationResult =>
   ({ result: res ? 'fail' : 'pass', output: res ? { error: res, depth, value: omitDisplay(value) } : null })
 
-const validateRecursive = (
+export const validateRecursive = (
   type: ValueTypes,
   value: InputTypes,
   depth: number,

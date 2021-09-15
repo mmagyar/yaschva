@@ -16,21 +16,23 @@ const run = async (): Promise<any> => {
 
   let validated = null
 
-  const count = 200
-  for (let i = 0; i < count; i++) {
+  const count = 30
+  for (let i = 29; i < count; i++) {
     console.log(i)
     const randomSeed = i
     generated = generate(example, { maxDepthSoft: 2, arrayMax: 3, randomSeed })
     fs.writeFileSync(`./testdata/generated-schema-${i}.json`, JSON.stringify(generated, null, 2))
 
     validated = validate(example, generated)
-    const generatedData = generate(generated, { randomSeed })
-    fs.writeFileSync(`./testdata/generated-${i}.json`, JSON.stringify(generatedData, null, 2))
+
     if (validated.result !== 'pass') {
-      console.error('VALIDATION FAILED')
+      console.error('VALIDATION FOR GENERATED SCHEMA FAILED')
       fs.writeFileSync(`./testdata/failed_validation-${i}.json`, JSON.stringify(validated, null, 2))
       break
     }
+
+    const generatedData = generate(generated, { randomSeed })
+    fs.writeFileSync(`./testdata/generated-${i}.json`, JSON.stringify(generatedData, null, 2))
   }
   return generated
 }
