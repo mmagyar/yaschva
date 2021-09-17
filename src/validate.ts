@@ -318,7 +318,7 @@ ValidationResult => {
 
   if (type.valueType && current) {
     const result = validateRecursive(type.valueType, current[value], depth, allTypes)
-    if (result.result === 'fail') { return toResult(`Key ${String(value)} did not have the required type`, depth, value) }
+    if (result.result === 'fail') { return toResult(`Key ${String(value)} did not have the required type`, value, depth) }
   }
 
   return toResult(validated, value, depth)

@@ -3,7 +3,10 @@ import { randomNumber, seededRandom, setSeed } from './random.js'
 import { generateInternal } from './internal.js'
 import { keyOfSymbol, Options, propertyPathSymbol } from './config.js'
 import fs from 'fs'
-import { processCustomTypes, validate, validateRecursive } from '../validate.js'
+
+import { inspect } from 'util'
+
+inspect.defaultOptions.depth = null
 
 function shuffleArray<T> (arrayIn: T[]): T[] {
   const array = arrayIn.concat([])
@@ -36,10 +39,11 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
   // Because we just need to get the keyOf parameters, and resolving everything,
   // May result in an infine loop, because schemas can be recursive
 
-  const iterate = (obj: {[key: string]: any}, path: Array<string|number> = []): Array<{value: string[], type: any}> => {
+  interface FoundKeys {path: string[], type?: string[]}
+  const iterate = (obj: {[key: string]: any}, path: Array<string|number> = []): FoundKeys[] => {
     const itrFunction = (key: string|number): any => {
       if (key === '$keyOf') {
-        return { path: path, value: obj[key], type: obj }
+        return { pathOg: path, path: obj[key], type: obj?.valueType }
       }
 
       if (typeof obj[key] === 'object') {
@@ -59,12 +63,25 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     return Object.keys(obj || {}).flatMap(itrFunction).filter(x => x)
   }
 
+  function removeMarkerSymbol (o: any, parent?: any, parentKey?: any): void {
+    Object.keys(o).forEach(function (k) {
+      if (k === '$___symbol') {
+        parent[parentKey] = o.content
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete o[k]
+      } else {
+        if (o[k] !== null && typeof o[k] === 'object') {
+          removeMarkerSymbol(o[k], o, k)
+        }
+      }
+    })
+  }
+
   // This reduce remove all but one for the same keyOf, but that is not valid, since we may require multiple different types to be in a keyof
-  console.log(iterate(type as any))
-  const neededKeysFor = iterate(type as any)?.map((x) => ({ value: x.value, type: x.type }))
-    .reduce((p: Array<{path: string[], type: any}>, c) => {
-      if (!p.some(x => x.path.length === c.value.length && x.path.every((y, i) => y === c.value[i]))) {
-        p.push({ path: c.value, type: c.type })
+  const neededKeysFor = iterate(type as any)
+    .reduce((p: FoundKeys[], c: FoundKeys) => {
+      if (!p.some(x => x.path.length === c.path.length && x.path.every((y, i) => y === c.path[i]) && x?.type?.length === c?.type?.length && x?.type?.every((y: string) => c?.type?.includes(y)))) {
+        p.push({ path: c.path, type: c.type })
       }
 
       return p
@@ -72,7 +89,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
 
   const usedOptions = { ...defaultOptions, ...options }
   setSeed(usedOptions.randomSeed)
-  console.log(neededKeysFor)
+  // console.log('PASSED DOWN', neededKeysFor)
   // TODO so the lacking generated type, duh i solved it, i just need to pass the typeinfo as well
   const generated1stPass = generateInternal(type, usedOptions, {}, 0, type, neededKeysFor)
   fs.writeFileSync('./faultRawGen.json', JSON.stringify(generated1stPass || {}, null, 2))
@@ -163,21 +180,28 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
             result[key][randomKey] = generate((value as any).valueType)
           }
         } else if ((value as any).type.valueType) {
-          console.log('KYOF', (value as any))
-          // Randomize order
-          const randPossibleKeys = shuffleArray(possibleKeys)
-          // Check every if there are any that fit
-          const customT = processCustomTypes(schema)
-          randPossibleKeys.find(x => {
-            // This may not be needed, since with the help of neededKeys i can resolve this
-            const a = current[x]
-            const b = validateRecursive((value as any).type.valueType, a, 0, { root: a, custom: customT.customTypes })
-            console.log('AAAAA', a, b.result)
-            return false
-          })
-          const b = validateRecursive((value as any).type.valueType, { a: 'string' }, 0, { root: { a: 'string' }, custom: customT.customTypes })
-          // generateInternal()
-          console.log('bbbbbb', b.result)
+          const target = possibleKeys.find(x => current[x].$___symbol)
+          console.log('TTT', target, key, value)
+          // Forking infinite look
+          if (!target) {
+            throw new Error('What the fork')
+          }
+          result[key] = target // [target] = generate((value as any).valueType)
+
+          // const randomKey = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
+
+          //   console.log('KYOF', (value as any))
+          //   // Randomize order
+          //   const randPossibleKeys = shuffleArray(possibleKeys)
+          //   // Check every if there are any that fit
+          //   const customT = processCustomTypes(schema)
+          //   randPossibleKeys.find(x => {
+          //     // This may not be needed, since with the help of neededKeys i can resolve this
+          //     const a = current[x]
+          //     const b = validateRecursive((value as any).type.valueType, a, 0, { root: a, custom: customT.customTypes })
+          //     console.log('AAAAA', a, b.result)
+          //     return false
+          //   })
 
           // TODO search for one that fits
         } else {
@@ -204,6 +228,8 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
       throw new Error('could not resolve all symbols in 10000 passes')
     }
   }
+
+  removeMarkerSymbol(replaced)
   fs.writeFileSync('./faultRawGen3.json', JSON.stringify(replaced || {}, null, 2))
 
   return replaced

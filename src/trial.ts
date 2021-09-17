@@ -17,7 +17,7 @@ const run = async (): Promise<any> => {
   let validated = null
 
   const count = 30
-  for (let i = 29; i < count; i++) {
+  for (let i = 0; i < count; i++) {
     console.log(i)
     const randomSeed = i
     generated = generate(example, { maxDepthSoft: 2, arrayMax: 3, randomSeed })

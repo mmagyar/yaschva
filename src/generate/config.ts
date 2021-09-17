@@ -17,3 +17,4 @@ export interface Options {
 
 export const keyOfSymbol = Symbol('KeyOf')
 export const propertyPathSymbol = Symbol('PropertyPath')
+export const mapSymbol = Symbol('Map')
