@@ -27,13 +27,14 @@ const simpleGeneration = (type: SimpleTypes, options: Options): any => {
 }
 
 const applyPreference = (input: Validation[], options: Options): Validation[] => {
+  let result: any|undefined
   if (options.prefer === 'defined') {
-    return input.length > 1 ? input.filter(x => x !== '?') : input
+    result = input.length > 1 ? input.filter(x => x !== '?') : input
   }
   if (options.prefer === 'undefined') {
-    return input.find(x => x === '?') ? ['?'] : input
+    result = input.find(x => x === '?') ? ['?'] : input
   }
-  return input
+  return result?.length ? result : input
 }
 // NOTE TODO may mark values generated because of a keyOf, so it's easier to associate
 export const generateInternal = (
@@ -122,6 +123,7 @@ export const generateInternal = (
   if (isEnum(type)) { return type.$enum[randomNumber(true, 0, type.$enum.length - 1)] }
 
   if (isKeyOf(type)) {
+    console.log('KEYOF', type)
     // Just Return a symbol, will resolve it in the second pass
     return { symbol: keyOfSymbol, type }
   }
@@ -134,9 +136,6 @@ export const generateInternal = (
   if (isObj(type)) {
     const need = needed(neededPaths, currentPath)
     return Object.entries(type).reduce((prev: any, [key, value]) => {
-      // console.log("KKKK", key, need, neededPaths)
-
-      if (need.length) console.log('NEED', key, neededPaths)
       let current
       if (need.length) {
         current = need.pop()
@@ -148,8 +147,10 @@ export const generateInternal = (
         if (typeof generated !== 'undefined') {
           console.log(keyC, generated)
           prev[keyC] = {
+            $___type: current.type,
+            $___key: keyC,
             $___symbol: mapSymbol,
-            content: generated
+            $___content: generated
           }
         }
         return prev
@@ -208,6 +209,8 @@ export const generateInternal = (
 
     if (!specKey) specKey = {}
     if (isKeyOf(mapType.key ?? {})) {
+      console.log('KEYOF in map', type)
+
       return { symbol: keyOfSymbol, type: mapType.key, valueType: mapType.$map, size: count }
     }
 
@@ -224,12 +227,18 @@ export const generateInternal = (
         // This above might be out of date, key generation is not a problem actually in and of itself
 
         const str = mapType.key ? gen(mapType.key) : simpleGeneration('string', options)
+
+        let current
         if (need.length) {
-          const type = need[need.length - 1].type
-          prev[str] = gen(type || mapType.$map, true, currentPath.concat([str]))
+          current = need.pop()
+        }
+        if (current?.type) {
+          prev[str] = gen(current.type, true, currentPath.concat([str]))
           prev[str] = {
+            $___type: current.type,
+            $___key: str,
             $___symbol: mapSymbol,
-            content: prev[str]
+            $___content: prev[str]
           }
           need.pop()
         } else {

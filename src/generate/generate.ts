@@ -1,5 +1,5 @@
 import { Validation } from '../validationTypes.js'
-import { randomNumber, seededRandom, setSeed } from './random.js'
+import { randomNumber, setSeed } from './random.js'
 import { generateInternal } from './internal.js'
 import { keyOfSymbol, Options, propertyPathSymbol } from './config.js'
 import fs from 'fs'
@@ -8,14 +8,14 @@ import { inspect } from 'util'
 
 inspect.defaultOptions.depth = null
 
-function shuffleArray<T> (arrayIn: T[]): T[] {
-  const array = arrayIn.concat([])
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(seededRandom() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]]
-  }
-  return array
-}
+// function shuffleArray<T> (arrayIn: T[]): T[] {
+//   const array = arrayIn.concat([])
+//   for (let i = array.length - 1; i > 0; i--) {
+//     const j = Math.floor(seededRandom() * (i + 1));
+//     [array[i], array[j]] = [array[j], array[i]]
+//   }
+//   return array
+// }
 
 export const generate = (type: Validation, options: Partial<Options> = {}): any => {
   const defaultOptions: Options = {
@@ -43,7 +43,15 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
   const iterate = (obj: {[key: string]: any}, path: Array<string|number> = []): FoundKeys[] => {
     const itrFunction = (key: string|number): any => {
       if (key === '$keyOf') {
-        return { pathOg: path, path: obj[key], type: obj?.valueType }
+        let valType: any = obj?.valueType
+
+        console.log(')))))))',valType)
+        // TODO temporary fix for requring keyof that is undefined (which is impossilbe in json)
+        if (valType?.$type === '?') {
+          valType = undefined
+        }
+
+        return { pathOg: path, path: obj[key], type: !valType || Array.isArray(valType) ? valType : [valType] }
       }
 
       if (typeof obj[key] === 'object') {
@@ -64,9 +72,9 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
   }
 
   function removeMarkerSymbol (o: any, parent?: any, parentKey?: any): void {
-    Object.keys(o).forEach(function (k) {
+    Object.keys(o || {}).forEach(function (k) {
       if (k === '$___symbol') {
-        parent[parentKey] = o.content
+        parent[parentKey] = o.$___content
         // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete o[k]
       } else {
@@ -89,7 +97,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
 
   const usedOptions = { ...defaultOptions, ...options }
   setSeed(usedOptions.randomSeed)
-  // console.log('PASSED DOWN', neededKeysFor)
+  console.log('PASSED DOWN', neededKeysFor)
   // TODO so the lacking generated type, duh i solved it, i just need to pass the typeinfo as well
   const generated1stPass = generateInternal(type, usedOptions, {}, 0, type, neededKeysFor)
   fs.writeFileSync('./faultRawGen.json', JSON.stringify(generated1stPass || {}, null, 2))
@@ -143,14 +151,13 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     const result: any = Array.isArray(data) ? [] : {}
     for (const [key, value] of Object.entries(data)) {
       if ((value as any)?.symbol === keyOfSymbol) {
+        // console.log('__START__', key)
+
         const current = (value as any).type.$keyOf.reduce((p: any, c: any) => p?.[c], rootDataCurrent)
 
         if (!current) {
           result[key] = value
-          // console.error('CURRENT NOT FOUND', JSON.stringify(rootData, null, 2), 'CURRENT', JSON.stringify(value, null, 2))
           continue
-          // fs.writeFileSync('./faultRoot.json', JSON.stringify(rootData, null, 2))
-          // fs.writeFileSync('./faultCurrent.json', JSON.stringify(value, null, 2))
         }
 
         // Skip generation when referencing an unresovled key
@@ -177,33 +184,21 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
                 randomKey = possibleKeys.find(x => typeof result[key][x] === 'undefined') ?? possibleKeys[0]
               }
             }
+            console.log(key, randomKey)
             result[key][randomKey] = generate((value as any).valueType)
           }
         } else if ((value as any).type.valueType) {
-          const target = possibleKeys.find(x => current[x].$___symbol)
-          console.log('TTT', target, key, value)
-          // Forking infinite look
-          if (!target) {
-            throw new Error('What the fork')
+          let parentRealKey: string | undefined
+          if (key === '$___content') {
+            parentRealKey = data.$___key
           }
-          result[key] = target // [target] = generate((value as any).valueType)
+          console.log(parentRealKey, key)
+          const target = parentRealKey ? possibleKeys.find(x => current[x].$___symbol && current[x].$___key !== parentRealKey) : possibleKeys.find(x => current[x]?.$___symbol)
 
-          // const randomKey = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
-
-          //   console.log('KYOF', (value as any))
-          //   // Randomize order
-          //   const randPossibleKeys = shuffleArray(possibleKeys)
-          //   // Check every if there are any that fit
-          //   const customT = processCustomTypes(schema)
-          //   randPossibleKeys.find(x => {
-          //     // This may not be needed, since with the help of neededKeys i can resolve this
-          //     const a = current[x]
-          //     const b = validateRecursive((value as any).type.valueType, a, 0, { root: a, custom: customT.customTypes })
-          //     console.log('AAAAA', a, b.result)
-          //     return false
-          //   })
-
-          // TODO search for one that fits
+          if (!target) {
+            throw new Error(`What the fork: ${key} / ${parentRealKey ?? ''} target: ${target}`)
+          }
+          result[key] = target
         } else {
           result[key] = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
         }

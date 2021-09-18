@@ -353,7 +353,7 @@ const validatePropertyPath = (value: InputTypes, type: PropertyPathType, depth: 
     // Just beucase it points to something that is optionally not defined, it may still be valid, since this validation may be optional as well
     // Oh well, it may still be used for validation though
     const withoutKeys = (x: any): boolean => isSimpleType(x) || isString(x) || isNumber(x) ||
-      isEnum(x) || isAnd(x) || isKeyOf(x) || isLiteral(x) || isTuple(x) || isPropertyPath(x) || false
+      isEnum(x) || isKeyOf(x) || isLiteral(x) || isPropertyPath(x) || false
     let withoutKeysResult = false
 
     if (Array.isArray(current)) {

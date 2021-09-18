@@ -16,8 +16,8 @@ const run = async (): Promise<any> => {
 
   let validated = null
 
-  const count = 30
-  for (let i = 0; i < count; i++) {
+  const count = 300
+  for (let i = 25; i < count; i++) {
     console.log(i)
     const randomSeed = i
     generated = generate(example, { maxDepthSoft: 2, arrayMax: 3, randomSeed })
@@ -32,7 +32,7 @@ const run = async (): Promise<any> => {
     }
 
     const generatedData = generate(generated, { randomSeed })
-    fs.writeFileSync(`./testdata/generated-${i}.json`, JSON.stringify(generatedData, null, 2))
+    fs.writeFileSync(`./testdata/generated-${i}.json`, JSON.stringify(generatedData, null, 2) || '')
   }
   return generated
 }

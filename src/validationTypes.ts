@@ -54,16 +54,16 @@ export type ValueType =
 
 export const isSimpleType = (tbd: any): tbd is SimpleTypes => typeof tbd === 'string'
 export const isArray = (tbd: any): tbd is ArrayType => tbd?.$array
-export const isMap = (tbd: any): tbd is MapType => tbd.$map
-export const isString = (tbd: any): tbd is StringType => tbd.$string
-export const isNumber = (tbd: any): tbd is NumberType => tbd.$number
+export const isMap = (tbd: any): tbd is MapType => tbd?.$map
+export const isString = (tbd: any): tbd is StringType => tbd?.$string
+export const isNumber = (tbd: any): tbd is NumberType => tbd?.$number
 export const isMeta = (tbd: any): tbd is MetaType => tbd?.$type
-export const isEnum = (tbd: any): tbd is EnumType => typeof tbd.$enum !== 'undefined'
+export const isEnum = (tbd: any): tbd is EnumType => typeof tbd?.$enum !== 'undefined'
 export const isObj = (tbd: any): tbd is ObjectType =>
   tbd instanceof Object && !Object.keys(tbd).some(x => x.startsWith('$'))
-export const isTypeDefValidation = (tbd: any): tbd is TypeDef => tbd.$types
-export const isAnd = (tbd: any): tbd is AndType => tbd.$and
-export const isKeyOf = (tbd: any): tbd is KeyOfType => tbd.$keyOf
-export const isLiteral = (tbd: any): tbd is LiteralType => typeof tbd.$literal !== 'undefined'
-export const isTuple = (tbd: any): tbd is TupleType => tbd.$tuple
-export const isPropertyPath = (tbd: any): tbd is PropertyPathType => tbd.$propertyPath
+export const isTypeDefValidation = (tbd: any): tbd is TypeDef => tbd?.$types
+export const isAnd = (tbd: any): tbd is AndType => tbd?.$and
+export const isKeyOf = (tbd: any): tbd is KeyOfType => tbd?.$keyOf
+export const isLiteral = (tbd: any): tbd is LiteralType => typeof tbd?.$literal !== 'undefined'
+export const isTuple = (tbd: any): tbd is TupleType => tbd?.$tuple
+export const isPropertyPath = (tbd: any): tbd is PropertyPathType => tbd?.$propertyPath
