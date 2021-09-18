@@ -45,7 +45,6 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
       if (key === '$keyOf') {
         let valType: any = obj?.valueType
 
-        console.log(')))))))',valType)
         // TODO temporary fix for requring keyof that is undefined (which is impossilbe in json)
         if (valType?.$type === '?') {
           valType = undefined
@@ -109,7 +108,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
   // TODO before starting to generate, check the schema if keyofs make any sense. But that may not be possible, so it may need to be on the fly. This is actually just a problem when the base type is not an object. Does it make any sense to do keyOf if the base type is not an object / map (or meta of those)? i don't think so. Need to check if i can disable this on schame level, but i think that would be too complicated, and not worth it (since such nonsense schema will fail on validation) so it's probably a problem with the generator, and i need to solve it there.
 
   const propertyPath = (data: any, onlyObjects: boolean, path: string[] = [], fallbackPath: string[] = []): any => {
-    // console.log('DAAAA', JSON.stringify(path))
+    console.log('DAAAA', JSON.stringify(path), data)
     // Maybe there should be no path generated to properties starting with a $? nah, thats not the solution / problem
     if (!data || typeof data !== 'object' || Array.isArray(data) || typeof data?.symbol === 'symbol') {
       // console.log('EARLY PATH', onlyObjects ? fallbackPath : path, onlyObjects)
@@ -118,15 +117,34 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     const entries = Object.entries(data).filter(([key, value]) => !key.startsWith('$'))
 
     if (entries.length === 0) {
+      console.log('FALLBACK APTH', fallbackPath)
       return fallbackPath
     }
     const randomIndex = randomNumber(true, 0, entries.length - 1)
     if (randomNumber(true, 0, 1) === 1) { // Roll the dice, if we are deep enought
+      console.log('PATH', path)
       return path
     }
 
     return propertyPath(entries[randomIndex][1], onlyObjects, path.concat([entries[randomIndex][0]]), path)
   }
+
+  interface KeyOfMarker {
+    $___symbol: typeof keyOfSymbol
+    $___type: any
+    $___keyof: boolean
+    $___valueType?: Validation
+    $___size?: number
+  }
+
+  interface PropertyPathMarker {
+    $___symbol: typeof propertyPathSymbol
+    $___type: any
+
+  }
+
+  const isKeyOfMarker = (tbd: any): tbd is KeyOfMarker => tbd?.$___symbol === keyOfSymbol
+  const isPropertyPathOfMarker = (tbd: any): tbd is PropertyPathMarker => tbd?.$___symbol === propertyPathSymbol
 
   const symbolFinder = (data: any, rootData?: any): any => {
     const rootDataCurrent = rootData || data
@@ -134,9 +152,9 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [_, value] of Object.entries(data)) {
-      if ((value as any)?.symbol === keyOfSymbol) {
+      if (isKeyOfMarker(value)) {
         return true
-      } else if ((value as any)?.symbol === propertyPathSymbol) {
+      } else if (isPropertyPathOfMarker(value)) {
         return true
       } else {
         if (symbolFinder(value, rootDataCurrent)) return true
@@ -150,10 +168,10 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     if (!data || typeof data !== 'object') return data
     const result: any = Array.isArray(data) ? [] : {}
     for (const [key, value] of Object.entries(data)) {
-      if ((value as any)?.symbol === keyOfSymbol) {
+      if (isKeyOfMarker(value)) {
         // console.log('__START__', key)
 
-        const current = (value as any).type.$keyOf.reduce((p: any, c: any) => p?.[c], rootDataCurrent)
+        const current = value.$___type.$keyOf.reduce((p: any, c: any) => p?.[c], rootDataCurrent)
 
         if (!current) {
           result[key] = value
@@ -161,7 +179,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
         }
 
         // Skip generation when referencing an unresovled key
-        if (current?.symbol === keyOfSymbol) {
+        if (current?.$___symbol === keyOfSymbol) {
           result[key] = value
           continue
         }
@@ -170,9 +188,9 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
 
         possibleKeys = Object.keys(current)
 
-        if ((value as any).valueType) {
+        if (value.$___valueType) {
           result[key] = {}
-          for (let i = 0; i < (value as any)?.size; i++) {
+          for (let i = 0; i < (value.$___size ?? 0); i++) {
             let randomKey = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
             let safeWord = 0
             // Try getting a random prop, if we don't find any new in 10 tries, get the next unused,
@@ -184,15 +202,15 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
                 randomKey = possibleKeys.find(x => typeof result[key][x] === 'undefined') ?? possibleKeys[0]
               }
             }
-            console.log(key, randomKey)
-            result[key][randomKey] = generate((value as any).valueType)
+
+            result[key][randomKey] = generate(value.$___valueType)
           }
-        } else if ((value as any).type.valueType) {
+        } else if (value.$___type.valueType) {
           let parentRealKey: string | undefined
           if (key === '$___content') {
             parentRealKey = data.$___key
           }
-          console.log(parentRealKey, key)
+
           const target = parentRealKey ? possibleKeys.find(x => current[x].$___symbol && current[x].$___key !== parentRealKey) : possibleKeys.find(x => current[x]?.$___symbol)
 
           if (!target) {
@@ -202,8 +220,8 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
         } else {
           result[key] = possibleKeys[randomNumber(true, 0, possibleKeys.length - 1)]
         }
-      } else if ((value as any)?.symbol === propertyPathSymbol) {
-        result[key] = propertyPath(rootDataCurrent, (value as any).type?.$propertyPath?.onlyObjects)
+      } else if (isPropertyPathOfMarker(value)) {
+        result[key] = propertyPath(rootDataCurrent, value.$___type?.$propertyPath?.onlyObjects)
       } else {
         result[key] = replaceKeyOfAndPropertyPath(value, schema, rootDataCurrent)
       }

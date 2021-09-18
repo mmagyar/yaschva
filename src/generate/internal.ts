@@ -123,14 +123,13 @@ export const generateInternal = (
   if (isEnum(type)) { return type.$enum[randomNumber(true, 0, type.$enum.length - 1)] }
 
   if (isKeyOf(type)) {
-    console.log('KEYOF', type)
     // Just Return a symbol, will resolve it in the second pass
-    return { symbol: keyOfSymbol, type }
+    return { $___symbol: keyOfSymbol, $___keyof: true, $___type: type }
   }
 
   if (isPropertyPath(type)) {
     // Just Return a symbol, will resolve it in the second pass
-    return { symbol: propertyPathSymbol, type }
+    return { $___symbol: propertyPathSymbol, $___propertyPath: true, $___type: type }
   }
 
   if (isObj(type)) {
@@ -145,7 +144,6 @@ export const generateInternal = (
 
         const generated = gen(current.type, true, currentPath.concat([keyC]))
         if (typeof generated !== 'undefined') {
-          console.log(keyC, generated)
           prev[keyC] = {
             $___type: current.type,
             $___key: keyC,
@@ -209,9 +207,7 @@ export const generateInternal = (
 
     if (!specKey) specKey = {}
     if (isKeyOf(mapType.key ?? {})) {
-      console.log('KEYOF in map', type)
-
-      return { symbol: keyOfSymbol, type: mapType.key, valueType: mapType.$map, size: count }
+      return { $___symbol: keyOfSymbol, $___type: mapType.key, $___valueType: mapType.$map, $___size: count }
     }
 
     const specKeys = Object.keys(specKey)
@@ -262,7 +258,19 @@ export const generateInternal = (
 
   if (isString(type)) {
     if (type.$string.regex) {
-      const regexString = randexp.randexp(type.$string.regex)
+      let regexString = ''
+      let i = 0
+      do {
+        regexString = randexp.randexp(type.$string.regex)
+        i++
+        if (i > 128) {
+          throw new Error('Generated string does not match regexp for 128 times')
+        }
+        if (i > 1) {
+          // This should really never happen, need to reviese the generation lib
+          console.log('Needed multiple retries to generate a string matching the regex', type.$string.regex, 'with', regexString)
+        }
+      } while (!(new RegExp(type.$string.regex)).test(regexString))
       return regexString
     }
 
