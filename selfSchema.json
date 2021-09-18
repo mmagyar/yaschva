@@ -41,6 +41,9 @@
     "$simpleTypes": {
       "$enum": ["string", "boolean", "number", "integer", "null", "?", "any"]
     },
+    "$simpleTypesNoOptional": {
+      "$enum": ["string", "boolean", "number", "integer", "null", "any"]
+    },
     "$enumType": {
       "name": ["?", "string"],
       "description": ["?", "string"],
@@ -201,20 +204,7 @@
 
     "$keyOfType": {
       "valueType": ["?", 
-        "$simpleTypes",
-        "$enumType",
-        "$stringType",
-        "$numberType",
-        "$literalType",
-        "$keyOfType",
-        "$customType",
-        "$propertyPathType",
-        "$objectTypeKeyOf",
-        "$arrayTypeKeyOf",
-        "$metaTypeKeyOf",
-        "$mapTypeKeyOf",
-        "$tupleTypeKeyOf",
-        "$andTypeKeyOf"],
+        { "$array": "$valueTypeKeyOf", "minLength": 1 }, "$valueTypeKeyOf"   ],
       "\\$keyOf": {"$propertyPath":{ "onlyObjects": true }}
     },
 
@@ -226,7 +216,7 @@
 
     "$andType": {
       "\\$and": {
-        "$array": ["$objectOnlyMetaType", "$objectType", "$customTypeDefObjectKeyOf"]
+        "$array": ["$objectOnlyMetaType", "$objectType", "$customTypeDefObject"]
       }
     },
     "$andTypeWithoutCustom": {
@@ -270,6 +260,7 @@
       "$mapType",
       "$andType",     
       "$objectType"],
+
     "$valueType": [
       "$simpleTypes",
       "$enumType",
@@ -284,6 +275,7 @@
       "$tupleType",      
       "$customType"
     ],
+
     "$valueTypeWithoutCustom": [
       "$simpleTypes",
       "$enumType",
@@ -313,14 +305,62 @@
       "$tupleTypeKeyOf",
       "$andTypeKeyOf"
       ],
+      "$valueTypeNoOptional": [
+        "$simpleTypesNoOptional",
+        "$enumType",
+        "$objectType",
+        "$arrayType",
+        "$stringType",
+        "$numberType",
+        "$metaType",
+        "$mapType",
+        "$literalType",
+        "$andType",     
+        "$tupleType",      
+        "$customType"
+      ],
+  
+      "$valueTypeWithoutCustomNoOptional": [
+        "$simpleTypesNoOptional",
+        "$enumType",
+        "$objectTypeWithoutCustom",
+        "$arrayTypeWithoutCustom",
+        "$stringType",
+        "$numberType",
+        "$metaTypeWithoutCustom",
+        "$mapTypeWithoutCustom",
+        "$literalType",
+        "$andTypeWithoutCustom",     
+        "$tupleTypeWithoutCustom"
+      ],
+      "$valueTypeKeyOfNoOptional": [
+        "$simpleTypesNoOptional",
+        "$enumType",
+        "$stringType",
+        "$numberType",
+        "$literalType",
+        "$keyOfType",
+        "$customType",
+        "$propertyPathType",
+        "$objectTypeKeyOf",
+        "$arrayTypeKeyOf",
+        "$metaTypeKeyOf",
+        "$mapTypeKeyOf",
+        "$tupleTypeKeyOf",
+        "$andTypeKeyOf"
+        ],
     "$valueTypes": [{ "$array": "$valueType", "minLength": 1 }, "$valueType"],
     "$valueTypesWithoutCustom": [{ "$array": "$valueTypeWithoutCustom", "minLength": 1 }, "$valueTypeWithoutCustom"],
-    "$valueTypesKeyOf": [{ "$array": "$valueTypeKeyOf", "minLength": 1 }, "$valueTypeKeyOf"]
+    "$valueTypesKeyOf": [{ "$array": "$valueTypeKeyOf", "minLength": 1 }, "$valueTypeKeyOf"],
+
+    "$valueTypesNoOptional": [{ "$array": "$valueTypeNoOptional", "minLength": 1 }, "$valueTypeNoOptional"],
+    "$valueTypesWithoutCustomNoOptional": [{ "$array": "$valueTypeWithoutCustomNoOptional", "minLength": 1 }, "$valueTypeWithoutCustomNoOptional"],
+    "$valueTypesKeyOfNoOptional": [{ "$array": "$valueTypeKeyOfNoOptional", "minLength": 1 }, "$valueTypeKeyOfNoOptional"]
 
    
   },
   "$type": [
-    "$simpleTypes",
+    "$simpleTypesNoOptional",
     "$enumType",
     "$literalType",
     {

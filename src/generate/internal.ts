@@ -92,7 +92,7 @@ export const generateInternal = (
       return gen(leastDepth ? leastDepth.type : type[0])
     } else {
       // Use a defined value if this path is referenced as keyOf
-      const typeArray = applyPreference(type, need ? { ...options, prefer: 'defined' } : options)
+      const typeArray = applyPreference(type, need.length ? { ...options, prefer: 'defined' } : options)
       const randomIndex = randomNumber(true, 0, typeArray.length - 1)
 
       // DELETE THIS, IT"S JUST A TEST TO DEBUG

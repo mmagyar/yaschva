@@ -97,7 +97,7 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
 
   const usedOptions = { ...defaultOptions, ...options }
   setSeed(usedOptions.randomSeed)
-  console.log('PASSED DOWN', neededKeysFor)
+  // console.log('PASSED DOWN', neededKeysFor)
   // TODO so the lacking generated type, duh i solved it, i just need to pass the typeinfo as well
   const generated1stPass = generateInternal(type, usedOptions, {}, 0, type, neededKeysFor)
   fs.writeFileSync('./faultRawGen.json', JSON.stringify(generated1stPass || {}, null, 2))

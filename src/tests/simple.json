@@ -32,9 +32,8 @@
     "invalidData": ["true", "false", 0, 1, {}, [], [true], null]
   },
   {
-    "name": "undefined",
-    "schema": "?",
-    "validData": [],
+    "name": "undefined cannot be route type",
+    "invalidSchema": "?",
     "invalidData": [null, [], {}, 0, "anything"]
   },
   {

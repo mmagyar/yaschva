@@ -1,9 +1,22 @@
 import { loadJson, validate } from './validate.js'
 import fs from 'fs'
+import path from 'path'
 import { generate } from './generate/generate.js'
 const file = fs.promises.readFile
 
 const run = async (): Promise<any> => {
+  const directory = 'testdata'
+
+  fs.readdir(directory, (err, files) => {
+    if (err) throw err
+
+    for (const file of files) {
+      fs.unlink(path.join(directory, file), err => {
+        if (err) throw err
+      })
+    }
+  })
+
   const example = loadJson(await file('./selfSchema.json', 'utf8'))
   const selfSchema = loadJson(await file('./selfSchema.json', 'utf8'))
   const result = validate(selfSchema, example)
@@ -17,7 +30,7 @@ const run = async (): Promise<any> => {
   let validated = null
 
   const count = 300
-  for (let i = 25; i < count; i++) {
+  for (let i = 0; i < count; i++) {
     console.log(i)
     const randomSeed = i
     generated = generate(example, { maxDepthSoft: 2, arrayMax: 3, randomSeed })

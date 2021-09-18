@@ -203,17 +203,14 @@ test('Generates uuid based on regex', (t) => {
 })
 
 test('Does not add property to object if it\'s optionally undefined and undefined is prefered', (t) => {
-  const undefinedGenerated = []
-  for (let i = 0; i < 240; i++) {
-    const result = generate({ value: ['string', '?'] }, { prefer: 'undefined' })
-    if (Object.keys(result).includes('value')) {
-      t.is(typeof result.value, 'string')
-    } else {
-      t.is(Object.keys(result).length, 0)
-      undefinedGenerated.push(result)
+  const definedGenerated = []
+  for (let i = 0; i < 512; i++) {
+    const result = generate({ value: ['string', '?'] }, { prefer: 'undefined', randomSeed: i })
+    if (Object.keys(result).length > 0) {
+      definedGenerated.push({ i, result })
     }
   }
-  t.true(undefinedGenerated.length > 0)
+  t.true(definedGenerated.length === 0, JSON.stringify(definedGenerated))
 })
 
 test('$ sign can be escaped in the schema and used for data key', (t) => {
