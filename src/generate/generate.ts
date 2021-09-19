@@ -101,28 +101,36 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
   const generated1stPass = generateInternal(type, usedOptions, {}, 0, type, neededKeysFor)
   fs.writeFileSync('./faultRawGen.json', JSON.stringify(generated1stPass || {}, null, 2))
 
-  // TODO Schema generation is failing because we are generating propertyPaths as keyof to non objects
-  // TODO Also there are keyOf being generated for toplevel type (such as $map)
-
-  // TODO Another slightly unrelated error: when base type is array, there cannot be $type keyOf property
-  // TODO before starting to generate, check the schema if keyofs make any sense. But that may not be possible, so it may need to be on the fly. This is actually just a problem when the base type is not an object. Does it make any sense to do keyOf if the base type is not an object / map (or meta of those)? i don't think so. Need to check if i can disable this on schame level, but i think that would be too complicated, and not worth it (since such nonsense schema will fail on validation) so it's probably a problem with the generator, and i need to solve it there.
+  /**
+   *  TODO this is a crude, and not entierly correct way to handle the problem with generating a schema from self.
+   * The correct solution will be to rewrite generate to use speical nodes for all values,
+   * that can be analysed after generation.
+   *
+   * This could lead to real problems with generating data for real schemas, if they use $ sign in the output data
+   */
+  const isUsableObject = <T extends object>(input: T): boolean => {
+    return !Object.entries(input || {}).find(([key, value]) => {
+      if (key === '$type') {
+        return isUsableObject(value)
+      }
+      return key.startsWith('$')
+    })
+  }
 
   const propertyPath = (data: any, onlyObjects: boolean, path: string[] = [], fallbackPath: string[] = []): any => {
-    console.log('DAAAA', JSON.stringify(path), data)
+    // console.log('DAAAA', JSON.stringify(path), data)
     // Maybe there should be no path generated to properties starting with a $? nah, thats not the solution / problem
-    if (!data || typeof data !== 'object' || Array.isArray(data) || typeof data?.symbol === 'symbol') {
+    if (!data || typeof data !== 'object' || Array.isArray(data) || typeof data?.symbol === 'symbol' || !isUsableObject(data)) {
       // console.log('EARLY PATH', onlyObjects ? fallbackPath : path, onlyObjects)
       return onlyObjects ? fallbackPath : path
     }
     const entries = Object.entries(data).filter(([key, value]) => !key.startsWith('$'))
 
     if (entries.length === 0) {
-      console.log('FALLBACK APTH', fallbackPath)
       return fallbackPath
     }
     const randomIndex = randomNumber(true, 0, entries.length - 1)
     if (randomNumber(true, 0, 1) === 1) { // Roll the dice, if we are deep enought
-      console.log('PATH', path)
       return path
     }
 
@@ -169,8 +177,6 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     const result: any = Array.isArray(data) ? [] : {}
     for (const [key, value] of Object.entries(data)) {
       if (isKeyOfMarker(value)) {
-        // console.log('__START__', key)
-
         const current = value.$___type.$keyOf.reduce((p: any, c: any) => p?.[c], rootDataCurrent)
 
         if (!current) {
@@ -188,6 +194,12 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
 
         possibleKeys = Object.keys(current)
 
+        /**
+         * Again, an ugly hack, to make sure we are not generating direct infinte recursion
+         * A more sophisticated solution should be implemented, either here or in the schema
+         */
+        possibleKeys = possibleKeys.filter(x => x !== key)
+
         if (value.$___valueType) {
           result[key] = {}
           for (let i = 0; i < (value.$___size ?? 0); i++) {
@@ -202,8 +214,9 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
                 randomKey = possibleKeys.find(x => typeof result[key][x] === 'undefined') ?? possibleKeys[0]
               }
             }
-
-            result[key][randomKey] = generate(value.$___valueType)
+            // Just using generate does not work
+            // result[key][randomKey] = generate(value.$___valueType)
+            result[key][randomKey] = generateInternal(value.$___valueType, usedOptions, (type as any)?.$types ?? {}, 0, type, [])
           }
         } else if (value.$___type.valueType) {
           let parentRealKey: string | undefined
@@ -242,7 +255,13 @@ export const generate = (type: Validation, options: Partial<Options> = {}): any 
     }
   }
 
-  removeMarkerSymbol(replaced)
+  if (!replaced?.$___symbol) {
+    /**
+     * This ugly if is needed because we are using recursion to generate parts, and sometimes it cannot be fully resolved before returning
+     * Having a symbol at the root, means that it's impossible to remove
+     */
+    removeMarkerSymbol(replaced)
+  }
   fs.writeFileSync('./faultRawGen3.json', JSON.stringify(replaced || {}, null, 2))
 
   return replaced
