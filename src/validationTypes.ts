@@ -35,7 +35,9 @@ export interface PropertyPathType {
   }
 }
 
-export declare type MetaType = TypeMeta & { $type: ValueTypes }
+export interface OneOf {
+  $oneOf: NonEmptyArray<ValueType>
+}
 
 export type ValueType =
   | SimpleTypes
@@ -44,20 +46,20 @@ export type ValueType =
   | ArrayType
   | StringType
   | NumberType
-  | MetaType
   | MapType
   | AndType
   | KeyOfType
   | LiteralType
   | TupleType
   | PropertyPathType
+  | OneOf
 
 export const isSimpleType = (tbd: any): tbd is SimpleTypes => typeof tbd === 'string'
 export const isArray = (tbd: any): tbd is ArrayType => tbd?.$array
+export const isOneOf = (tbd: any): tbd is OneOf => tbd?.$oneOf
 export const isMap = (tbd: any): tbd is MapType => tbd?.$map
 export const isString = (tbd: any): tbd is StringType => tbd?.$string
 export const isNumber = (tbd: any): tbd is NumberType => tbd?.$number
-export const isMeta = (tbd: any): tbd is MetaType => tbd?.$type
 export const isEnum = (tbd: any): tbd is EnumType => typeof tbd?.$enum !== 'undefined'
 export const isObj = (tbd: any): tbd is ObjectType =>
   tbd instanceof Object && !Object.keys(tbd).some(x => x.startsWith('$'))

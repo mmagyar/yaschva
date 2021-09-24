@@ -1,7 +1,8 @@
 
+import { type } from 'os'
 import randexp from '../randexp/index.js'
 import { combineValidationObjects } from '../validate.js'
-import { Validation, ValueTypes, isTypeDefValidation, isSimpleType, isEnum, isKeyOf, isPropertyPath, isObj, isMap, isMeta, isAnd, isLiteral, isTuple, SimpleTypes, isArray, isNumber, isString, ValueType } from '../validationTypes.js'
+import { Validation, ValueTypes, isTypeDefValidation, isSimpleType, isEnum, isKeyOf, isPropertyPath, isObj, isMap, isAnd, isLiteral, isTuple, SimpleTypes, isArray, isNumber, isString, ValueType, isOneOf } from '../validationTypes.js'
 import { keyOfSymbol, mapSymbol, Options, propertyPathSymbol } from './config.js'
 import { getMinimumDepth } from './info.js'
 import { randomBoolean, randomNumber, randomString } from './random.js'
@@ -76,12 +77,14 @@ export const generateInternal = (
     return simpleGeneration(type, options)
   }
 
-  if (Array.isArray(type)) {
+  if (Array.isArray(type) || isOneOf(type)) {
+    // TODO checking the same thing twice is not the nices thing to do
+    const oneOfAray = isOneOf(type) ? type.$oneOf : type
     const need = needed(neededPaths, currentPath)
     if (!need.length && depth > options.maxDepthSoft) {
-      if (type.find(x => x === '?')) { return simpleGeneration('?', options) }
+      if (oneOfAray.find(x => x === '?')) { return simpleGeneration('?', options) }
       let leastDepth: {depth: number, type: ValueType} | undefined
-      for (const currentType of type) {
+      for (const currentType of oneOfAray) {
         const minDepth = getMinimumDepth(currentType, customTypes)
         if (minDepth < 1) return gen(currentType)
         if (!leastDepth) leastDepth = { depth: minDepth, type: currentType }
@@ -89,10 +92,10 @@ export const generateInternal = (
           leastDepth = { depth: minDepth, type: currentType }
         }
       }
-      return gen(leastDepth ? leastDepth.type : type[0])
+      return gen(leastDepth ? leastDepth.type : oneOfAray[0])
     } else {
       // Use a defined value if this path is referenced as keyOf
-      const typeArray = applyPreference(type, need.length ? { ...options, prefer: 'defined' } : options)
+      const typeArray = applyPreference(oneOfAray, need.length ? { ...options, prefer: 'defined' } : options)
       const randomIndex = randomNumber(true, 0, typeArray.length - 1)
 
       // DELETE THIS, IT"S JUST A TEST TO DEBUG
@@ -253,8 +256,6 @@ export const generateInternal = (
       type.$number.min == null ? options.minNumber : type.$number.min,
       type.$number.max == null ? options.maxNumber : type.$number.max)
   }
-
-  if (isMeta(type)) { return gen(type.$type) }
 
   if (isString(type)) {
     if (type.$string.regex) {

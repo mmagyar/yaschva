@@ -15,7 +15,7 @@
       "$and": [
         { "valueA": "string" },
         { "valueB": "number" },
-        { "$type": { "otherValue": "number" } }
+        { "$oneOf": [ { "otherValue": "number" } ] }
       ]
     },
     "validData": [{ "valueA": "someString", "valueB": 32, "otherValue": 9 }],
@@ -46,13 +46,13 @@
       "$types": {
         "$myObject": { "value": "string" },
         "$otherObject": { "num": "number" },
-        "$myMetaObject": { "$type": { "value2": "string" } }
+        "$myMetaObject": { "$oneOf": [{ "value2": "string" }] }
       },
       "$and": [
         { "valueA": "string" },
         "$myObject",
         "$myMetaObject",
-        { "$type": "$otherObject" }
+        { "$oneOf": ["$otherObject" ]}
       ]
     },
     "validData": [

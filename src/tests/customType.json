@@ -30,7 +30,7 @@
     ]
   },
   {
-    "name": "Root can be a custom type via a meta type",
+    "name": "Root can be a custom type via a oneOf type",
     "schema": {
       "$types": {
         "$customType": {
@@ -38,7 +38,7 @@
           "nodes": { "$array": "$customType" }
         }
       },
-      "$type": "$customType"
+      "$oneOf": [ "$customType" ]
     },
     "validData": [
       { "value": "abc", "nodes": [] },

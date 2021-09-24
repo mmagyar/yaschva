@@ -99,7 +99,7 @@ test('Generates object meta', (t) => {
   const schema: Validation = {
     meta: {
       name: 'object with name',
-      $type: { here: 'string' }
+      $oneOf: [{ here: 'string' }]
     }
   }
   const result = generate(schema)
@@ -144,7 +144,7 @@ test('Generates unbound number', (t) => {
 })
 
 test('Generates extended simple type', (t) => {
-  const result = generate({ $type: 'string' })
+  const result = generate({ $oneOf: ['string'] })
   t.true(typeof result === 'string')
 })
 
@@ -279,9 +279,9 @@ test('Depth can be limited for recursive data structures', (t) => {
 })
 
 test('Depth for nested arrays can be limited', (t) => {
-  const schema = {
+  const schema: Validation = {
     $types: { $tree: { value: 'string', nodes: { $array: '$tree' } } },
-    $type: '$tree'
+    $oneOf: ['$tree']
   }
   // Set preference to defined values, to make sure that we have a large enough tree
   const generated = generate(schema, { arrayMin: 1, maxDepthSoft: 3 })
@@ -291,12 +291,12 @@ test('Depth for nested arrays can be limited', (t) => {
   const validated = validate(schema, generated)
   t.is(validated.result, 'pass')
 })
-
 test('Depth for nested maps can be limited', (t) => {
-  const schema = {
+  const schema: Validation = {
     $types: { $tree: { value: 'string', nodes: { $map: '$tree' } } },
-    $type: '$tree'
+    $oneOf: ['$tree']
   }
+
   // Set preference to defined values, to make sure that we have a large enough tree
   const layers3 = generate(schema, { mapMin: 1, maxDepthSoft: 3 })
   t.true(Object.keys(layers3.nodes).length > 0)
@@ -319,9 +319,9 @@ test('Can validate to multiple custom types with $and', (t) => {
     $types: {
       $myObject: { value: 'string' },
       $otherObject: { num: 'number' },
-      $myMetaObject: { $type: { value2: 'string' } }
+      $myMetaObject: { value2: 'string' }
     },
-    $and: [{ valueA: 'string' }, '$myObject', '$myMetaObject', { $type: '$otherObject' }]
+    $and: [{ valueA: 'string' }, '$myObject', '$myMetaObject', '$otherObject']
   }
   const generated = generate(schema)
   t.is(typeof generated.value, 'string')

@@ -1,7 +1,7 @@
 import { combineValidationObjects } from './validate.js'
 import {
   Validation, isArray, isEnum, isObj,
-  isString, isMap, isNumber, isTypeDefValidation, ValueTypes, isMeta, isAnd, isLiteral, isTuple, isKeyOf, isPropertyPath
+  isString, isMap, isNumber, isTypeDefValidation, ValueTypes, isAnd, isLiteral, isTuple, isKeyOf, isPropertyPath, isOneOf
 } from './validationTypes.js'
 
 const containsOptional = (input: Validation): boolean =>
@@ -46,6 +46,7 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: { [key: string]: V
   const toType = (input: ValueTypes): string => validationToTypeInternal(input, customTypes, depth + 1)
   if (depth > maxDepth) return 'any' // Bail out with any for recursive types
   if (Array.isArray(type)) { return type.map(toType).join(' | ') }
+  if (isOneOf(type)) { return type.$oneOf.map(toType).join(' | ') }
 
   if (typeof type === 'string') {
     if (customTypes[type]) {
@@ -84,8 +85,6 @@ const validationToTypeInternal = (input: ValueTypes, typesIn: { [key: string]: V
     }
     return `{ [key: string] : ${toType(type.$map)}}${objType ? ' & ' + objType : ''}`
   }
-
-  if (isMeta(type)) { return toType(type.$type) }
 
   if (isNumber(type)) { return toType('number') }
 

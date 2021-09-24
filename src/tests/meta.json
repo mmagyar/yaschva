@@ -1,8 +1,0 @@
-[
-  {
-    "name":"Root can be a meta type",
-  "schema": {"$type":{"$array":"string"}},
-  "validData":[[], ["abc"], ["a","b","C"]],
-  "invalidData":[{},null,[1,2,3]]
-  }
-]

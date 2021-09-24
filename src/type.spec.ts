@@ -31,11 +31,6 @@ test('Generates object of simple types', (t) => {
   }
   t.is(validationToType(schema), '{ string: string; number: number; any: any;' +
         ' optional?: undefined; boolean: boolean; integer: number }')
-
-  t.is(validationToType({
-    name: 'object with name',
-    $type: { str: 'string', num: 'number' }
-  }), '{ str: string; num: number }')
 })
 test('Generates type for arrays', (t) => {
   const schema: Validation = {
@@ -109,11 +104,6 @@ test('$ sign can be escaped in the schema and used for data key', (t) => {
   t.is(validated, '{ myNumber: number; $escapedDollar: string }')
 })
 
-test('Root can be a meta type', (t) => {
-  const validated = validationToType({ $type: { $array: 'string' } })
-  t.is(validated, 'string[]')
-})
-
 test('Generate literal type', (t) => {
   const schema = { literalProp: { $literal: 'doge' } }
   const type = validationToType(schema)
@@ -147,9 +137,9 @@ test('Can validate to multiple custom types with $and', (t) => {
     $types: {
       $myObject: { value: 'string' },
       $otherObject: { num: 'number' },
-      $myMetaObject: { $type: { value2: 'string' } }
+      $myMetaObject: { value2: 'string' }
     },
-    $and: [{ valueA: 'string' }, '$myObject', '$myMetaObject', { $type: '$otherObject' }]
+    $and: [{ valueA: 'string' }, '$myObject', '$myMetaObject', '$otherObject']
   }
   const type = validationToType(schema)
   t.is(type, '{ valueA: string; value: string; value2: string; num: number }')

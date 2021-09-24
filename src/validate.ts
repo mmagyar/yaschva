@@ -1,7 +1,7 @@
 import {
   Validation, StringType, ArrayType, ObjectType, SimpleTypes,
   isSimpleType, isArray, isEnum, isObj,
-  isMap, isNumber, isMeta, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType, isKeyOf, isLiteral, KeyOfType, isTuple, isPropertyPath, PropertyPathType
+  isMap, isNumber, isString, ValueType, isTypeDefValidation, ValueTypes, isAnd, AndType, MapType, NumberType, isKeyOf, isLiteral, KeyOfType, isTuple, isPropertyPath, PropertyPathType, isOneOf
 } from './validationTypes.js'
 
 interface Custom { custom: { [key: string]: ValueTypes }, root: any }
@@ -56,7 +56,8 @@ const depthSort = (a: ValidationOutput, b: ValidationOutput): number => {
 export const combineValidationObjects = <T>(type: AndType, customTypes: Custom, onError: (input: any) => T): { result: 'error', error: T } | { pass: ObjectType, result?: undefined } => {
   const resolveMeta = (tpe: Validation): Validation => {
     if (typeof tpe === 'string') { return resolveMeta(customTypes.custom[tpe]) }
-    if (isMeta(tpe)) return resolveMeta(tpe.$type)
+    // TODO this is ugly, but will do for now
+    if (isOneOf(tpe)) return resolveMeta(tpe.$oneOf[0])
     return tpe
   }
   const resolvedType = type.$and.map(x => resolveMeta(x))
@@ -344,9 +345,9 @@ const validatePropertyPath = (value: InputTypes, type: PropertyPathType, depth: 
       current = allTypes.root?.$types?.[current]
     }
 
-    if (isMeta(current)) {
-      current = current.$type
-    }
+    // if (isMeta(current)) {
+    //   current = current.$type
+    // }
 
     // This may not be a good idea after all, since it does not guarantuee soundness
     // Just because it points to a map, it still can be invalid, if the map has no members
@@ -409,6 +410,7 @@ export const validateRecursive = (
   if (isSimpleType(type)) { return toResult(simpleValidation(type, value), value, depth) }
 
   if (Array.isArray(type)) { return validateOneOf(value, type, depth, validationRef) }
+  if (isOneOf(type)) { return validateOneOf(value, type.$oneOf, depth, validationRef) }
 
   if (isPropertyPath(type)) { return validatePropertyPath(value, type, depth, validationRef) }
 
@@ -421,8 +423,6 @@ export const validateRecursive = (
   if (isMap(type)) { return validateMap(value, type, depth, validationRef) }
 
   if (isNumber(type)) { return toResult(validateNumberComplex(value, type), value, depth) }
-
-  if (isMeta(type)) { return validateRecursive(type.$type, value, depth + 1, validationRef) }
 
   if (isString(type)) { return toResult(validateStringObject(value, type), value, depth) }
 

@@ -1,5 +1,5 @@
 import { combineValidationObjects } from '../validate.js'
-import { isArray, isSimpleType, isEnum, isKeyOf, Validation, ValueTypes, isPropertyPath, isObj, isNumber, isString, isMap, isMeta, isAnd, isLiteral, isTuple } from '../validationTypes.js'
+import { isArray, isSimpleType, isEnum, isKeyOf, Validation, ValueTypes, isPropertyPath, isObj, isNumber, isString, isMap, isAnd, isLiteral, isTuple } from '../validationTypes.js'
 export const findEarliestTermination =
  <T extends {[key: string]: Validation}>(input: T): Array<{key: keyof T, depth: number}> => {
    return []
@@ -67,7 +67,6 @@ export const getMinimumDepth = (type: ValueTypes, customTypes: { [key: string]: 
     return gen(type.$map, true)
   }
 
-  if (isMeta(type)) { return gen(type.$type, false) }
 
   if (isAnd(type)) {
     const combined = combineValidationObjects(type, { root: {}, custom: customTypes }, (x) => x)

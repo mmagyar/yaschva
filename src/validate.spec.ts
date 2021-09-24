@@ -415,3 +415,35 @@ test('Protects against prototype injection on class', (t) => {
   t.is(result.output?.objectResults.a, null)
   t.is(result.output.objectResults.b.error, 'Did not match any from the listed types')
 })
+
+/**
+ * This test is important, but it wont work until a make a type for custom types in root:
+ *   {
+    "name": "Root can be a custom type via a meta type",
+    "schema": {
+      "$types": {
+        "$customType": {
+          "value": "string",
+          "nodes": { "$array": "$customType" }
+        }
+      },
+      "$type": "$customType"
+    },
+    "validData": [
+      { "value": "abc", "nodes": [] },
+      { "value": "abc", "nodes": [{ "value": "xyz", "nodes": [] }] },
+      {
+        "value": "abc",
+        "nodes": [
+          { "value": "xyz", "nodes": [{ "value": "xyz", "nodes": [] }] }
+        ]
+      }
+    ],
+    "invalidData": [
+      {},
+      { "value": "abc" },
+      { "value": "abc", "nodes": [{ "nodes": [] }] },
+      { "value": "abc", "nodes": [{ "value": "xyz" }] }
+    ]
+  },
+ */
